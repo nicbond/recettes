@@ -13,5 +13,8 @@ This project will init a Symfony project with Docker
 - Edit your ``.env.local``
 - ``make install`` or ``make reset`` :)
 
-## Commande pour trouver un port libre sur sa machine
+## Command to find a free port on your machine
 python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsockname()[1]); s.close()"
+
+## Command used to initialize all components necessary for creating a web application
+- ``composer require webapp``
