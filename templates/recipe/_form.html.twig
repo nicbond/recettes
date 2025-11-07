@@ -1,0 +1,6 @@
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    {% if not show %}
+        <button class="btn btn-primary float-right">{{ button_label|default('Enregistrer') }}</button>
+    {% endif %}
+{{ form_end(form) }}
