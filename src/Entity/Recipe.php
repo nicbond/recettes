@@ -6,19 +6,19 @@ use App\Repository\RecipeRepository;
 use App\Validator\BanWord;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RecipeRepository::class)]
 #[UniqueEntity(
     fields: ['title'],
-    message: 'This title already exist.'
+    message: 'Ce titre existe déjà.'
 )]
 #[UniqueEntity(
     fields: ['slug'],
-    message: 'This slug already exist.'
+    message: 'Ce slug existe déjà.'
 )]
 class Recipe
 {

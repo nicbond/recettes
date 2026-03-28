@@ -18,3 +18,13 @@ python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsocknam
 
 ## Command used to initialize all components necessary for creating a web application
 - ``composer require webapp``
+
+## Sending emails part
+- Download mailpit to bin directory: ``curl -LO https://github.com/axllent/mailpit/releases/latest/download/mailpit-darwin-arm64.tar.gz``
+- Then extract with this command: ``tar -xvzf mailpit-darwin-arm64.tar.gz``
+- Make the binary file executable: ``chmod +x mailpit``
+- Launch Mailpit from directory bin: ``chmod +x mailpit``
+
+## To run GrumPHP locally, type the following command in your docker container: `vendor/bin/grumphp run`
+
+## To run only phpstan, type the following command in your docker container: `vendor/bin/phpstan analyse src --level=1`

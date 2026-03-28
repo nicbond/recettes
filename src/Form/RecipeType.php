@@ -17,7 +17,7 @@ class RecipeType extends AbstractType
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Titre',
-                'required' => true
+                'required' => true,
             ])
             ->add('slug', TextType::class, [
                 'label' => 'Slug <br><span style="color: #888; font-weight: normal;">Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du titre</span>',
@@ -41,7 +41,7 @@ class RecipeType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Recipe::class,
-            'validation_groups' => ['Default', 'Extra']
+            'validation_groups' => ['Default', 'Extra'],
         ]);
     }
 }

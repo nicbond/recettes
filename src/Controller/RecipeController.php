@@ -20,7 +20,7 @@ final class RecipeController extends AbstractController
         $recipes = $recipeRepository->findWithDurationLowerThan(30);
 
         return $this->render('recipe/index.html.twig', [
-            'recipes' => $recipes
+            'recipes' => $recipes,
         ]);
     }
 
@@ -86,10 +86,10 @@ final class RecipeController extends AbstractController
         ]);
     }
 
-    #[Route('/recettes/{id}/delete', name: 'recipe.delete', methods:['POST'])]
+    #[Route('/recettes/{id}/delete', name: 'recipe.delete', methods: ['POST'])]
     public function delete(Request $request, Recipe $recipe, EntityManagerInterface $em): RedirectResponse
     {
-        if ($this->isCsrfTokenValid('delete'.$recipe->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$recipe->getId(), $request->request->getString('_token'))) {
             $em->remove($recipe);
             $em->flush();
 
