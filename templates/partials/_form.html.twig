@@ -1,5 +1,7 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
+    {% for child in form %}
+        {{ form_row(child) }}
+    {% endfor %}
     {% if not show %}
         <button class="btn btn-primary float-right">{{ button_label|default('Enregistrer') }}</button>
     {% endif %}

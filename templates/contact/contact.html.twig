@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nous contacter{% endblock %}
+
+{% block body %}
+    <h1>Nous contacter</h1>
+    <div class="example-wrapper">
+        <div class="box-body">
+            {{ include('partials/_form.html.twig', {'button_label': 'Envoyer', 'form': form}) }}
+        </div>
+    </div>
+{% endblock %}

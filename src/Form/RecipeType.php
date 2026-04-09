@@ -20,9 +20,11 @@ class RecipeType extends AbstractType
                 'required' => true,
             ])
             ->add('slug', TextType::class, [
-                'label' => 'Slug <br><span style="color: #888; font-weight: normal;">Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du titre</span>',
-                'label_html' => true,
+                'label' => 'Slug',
                 'required' => false,
+                'help' => 'form.create.recipe.helpSlug',
+                'help_attr' => ['class' => 'form-text text-muted'],
+                'translation_domain' => 'form',
             ])
             ->add('content', TextareaType::class, [
                 'label' => 'Descriptif',

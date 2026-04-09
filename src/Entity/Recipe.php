@@ -65,7 +65,7 @@ class Recipe
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
@@ -77,7 +77,7 @@ class Recipe
         return $this->slug;
     }
 
-    public function setSlug(string $slug): static
+    public function setSlug(string $slug): self
     {
         $this->slug = $slug;
 
@@ -89,7 +89,7 @@ class Recipe
         return $this->content;
     }
 
-    public function setContent(string $content): static
+    public function setContent(string $content): self
     {
         $this->content = $content;
 
@@ -101,7 +101,7 @@ class Recipe
         return $this->duration;
     }
 
-    public function setDuration(?int $duration): static
+    public function setDuration(?int $duration): self
     {
         $this->duration = $duration;
 

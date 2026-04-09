@@ -1,5 +1,5 @@
 # Symfony - Docker
-This project will init a Symfony project with Docker
+This project will init a Symfony project with Docker using PHP 8.3 and Symfony 7.3.5
 
 ## Requirements
 - Docker
@@ -23,8 +23,10 @@ python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsocknam
 - Download mailpit to bin directory: ``curl -LO https://github.com/axllent/mailpit/releases/latest/download/mailpit-darwin-arm64.tar.gz``
 - Then extract with this command: ``tar -xvzf mailpit-darwin-arm64.tar.gz``
 - Make the binary file executable: ``chmod +x mailpit``
-- Launch Mailpit from directory bin: ``chmod +x mailpit``
+- Launch Mailpit from directory recettes/bin and this url will available which simulates a web client: ``http://localhost:8025/``
 
-## To run GrumPHP locally, type the following command in your docker container: `vendor/bin/grumphp run`
+## To run GrumPHP locally, type the following command in your docker container:
+- ``vendor/bin/grumphp run``
 
-## To run only phpstan, type the following command in your docker container: `vendor/bin/phpstan analyse src --level=1`
+## To run only phpstan, type the following command in your docker container:
+- ``vendor/bin/phpstan analyse src --level=1``
