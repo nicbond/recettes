@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Entity\Recipe;
 use App\Form\RecipeType;
@@ -10,7 +10,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 
+#[Route('/admin/recettes', name: 'admin.recipe.')]
 final class RecipeController extends AbstractController
 {
     public function __construct(
@@ -18,12 +20,12 @@ final class RecipeController extends AbstractController
     ) {
     }
 
-    #[Route('/recettes', name: 'recipe.index')]
+    #[Route('/', name: 'index')]
     public function index(): Response
     {
         $recipes = $this->recipeRepository->findWithDurationLowerThan(30);
 
-        return $this->render('recipe/index.html.twig', [
+        return $this->render('admin/recipe/index.html.twig', [
             'recipes' => $recipes,
         ]);
     }
@@ -49,7 +51,7 @@ final class RecipeController extends AbstractController
         ]);
     }
 
-    #[Route('/recettes/new', name: 'recipe.new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): RedirectResponse|Response
     {
         $recipe = new Recipe();
@@ -60,16 +62,16 @@ final class RecipeController extends AbstractController
             $this->recipeRepository->save($recipe, true);
             $this->addFlash('success', 'La recette a bien été créée');
 
-            return $this->redirectToRoute('recipe.index');
+            return $this->redirectToRoute('admin.recipe.index');
         }
 
-        return $this->render('recipe/new.html.twig', [
+        return $this->render('admin/recipe/new.html.twig', [
             'form' => $form,
             'show' => false,
         ]);
     }
 
-    #[Route('/recettes/{id}/edit', name: 'recipe.edit')]
+    #[Route('/{id}', name: 'edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function edit(Recipe $recipe, Request $request): Response
     {
         $form = $this->createForm(RecipeType::class, $recipe);
@@ -79,17 +81,17 @@ final class RecipeController extends AbstractController
             $this->recipeRepository->save($recipe, true);
             $this->addFlash('success', 'La recette a bien été modifiée');
 
-            return $this->redirectToRoute('recipe.index');
+            return $this->redirectToRoute('admin.recipe.index');
         }
 
-        return $this->render('recipe/edit.html.twig', [
+        return $this->render('admin/recipe/edit.html.twig', [
             'recipe' => $recipe,
             'form' => $form->createView(),
             'show' => false,
         ]);
     }
 
-    #[Route('/recettes/{id}/delete', name: 'recipe.delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'delete', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
     public function delete(Request $request, Recipe $recipe): RedirectResponse
     {
         if ($this->isCsrfTokenValid('delete'.$recipe->getId(), $request->request->getString('_token'))) {
@@ -97,6 +99,6 @@ final class RecipeController extends AbstractController
             $this->addFlash('success', 'Recette supprimée avec succès');
         }
 
-        return $this->redirectToRoute('recipe.index');
+        return $this->redirectToRoute('admin.recipe.index');
     }
 }

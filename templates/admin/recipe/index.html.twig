@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/admin.html.twig' %}
 
 {% block title %}Toutes les recettes{% endblock %}
 
@@ -8,7 +8,7 @@
     </style>
 
     <div class="d-flex justify-content-end mb-3">
-        <a href="{{ path('recipe.new') }}" class="btn btn-primary">Ajouter une nouvelle recette</a>
+        <a href="{{ path('admin.recipe.new') }}" class="btn btn-primary">Ajouter une nouvelle recette</a>
     </div>
 
     <table class="table">
@@ -25,13 +25,13 @@
                     {{ recipe.title }}
                 </th>
                 <th>
+{#                    <div class="btn-group">#}
+{#                        <a class="btn btn-success" href="{{ path('admin.recipe.show', {id: recipe.id, slug: recipe.slug}) }}">#}
+{#                            <i class="fa-solid fa-eye"></i>#}
+{#                        </a>#}
+{#                    </div>#}
                     <div class="btn-group">
-                        <a class="btn btn-success" href="{{ path('recipe.show', {id: recipe.id, slug: recipe.slug}) }}">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                    </div>
-                    <div class="btn-group">
-                        <a class="btn btn-primary" href="{{ path('recipe.edit', {id: recipe.id}) }}">
+                        <a class="btn btn-primary" href="{{ path('admin.recipe.edit', {id: recipe.id}) }}">
                             <i class="fas fa-edit"></i>
                         </a>
                     </div>
@@ -39,7 +39,7 @@
                         {% include('components/modal/_delete_from_index_form.html.twig') with {
                             icon: true,
                             id: recipe.id,
-                            route: 'recipe.delete',
+                            route: 'admin.recipe.delete',
                             message: 'Cette recette sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?'
                         } %}
                     </div>
