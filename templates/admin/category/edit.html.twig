@@ -1,9 +1,9 @@
 {% extends 'admin/admin.html.twig' %}
 
-{% block title %}Recette : {{ recipe.title }}{% endblock %}
+{% block title %}Editer la catégorie {{ category.name }}{% endblock %}
 
 {% block body %}
-    <h1>Editer la recette {{ recipe.title }}</h1>
+    <h1>Editer la catégorie {{ category.name }}</h1>
 
     <div class="box-body">
         {{ include('partials/_form.html.twig', {'button_label': 'Editer'}) }}

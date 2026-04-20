@@ -16,22 +16,25 @@ class RecipeType extends AbstractType
     {
         $builder
             ->add('title', TextType::class, [
-                'label' => 'Titre',
+                'label' => 'form.recipe.title',
                 'required' => true,
+                'translation_domain' => 'form',
             ])
             ->add('slug', TextType::class, [
-                'label' => 'Slug',
+                'label' => 'form.recipe.slug',
                 'required' => false,
-                'help' => 'form.create.recipe.helpSlug',
+                'help' => 'form.recipe.helpSlug',
                 'help_attr' => ['class' => 'form-text text-muted'],
                 'translation_domain' => 'form',
             ])
             ->add('content', TextareaType::class, [
-                'label' => 'Descriptif',
+                'label' => 'form.recipe.content',
+                'translation_domain' => 'form',
             ])
             ->add('duration', IntegerType::class, [
                 'required' => false,
-                'label' => 'Durée',
+                'label' => 'form.recipe.duration',
+                'translation_domain' => 'form',
                 'attr' => [
                     'placeholder' => 'Ex: 5',
                 ],

@@ -40,18 +40,18 @@ final class RecipeController extends AbstractController
             return $this->redirectToRoute('recipe.show', [
                 'slug' => $recipe->getSlug(),
                 'id' => $recipe->getId(),
-                'form' => $form->createView(),
+                'form' => $form,
             ]);
         }
 
         return $this->render('recipe/edit.html.twig', [
             'recipe' => $recipe,
             'show' => true,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
-    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
+    #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
     public function new(Request $request): RedirectResponse|Response
     {
         $recipe = new Recipe();
@@ -86,7 +86,7 @@ final class RecipeController extends AbstractController
 
         return $this->render('admin/recipe/edit.html.twig', [
             'recipe' => $recipe,
-            'form' => $form->createView(),
+            'form' => $form,
             'show' => false,
         ]);
     }

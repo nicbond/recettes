@@ -1,7 +1,14 @@
 form:
-  create:
-    recipe:
-      helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du titre."
+  recipe:
+    title: "Titre"
+    slug: "Slug"
+    content: "Descriptif"
+    duration: "Durée"
+    helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du titre."
+  category:
+    name: "Nom"
+    slug: "Slug"
+    helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du nom."
   contact:
     name: "Nom"
     email: "Email"
