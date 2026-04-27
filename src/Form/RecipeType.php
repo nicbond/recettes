@@ -2,7 +2,9 @@
 
 namespace App\Form;
 
+use App\Entity\Category;
 use App\Entity\Recipe;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -25,6 +27,13 @@ class RecipeType extends AbstractType
                 'required' => false,
                 'help' => 'form.recipe.helpSlug',
                 'help_attr' => ['class' => 'form-text text-muted'],
+                'translation_domain' => 'form',
+            ])
+            ->add('category', EntityType::class, [
+                'class' => Category::class,
+                'label' => 'form.recipe.category',
+                'choice_label' => 'name',
+                'required' => true,
                 'translation_domain' => 'form',
             ])
             ->add('content', TextareaType::class, [

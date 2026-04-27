@@ -15,6 +15,7 @@
         <thead>
         <tr>
             <th>Titre</th>
+            <th>Catégorie</th>
             <th style="width: 200px">Actions</th>
         </tr>
         </thead>
@@ -23,6 +24,9 @@
             <tr>
                 <th>
                     {{ recipe.title }}
+                </th>
+                <th>
+                    {{ recipe.category.name | default('') }}
                 </th>
                 <th>
                     <div class="btn-group">
