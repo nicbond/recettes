@@ -9,8 +9,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Entity\File as EmbeddedFile;
+use Vich\UploaderBundle\Mapping\Attribute as Vich;
 
+#[Vich\Uploadable]
 #[ORM\Entity(repositoryClass: RecipeRepository::class)]
 #[UniqueEntity(
     fields: ['title'],
@@ -57,6 +61,18 @@ class Recipe
 
     #[ORM\ManyToOne(inversedBy: 'recipes')]
     private ?Category $category = null;
+
+    #[ORM\Embedded(class: EmbeddedFile::class)]
+    private EmbeddedFile $thumbnail;
+
+    #[Vich\UploadableField(mapping: 'recipes', fileNameProperty: 'thumbnail.name', size: 'thumbnail.size', mimeType: 'thumbnail.mimeType', originalName: 'thumbnail.originalName')]
+    #[Assert\Image()]
+    private ?File $thumbnailFile = null;
+
+    public function __construct()
+    {
+        $this->thumbnail = new EmbeddedFile();
+    }
 
     public function getId(): ?int
     {
@@ -119,6 +135,35 @@ class Recipe
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getThumbnail(): EmbeddedFile
+    {
+        return $this->thumbnail;
+    }
+
+    public function setThumbnail(EmbeddedFile $thumbnail): static
+    {
+        $this->thumbnail = $thumbnail;
+
+        return $this;
+    }
+
+    public function getThumbnailFile(): ?File
+    {
+        return $this->thumbnailFile;
+    }
+
+    public function setThumbnailFile(?File $thumbnailFile): static
+    {
+        $this->thumbnailFile = $thumbnailFile;
+
+        if (null !== $thumbnailFile) {
+            // Mandatory: triggers update for VichUploader
+            $this->updatedAt = new \DateTime();
+        }
 
         return $this;
     }

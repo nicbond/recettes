@@ -33,7 +33,6 @@ final class RecipeController extends AbstractController
     #[Route('/recettes/{slug}-{id}', name: 'recipe.show', requirements: ['id' => '\d+', 'slug' => '[a-z0-9-]+'])]
     public function show(string $slug, Recipe $recipe): Response
     {
-        $recipe = $this->recipeRepository->find($recipe->getId());
         $form = $this->createForm(RecipeType::class, $recipe, ['disabled' => true]);
 
         if ($recipe->getSlug() != $slug) {

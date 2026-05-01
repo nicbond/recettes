@@ -2,6 +2,7 @@ form:
   recipe:
     title: "Titre"
     slug: "Slug"
+    thumbnailFile: "Fichier"
     category: "Catégorie"
     content: "Descriptif"
     duration: "Durée"

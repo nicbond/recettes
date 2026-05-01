@@ -24,6 +24,10 @@ final class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (null === $data->service) {
+                throw new \LogicException('Service ne peut pas être null après validation');
+            }
+
             $mail = (new TemplatedEmail())
                 ->to($data->service)
                 ->from($data->email)

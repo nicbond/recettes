@@ -6,11 +6,13 @@ use App\Entity\Category;
 use App\Entity\Recipe;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RecipeType extends AbstractType
 {
@@ -27,6 +29,27 @@ class RecipeType extends AbstractType
                 'required' => false,
                 'help' => 'form.recipe.helpSlug',
                 'help_attr' => ['class' => 'form-text text-muted'],
+                'translation_domain' => 'form',
+            ])
+            ->add('thumbnailFile', FileType::class, [
+                'label' => 'form.recipe.thumbnailFile',
+                'constraints' => [
+                    new Assert\File(
+                        [
+                            'maxSize' => '7000k',
+                            'maxSizeMessage' => 'Le fichier est trop volumineux',
+                            'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
+                            'mimeTypesMessage' => 'Veuillez uploader une image au format jpeg, png ou webp.',
+                        ]
+                    ),
+                    new Assert\Image(
+                        [
+                            'maxHeight' => 1080,
+                            'maxWidth' => 1080,
+                        ]
+                    ),
+                ],
+                'required' => false,
                 'translation_domain' => 'form',
             ])
             ->add('category', EntityType::class, [

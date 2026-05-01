@@ -18,4 +18,4 @@ parameters:
     reportUnmatchedIgnoredErrors: true
 
     ignoreErrors:
-        # temporaire uniquement
+        - '#Property App\\Entity\\Recipe::\$id \(int\|null\) is never assigned int#'

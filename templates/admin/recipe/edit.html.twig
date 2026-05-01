@@ -5,7 +5,37 @@
 {% block body %}
     <h1>Editer la recette {{ recipe.title }}</h1>
 
+    {% if recipe.thumbnail.name %}
+        <img id="thumbnail-preview"
+             src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
+             width="200">
+    {% else %}
+        <img id="thumbnail-preview" style="display:none" width="200">
+    {% endif %}
+
     <div class="box-body">
         {{ include('partials/_form.html.twig', {'button_label': 'Editer'}) }}
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function () {
+            const $input = $('input[type="file"]');
+            const $preview = $('#thumbnail-preview');
+
+            $input.on('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        $preview.attr('src', e.target.result);
+                        $preview.show();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
 {% endblock %}
