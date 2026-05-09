@@ -6,6 +6,7 @@ use App\Entity\Recipe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -18,20 +19,14 @@ class RecipeRepository extends ServiceEntityRepository
         parent::__construct($registry, Recipe::class);
     }
 
-    /**
-     * @return Recipe[]
-     */
-    public function findWithDurationLowerThan(int $duration): array
+    public function findWithDurationLowerThan(int $duration): QueryBuilder
     {
-        return $this->createQueryBuilder('r')
-            ->select('r', 'c')
-            ->leftJoin('r.category', 'c')
-            ->where('r.duration <= :val')
+        return $this->createQueryBuilder('recipe')
+            ->select('recipe', 'category')
+            ->leftJoin('recipe.category', 'category')
+            ->where('recipe.duration <= :val')
             ->setParameter('val', $duration)
-            ->orderBy('r.duration', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
+            ->orderBy('recipe.duration', 'ASC')
         ;
     }
 
@@ -70,29 +65,4 @@ class RecipeRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-
-    //    /**
-    //     * @return Recipe[] Returns an array of Recipe objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Recipe
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

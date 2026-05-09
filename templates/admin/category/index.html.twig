@@ -1,51 +1,53 @@
 {% extends 'admin/admin.html.twig' %}
 
-{% block title %}Toutes les catégories{% endblock %}
+{% block title %}Liste des catégories{% endblock %}
 
 {% block body %}
-    <style>
-        .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-    </style>
+    <h1>Liste des catégories</h1>
 
     <div class="d-flex justify-content-end mb-3">
         <a href="{{ path('admin.category.create') }}" class="btn btn-primary">Ajouter une nouvelle catégorie</a>
     </div>
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Titre</th>
-            <th style="width: 200px">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for category in categories %}
-            <tr>
-                <th>
-                    {{ category.name }}
-                </th>
-                <th>
-{#                    <div class="btn-group">#}
-{#                        <a class="btn btn-success" href="{{ path('admin.recipe.show', {id: recipe.id, slug: recipe.slug}) }}">#}
-{#                            <i class="fa-solid fa-eye"></i>#}
-{#                        </a>#}
-{#                    </div>#}
-                    <div class="btn-group">
-                        <a class="btn btn-primary" href="{{ path('admin.category.edit', {id: category.id}) }}">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    </div>
-                    <div class="btn-group">
-                        {% include('components/modal/_delete_from_index_form.html.twig') with {
-                            icon: true,
-                            id: category.id,
-                            route: 'admin.category.delete',
-                            message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?'
-                        } %}
-                    </div>
-                </th>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="border-top border-primary border-3">
+        <div class="box-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">
+                        {{ knp_pagination_sortable(pagination, 'Catégorie', 'category.name') }}
+                        <i class="fas fa-{{ sortDirectionIcon('category.name', pagination.params) }}"></i>
+                    </th>
+                    <th style="width: 200px">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for category in pagination %}
+                    <tr>
+                        <th scope="row">{{ category.name }}</th>
+                        <th>
+                            <div class="btn-group">
+                                <a class="btn btn-primary" href="{{ path('admin.category.edit', {id: category.id}) }}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                            <div class="btn-group">
+                                {% include('components/modal/_delete_from_index_form.html.twig') with {
+                                    icon: true,
+                                    id: category.id,
+                                    route: 'admin.category.delete',
+                                    message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?'
+                                } %}
+                            </div>
+                        </th>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        {% include('components/pagination/pagination.html.twig') with {pagination: pagination} %}
+    </div>
 {% endblock %}

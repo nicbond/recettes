@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Category;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,16 +16,27 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route('/admin/categories', name: 'admin.category.')]
 final class CategoryController extends AbstractController
 {
+    final public const int NUMBER_PER_PAGE = 2;
+
     public function __construct(
         private readonly CategoryRepository $categoryRepository,
+        private readonly PaginatorInterface $paginator,
     ) {
     }
 
     #[Route('/', name: 'index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $query = $this->categoryRepository->findAllCategoryByQueryBuilder();
+
+        $pagination = $this->paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            self::NUMBER_PER_PAGE
+        );
+
         return $this->render('admin/category/index.html.twig', [
-            'categories' => $this->categoryRepository->findAll(),
+            'pagination' => $pagination,
         ]);
     }
 

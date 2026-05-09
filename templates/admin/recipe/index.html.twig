@@ -1,50 +1,58 @@
 {% extends 'admin/admin.html.twig' %}
 
-{% block title %}Toutes les recettes{% endblock %}
+{% block title %}Liste des recettes{% endblock %}
 
 {% block body %}
-    <style>
-        .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-    </style>
+    <h1>Liste des recettes</h1>
 
     <div class="d-flex justify-content-end mb-3">
         <a href="{{ path('admin.recipe.create') }}" class="btn btn-primary">Ajouter une nouvelle recette</a>
     </div>
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Titre</th>
-            <th>Catégorie</th>
-            <th style="width: 200px">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for recipe in recipes %}
-            <tr>
-                <th>
-                    {{ recipe.title }}
-                </th>
-                <th>
-                    {{ recipe.category.name | default('') }}
-                </th>
-                <th>
-                    <div class="btn-group">
-                        <a class="btn btn-primary" href="{{ path('admin.recipe.edit', {id: recipe.id}) }}">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    </div>
-                    <div class="btn-group">
-                        {% include('components/modal/_delete_from_index_form.html.twig') with {
-                            icon: true,
-                            id: recipe.id,
-                            route: 'admin.recipe.delete',
-                            message: 'Cette recette sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?'
-                        } %}
-                    </div>
-                </th>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="border-top border-primary border-3">
+        <div class="box-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">
+                        {{ knp_pagination_sortable(pagination, 'Titre', 'recipe.title') }}
+                        <i class="fas fa-{{ sortDirectionIcon('recipe.title', pagination.params) }}"></i>
+                    </th>
+                    <th scope="col">
+                        {{ knp_pagination_sortable(pagination, 'Catégorie', 'category.name') }}
+                        <i class="fas fa-{{ sortDirectionIcon('category.name', pagination.params) }}"></i>
+                    </th>
+                    <th style="width: 200px">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for recipe in pagination %}
+                    <tr>
+                        <th scope="row">{{ recipe.title }}</th>
+                        <th scope="row">{{ recipe.category.name | default('') }}</th>
+                        <th>
+                            <div class="btn-group">
+                                <a class="btn btn-primary" href="{{ path('admin.recipe.edit', {id: recipe.id}) }}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                            <div class="btn-group">
+                                {% include('components/modal/_delete_from_index_form.html.twig') with {
+                                    icon: true,
+                                    id: recipe.id,
+                                    route: 'admin.recipe.delete',
+                                    message: 'Cette recette sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?'
+                                } %}
+                            </div>
+                        </th>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        {% include('components/pagination/pagination.html.twig') with {pagination: pagination} %}
+    </div>
 {% endblock %}

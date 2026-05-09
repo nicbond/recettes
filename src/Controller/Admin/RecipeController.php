@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Recipe;
 use App\Form\RecipeType;
 use App\Repository\RecipeRepository;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,18 +16,27 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route('/admin/recettes', name: 'admin.recipe.')]
 final class RecipeController extends AbstractController
 {
+    final public const int NUMBER_PER_PAGE = 5;
+
     public function __construct(
         private readonly RecipeRepository $recipeRepository,
+        private readonly PaginatorInterface $paginator,
     ) {
     }
 
     #[Route('/', name: 'index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $recipes = $this->recipeRepository->findWithDurationLowerThan(30);
+        $query = $this->recipeRepository->findWithDurationLowerThan(30);
+
+        $pagination = $this->paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            self::NUMBER_PER_PAGE
+        );
 
         return $this->render('admin/recipe/index.html.twig', [
-            'recipes' => $recipes,
+            'pagination' => $pagination,
         ]);
     }
 
