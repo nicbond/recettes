@@ -27,7 +27,7 @@ final class RecipeController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(Request $request): Response
     {
-        $query = $this->recipeRepository->findWithDurationLowerThan(30);
+        $query = $this->recipeRepository->findWithDurationLowerThan(60);
 
         $pagination = $this->paginator->paginate(
             $query,

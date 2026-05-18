@@ -19,3 +19,4 @@ parameters:
 
     ignoreErrors:
         - '#Property App\\Entity\\Recipe::\$id \(int\|null\) is never assigned int#'
+        - '#Call to an undefined method Faker\\Generator::foodName\(\)#'

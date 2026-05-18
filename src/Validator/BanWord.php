@@ -12,7 +12,7 @@ final class BanWord extends Constraint
      */
     public function __construct(
         public string $message = 'This contains a banned word "{{ banWord }}".',
-        public array $banWords = ['spam', 'viagra', 'sexy', 'hot', 'interdit', 'trash', 'bourré', 'ivre', 'dégueu', 'pourri'],
+        public array $banWords = ['spam', 'viagra', 'sexy', 'interdit', 'trash', 'bourré', 'ivre', 'dégueu', 'pourri'],
         public string $mode = 'strict',
         ?array $groups = null,
         mixed $payload = null,
