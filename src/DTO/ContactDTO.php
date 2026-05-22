@@ -30,6 +30,16 @@ class ContactDTO
     )]
     public string $email = '';
 
+    #[Assert\NotBlank(
+        message: 'Le téléphone ne doit pas être vide.',
+        normalizer: 'trim'
+    )]
+    #[Assert\Regex(
+        pattern: '/^((\+)33|0)[1-9](\d{2}){4}$/',
+        message: 'Le numéro de téléphone n\'est pas valide.',
+    )]
+    public string $phone = '';
+
     #[Assert\NotBlank(message: 'Veuillez sélectionner un service.')]
     #[Assert\Choice(callback: [ServiceEnum::class, 'values'])]
     public ?string $service = null;

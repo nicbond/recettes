@@ -29,6 +29,12 @@ class ContactType extends AbstractType
                 'translation_domain' => 'form',
                 'required' => true,
             ])
+            ->add('phone', TextType::class, [
+                'empty_data' => '',
+                'label' => 'form.contact.phone',
+                'translation_domain' => 'form',
+                'required' => true,
+            ])
             ->add('service', ChoiceType::class, [
                 'label' => 'form.contact.service.label',
                 'translation_domain' => 'form',

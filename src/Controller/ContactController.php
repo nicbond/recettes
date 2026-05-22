@@ -3,19 +3,19 @@
 namespace App\Controller;
 
 use App\DTO\ContactDTO;
+use App\Event\ContactRequestEvent;
 use App\Form\ContactType;
-use Psr\Log\LoggerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
+
 use Symfony\Component\Routing\Attribute\Route;
 
 final class ContactController extends AbstractController
 {
     #[Route('/contact', name: 'contact', methods: ['GET', 'POST'])]
-    public function contact(Request $request, MailerInterface $mailer, LoggerInterface $logger): Response
+    public function contact(Request $request, EventDispatcherInterface $dispatcher): Response
     {
         $data = new ContactDTO();
         $form = $this->createForm(ContactType::class, $data, [
@@ -28,30 +28,15 @@ final class ContactController extends AbstractController
                 throw new \LogicException('Service ne peut pas être null après validation');
             }
 
-            $mail = (new TemplatedEmail())
-                ->to($data->service)
-                ->from($data->email)
-                ->subject('Demande de contact')
-                ->htmlTemplate('emails/contact.html.twig')
-                ->context(['data' => $data])
-            ;
+            $event = new ContactRequestEvent($data);
+            $dispatcher->dispatch($event);
 
-            try {
-                $mailer->send($mail);
-                $this->addFlash('success', 'Votre email a bien été envoyé');
+            $this->addFlash(
+                $event->isFailed() ? 'danger' : 'success',
+                $event->isFailed() ? "Impossible d'envoyer votre message" : 'Votre message a bien été envoyé'
+            );
 
-                return $this->redirectToRoute('contact');
-            } catch (\Throwable $e) {
-                $logger->error('Failed to send email', [
-                    'status' => $e->getCode(),
-                    'message' => $e->getMessage(),
-                    'email' => $data->email,
-                ]);
-
-                $this->addFlash('danger', "Impossible d'envoyer votre email");
-
-                return $this->redirectToRoute('contact');
-            }
+            return $this->redirectToRoute('contact');
         }
 
         return $this->render('contact/contact.html.twig', [
