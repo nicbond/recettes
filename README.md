@@ -1,3 +1,50 @@
+## Recipes
+
+Symfony 7 application for managing cooking recipes.
+
+This personal project was created to experiment with modern Symfony best practices and explore architectural patterns used in professional projects.
+
+## Features
+
+- Recipe management
+- Full CRUD operations
+- Form validation
+- Email notifications
+- SMS notifications through a notification factory
+- Service-oriented architecture
+
+## Tech Stack
+
+- PHP 8.3
+- Symfony 7
+- Doctrine ORM
+- MySQL
+- Docker
+- Twig
+- PHPUnit
+- PHPStan
+- PHP-CS-Fixer
+- GrumPHP
+
+## Code Quality
+
+The project integrates several tools to ensure code quality :
+
+- PHPStan
+- PHP-CS-Fixer
+- GrumPHP
+- PHPUnit
+
+## Architecture
+
+The project demonstrates:
+
+- Notification Factory supporting Email and SMS delivery
+- Factory Pattern
+- Symfony Dependency Injection
+- Service-oriented architecture
+- SOLID principles
+
 # Symfony - Docker
 This project will init a Symfony project with Docker using PHP 8.3 and Symfony 7.3.5
 
