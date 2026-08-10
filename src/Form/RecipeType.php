@@ -35,18 +35,14 @@ class RecipeType extends AbstractType
                 'label' => 'form.recipe.thumbnailFile',
                 'constraints' => [
                     new Assert\File(
-                        [
-                            'maxSize' => '7000k',
-                            'maxSizeMessage' => 'Le fichier est trop volumineux',
-                            'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
-                            'mimeTypesMessage' => 'Veuillez uploader une image au format jpeg, png ou webp.',
-                        ]
+                        maxSize: '7000k',
+                        mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+                        maxSizeMessage: 'Le fichier est trop volumineux',
+                        mimeTypesMessage: 'Veuillez uploader une image au format jpeg, png ou webp.',
                     ),
                     new Assert\Image(
-                        [
-                            'maxHeight' => 1080,
-                            'maxWidth' => 1080,
-                        ]
+                        maxWidth: 1080,
+                        maxHeight: 1080,
                     ),
                 ],
                 'required' => false,

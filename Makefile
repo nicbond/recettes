@@ -30,7 +30,7 @@ kill:
 	$(DOCKER_COMPOSE) down --volumes --remove-orphans
 
 install: ## Install and start the project
-install: .env.local network build start vendor assets success
+install: .env.local network build start vendor mysql assets success
 
 network: ## Create network for project
 	docker network create $(PROJECT_NAME)_network || true
@@ -61,13 +61,21 @@ cache:
 cache:
 	-$(SYMFONY) cache:clear --no-warmup
 
+mysql-test: ## Reset the test database and load fixtures
+	$(SYMFONY) doctrine:database:drop --if-exists --force --env=test
+	$(SYMFONY) doctrine:database:create --if-not-exists --env=test
+	$(SYMFONY) doctrine:migrations:migrate --no-interaction --env=test
+	$(SYMFONY) doctrine:fixtures:load --no-interaction --env=test
+	@echo '\033[1;32mTest database up\033[0m';
+
 mysql: ## Reset the database and load fixtures
 	$(SYMFONY) doctrine:database:drop --if-exists --force
 	$(SYMFONY) doctrine:database:create --if-not-exists
-	#$(SYMFONY) doctrine:migrations:migrate --no-interaction --allow-no-migration
+	$(SYMFONY) doctrine:migrations:migrate --no-interaction --allow-no-migration
 	$(SYMFONY) doctrine:schema:update --force
 	$(SYMFONY) doctrine:schema:validate
 	@echo '\033[1;32mDatabase up\033[0m';
+	$(MAKE) mysql-test
 
 fixture: ## Reload fixtures
 fixture:
