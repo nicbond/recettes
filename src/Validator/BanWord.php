@@ -17,6 +17,6 @@ final class BanWord extends Constraint
         ?array $groups = null,
         mixed $payload = null,
     ) {
-        parent::__construct([], $groups, $payload);
+        parent::__construct(groups: $groups, payload: $payload);
     }
 }
