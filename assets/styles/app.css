@@ -1,3 +1,219 @@
 body {
     background-color: white;
 }
+
+/* ==========================================================
+   ADMINISTRATION
+   ========================================================== */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+
+/* ==========================================================
+   SIDEBAR
+   ========================================================== */
+
+.admin-sidebar {
+    width: 250px;
+    min-width: 250px;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 100vh;
+
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+
+/* Header */
+
+.admin-sidebar-header {
+    padding: 1.5rem;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.admin-brand {
+    display: flex;
+    align-items: center;
+
+    gap: 0.75rem;
+
+    color: #fff;
+    text-decoration: none;
+
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.admin-brand:hover {
+    color: #fff;
+}
+
+.admin-brand i {
+    width: 1.5rem;
+
+    text-align: center;
+}
+
+
+/* ==========================================================
+   NAVIGATION
+   ========================================================== */
+
+.admin-nav {
+    flex: 1;
+
+    padding: 1.25rem 0.75rem;
+}
+
+.admin-nav-section-title {
+    display: block;
+
+    padding: 0 1rem;
+    margin-bottom: 0.5rem;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 0.7rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+
+    gap: 0.85rem;
+
+    width: 100%;
+
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.25rem;
+
+    color: rgba(255, 255, 255, 0.85);
+
+    text-decoration: none;
+
+    border-radius: 0.5rem;
+
+    transition:
+            background-color 0.15s ease,
+            color 0.15s ease;
+}
+
+.admin-nav-link i {
+    width: 1.25rem;
+
+    text-align: center;
+
+    font-size: 0.95rem;
+}
+
+.admin-nav-link:hover {
+    color: #fff;
+
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.admin-nav-link.active {
+    color: #0d6efd;
+
+    background-color: #fff;
+
+    font-weight: 600;
+}
+
+
+/* ==========================================================
+   FOOTER SIDEBAR
+   ========================================================== */
+
+.admin-sidebar-footer {
+    padding: 1rem 0.75rem;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+/* ==========================================================
+   CONTENU
+   ========================================================== */
+
+.admin-content {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.admin-main {
+    width: 100%;
+
+    max-width: 1600px;
+
+    margin: 0 auto;
+
+    padding: 2rem 2.5rem;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 768px) {
+
+    .admin-sidebar {
+        width: 210px;
+        min-width: 210px;
+    }
+
+    .admin-main {
+        padding: 1.5rem;
+    }
+
+    .admin-brand span {
+        font-size: 1.1rem;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .admin-sidebar {
+        width: 70px;
+        min-width: 70px;
+    }
+
+    .admin-sidebar-header {
+        padding: 1.25rem 0.75rem;
+    }
+
+    .admin-brand {
+        justify-content: center;
+    }
+
+    .admin-brand span,
+    .admin-nav-section-title,
+    .admin-nav-link span {
+        display: none;
+    }
+
+    .admin-nav-link {
+        justify-content: center;
+
+        padding: 0.75rem;
+    }
+
+    .admin-sidebar-footer {
+        padding: 0.75rem;
+    }
+}

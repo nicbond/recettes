@@ -66,6 +66,9 @@ python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsocknam
 ## Command used to initialize all components necessary for creating a web application
 - ``composer require webapp``
 
+## Compile assets (CSS, JS)
+- ``php bin/console asset-map:compile``
+
 ## Sending emails part
 - Download mailpit to bin directory: ``curl -LO https://github.com/axllent/mailpit/releases/latest/download/mailpit-darwin-arm64.tar.gz``
 - Then extract with this command: ``tar -xvzf mailpit-darwin-arm64.tar.gz``
