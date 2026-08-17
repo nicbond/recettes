@@ -42,6 +42,10 @@ parameters:
             triggered_by: [ 'php' ]
             metadata:
                 priority: 97
+        twigcsfixer:
+            paths:
+                - templates
+            level: warning
         phpunit:
             config_file: ./
             always_execute: false

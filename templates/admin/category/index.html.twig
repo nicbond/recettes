@@ -32,12 +32,12 @@
                                 </a>
                             </div>
                             <div class="btn-group">
-                                {% include('components/modal/_delete_from_index_form.html.twig') with {
+                                {{ include(('components/modal/_delete_from_index_form.html.twig'), {
                                     icon: true,
                                     id: category.id,
                                     route: 'admin.category.delete',
-                                    message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?'
-                                } %}
+                                    message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
+                                }) }}
                             </div>
                         </th>
                     </tr>
@@ -48,6 +48,6 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mt-3">
-        {% include('components/pagination/pagination.html.twig') with {pagination: pagination} %}
+        {{ include(('components/pagination/pagination.html.twig'), {pagination: pagination}) }}
     </div>
 {% endblock %}

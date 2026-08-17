@@ -81,6 +81,12 @@ python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsocknam
 ## To run only phpstan, type the following command in your docker container:
 - ``vendor/bin/phpstan analyse src --level=1``
 
+## To lint Twig templates, type the following command in your docker container:
+- ``vendor/bin/twig-cs-fixer lint templates/``
+
+## To fix Twig templates, type the following command in your docker container:
+- ``vendor/bin/twig-cs-fixer fix templates/``
+
 ## Testing
 
 ### Setup the test database

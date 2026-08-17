@@ -23,7 +23,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                 {% if id != 'delete' %}
-                    <form class="inline" method="post" action="{{ path(route, {'id': id}) }}">
+                    <form class="inline" method="post" action="{{ path(route, {id: id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ id) }}">
                         <input type="hidden" name="_method" value="DELETE">
                         <button class="btn btn-danger">Supprimer</button>
