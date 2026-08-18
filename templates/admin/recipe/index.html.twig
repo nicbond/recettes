@@ -31,12 +31,10 @@
                         <th scope="row">{{ recipe.title }}</th>
                         <th scope="row">{{ recipe.category.name|default('') }}</th>
                         <th>
-                            <div class="btn-group">
+                            <div class="d-flex gap-2">
                                 <a class="btn btn-primary" href="{{ path('admin.recipe.edit', {id: recipe.id}) }}">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                            </div>
-                            <div class="btn-group">
                                 {{ include(('components/modal/_delete_from_index_form.html.twig'), {
                                     icon: true,
                                     id: recipe.id,

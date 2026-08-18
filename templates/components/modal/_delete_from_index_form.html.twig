@@ -1,13 +1,11 @@
 {% if id != 'delete' %}
-    <div class="btn-group" data-bs-toggle="modal" data-bs-target="#modalRemoveInfos-{{ id }}">
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalRemoveInfos-{{ id }}">
         {% if icon is defined %}
-            <button type="button" class="btn btn-danger">
-                <i class="fas fa-trash-alt"></i>
-            </button>
+            <i class="fas fa-trash-alt"></i>
         {% else %}
-            <button type="button" class="btn btn-danger">Supprimer</button>
+            Supprimer
         {% endif %}
-    </div>
+    </button>
 {% endif %}
 
 <div class="modal fade" id="modalRemoveInfos-{{ id }}" tabindex="-1" aria-labelledby="modalRemoveInfos" aria-hidden="true">

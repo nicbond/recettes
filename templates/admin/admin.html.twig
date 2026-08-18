@@ -50,7 +50,7 @@
                     href="{{ path('admin.recipe.index') }}"
                     class="admin-brand"
             >
-                <i class="fa-solid fa-utensils"></i>
+                <i class="fa-solid fa-screwdriver-wrench"></i>
                 <span>Administration</span>
             </a>
         </div>
@@ -63,23 +63,31 @@
                             Gestion
                         </span>
 
-                <a
-                        href="{{ path('admin.recipe.index') }}"
-                        class="admin-nav-link {{ app.current_route starts with 'admin.recipe.' ? 'active' : '' }}"
-                >
-                    <i class="fa-solid fa-book-open"></i>
-                    <span>Recettes</span>
-                </a>
+                {# Dropdown Recettes #}
+                <div class="admin-nav-dropdown {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'open' : '' }}">
+                    <button
+                            class="admin-nav-link admin-nav-dropdown-toggle {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'active' : '' }}"
+                            type="button"
+                            onclick="this.closest('.admin-nav-dropdown').classList.toggle('open')"
+                    >
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Recettes</span>
+                        <i class="fa-solid fa-chevron-down admin-nav-chevron"></i>
+                    </button>
 
-                <a
-                        href="{{ path('admin.category.index') }}"
-                        class="admin-nav-link {{ app.current_route starts with 'admin.category.' ? 'active' : '' }}"
-                >
-                    <i class="fa-solid fa-tags"></i>
-                    <span>Catégories</span>
-                </a>
+                    <div class="admin-nav-dropdown-menu">
+                        <a href="{{ path('admin.recipe.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.recipe.' ? 'active' : '' }}">
+                            <i class="fa-solid fa-utensils"></i>
+                            <span>Liste des recettes</span>
+                        </a>
+
+                        <a href="{{ path('admin.category.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.category.' ? 'active' : '' }}">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <span>Liste des catégories</span>
+                        </a>
+                    </div>
+                </div>
             </div>
-
         </nav>
 
         {# Bottom of the sidebar #}
