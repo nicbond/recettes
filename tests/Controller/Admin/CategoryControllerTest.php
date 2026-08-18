@@ -4,6 +4,8 @@ namespace App\Tests\Controller\Admin;
 
 use App\Entity\Category;
 use App\Repository\CategoryRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -67,7 +69,8 @@ final class CategoryControllerTest extends WebTestCase
     public function testEditPageIsSuccessful(): void
     {
         $client = CategoryControllerTest::createClient();
-        $em = CategoryControllerTest::getContainer()->get(EntityManagerInterface::class);
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em);
 
         $client->request('GET', '/admin/categories/'.$category->getId());
@@ -78,7 +81,8 @@ final class CategoryControllerTest extends WebTestCase
     public function testEditCategory(): void
     {
         $client = CategoryControllerTest::createClient();
-        $em = CategoryControllerTest::getContainer()->get(EntityManagerInterface::class);
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em, 'Dessert '.uniqid());
 
         $client->request('GET', '/admin/categories/'.$category->getId());
@@ -101,10 +105,14 @@ final class CategoryControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDeleteCategory(): void
     {
         $client = static::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em, 'A supprimer '.uniqid());
         $categoryId = $category->getId();
 
@@ -124,6 +132,7 @@ final class CategoryControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
 
         $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
+        assert($connection instanceof Connection);
         $result = $connection->fetchOne(
             'SELECT id FROM category WHERE id = ?',
             [$categoryId]
@@ -135,7 +144,8 @@ final class CategoryControllerTest extends WebTestCase
     public function testDeleteCategoryWithInvalidCsrfToken(): void
     {
         $client = CategoryControllerTest::createClient();
-        $em = CategoryControllerTest::getContainer()->get(EntityManagerInterface::class);
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em, 'Ne doit pas être supprimée');
 
         $client->request('DELETE', '/admin/categories/'.$category->getId(), [
@@ -144,9 +154,9 @@ final class CategoryControllerTest extends WebTestCase
 
         self::assertResponseRedirects('/admin/categories/');
 
-        $existingCategory = CategoryControllerTest::getContainer()
-            ->get(CategoryRepository::class)
-            ->find($category->getId());
+        $repository = $client->getContainer()->get(CategoryRepository::class);
+        assert($repository instanceof CategoryRepository);
+        $existingCategory = $repository->find($category->getId());
 
         self::assertNotNull($existingCategory);
     }

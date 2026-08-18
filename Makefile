@@ -62,6 +62,7 @@ cache:
 	-$(SYMFONY) cache:clear --no-warmup
 
 mysql-test: ## Reset the test database and load fixtures
+	docker compose exec -T mysql mysql -u root -proot -e "GRANT ALL PRIVILEGES ON recettes_test.* TO 'dev'@'%'; FLUSH PRIVILEGES;"
 	$(SYMFONY) doctrine:database:drop --if-exists --force --env=test
 	$(SYMFONY) doctrine:database:create --if-not-exists --env=test
 	$(SYMFONY) doctrine:migrations:migrate --no-interaction --env=test

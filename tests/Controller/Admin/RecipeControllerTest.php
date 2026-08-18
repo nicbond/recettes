@@ -2,23 +2,14 @@
 
 namespace App\Tests\Controller\Admin;
 
-use App\Entity\Category;
 use App\Entity\Recipe;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class RecipeControllerTest extends WebTestCase
 {
-    private function createCategory(EntityManagerInterface $em): Category
-    {
-        $category = new Category();
-        $category->setName('Dessert '.uniqid());
-        $em->persist($category);
-        $em->flush();
-
-        return $category;
-    }
-
     private function createRecipe(EntityManagerInterface $em, string $title = 'Recette'): Recipe
     {
         $recipe = new Recipe();
@@ -82,6 +73,7 @@ final class RecipeControllerTest extends WebTestCase
     {
         $client = RecipeControllerTest::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em);
 
         $client->request('GET', '/admin/recettes/'.$recipe->getId());
@@ -118,6 +110,9 @@ final class RecipeControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDeleteRecipe(): void
     {
         $client = RecipeControllerTest::createClient();
@@ -129,7 +124,7 @@ final class RecipeControllerTest extends WebTestCase
         // Search for the recipe on all pages
         $csrfToken = null;
         $page = 1;
-        while (null === $csrfToken) {
+        while (true) {
             $crawler = $client->request('GET', '/admin/recettes/?page='.$page);
             $form = $crawler->filter('form[action="/admin/recettes/'.$recipeId.'"]');
             if ($form->count() > 0) {
@@ -155,6 +150,7 @@ final class RecipeControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
 
         $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
+        assert($connection instanceof Connection);
         $result = $connection->fetchOne(
             'SELECT id FROM recipe WHERE id = ?',
             [$recipeId]
@@ -163,6 +159,9 @@ final class RecipeControllerTest extends WebTestCase
         self::assertFalse($result);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDeleteRecipeWithInvalidCsrfToken(): void
     {
         $client = RecipeControllerTest::createClient();
@@ -178,6 +177,7 @@ final class RecipeControllerTest extends WebTestCase
         self::assertResponseRedirects('/admin/recettes/');
 
         $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
+        assert($connection instanceof Connection);
         $result = $connection->fetchOne(
             'SELECT id FROM recipe WHERE id = ?',
             [$recipeId]

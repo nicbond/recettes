@@ -38,7 +38,7 @@ class ImageConvertSubscriber implements EventSubscriberInterface
             default => null,
         };
 
-        if (null === $image) {
+        if (!$image instanceof \GdImage) {
             return;
         }
 

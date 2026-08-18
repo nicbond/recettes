@@ -109,7 +109,7 @@ If you get an "Access denied" error, run the following command:
 ### Run a specific test method
 - ``php bin/phpunit --filter testIndex``
 
-### Run tests with detailed output
+### Run ALL TESTS with detailed output
 - ``php bin/phpunit --testdox``
 
 ### Test database behavior

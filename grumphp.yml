@@ -38,7 +38,7 @@ parameters:
                 priority: 98
         phpstan:
             configuration: 'phpstan.neon'
-            level: 1
+            level: 9
             triggered_by: [ 'php' ]
             metadata:
                 priority: 97
