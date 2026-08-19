@@ -9,44 +9,54 @@
         <a href="{{ path('admin.recipe.create') }}" class="btn btn-primary">Ajouter une nouvelle recette</a>
     </div>
 
-    <div class="border-top border-primary border-3">
-        <div class="box-body">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th scope="col">
-                        {{ knp_pagination_sortable(pagination, 'Titre', 'recipe.title') }}
-                        <i class="fas fa-{{ sortDirectionIcon('recipe.title', pagination.params) }}"></i>
-                    </th>
-                    <th scope="col">
-                        {{ knp_pagination_sortable(pagination, 'Catégorie', 'category.name') }}
-                        <i class="fas fa-{{ sortDirectionIcon('category.name', pagination.params) }}"></i>
-                    </th>
-                    <th style="width: 200px">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for recipe in pagination %}
-                    <tr>
-                        <th scope="row">{{ recipe.title }}</th>
-                        <th scope="row">{{ recipe.category.name|default('') }}</th>
-                        <th>
-                            <div class="d-flex gap-2">
-                                <a class="btn btn-primary" href="{{ path('admin.recipe.edit', {id: recipe.id}) }}">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                {{ include(('components/modal/_delete_from_index_form.html.twig'), {
-                                    icon: true,
-                                    id: recipe.id,
-                                    route: 'admin.recipe.delete',
-                                    message: 'Cette recette sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
-                                }) }}
+    <div class="border-top border-primary border-3 pt-3">
+        <div class="d-flex gap-3 mb-3">
+            <span>
+                {{ knp_pagination_sortable(pagination, 'Titre', 'recipe.title') }}
+                <i class="fas fa-{{ sortDirectionIcon('recipe.title', pagination.params) }}"></i>
+            </span>
+            <span>
+                {{ knp_pagination_sortable(pagination, 'Catégorie', 'category.name') }}
+                <i class="fas fa-{{ sortDirectionIcon('category.name', pagination.params) }}"></i>
+            </span>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="recipes-container">
+            {% for recipe in pagination %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        {% if recipe.thumbnail.name %}
+                            <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}" class="card-img-top" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-utensils fa-3x text-white"></i>
                             </div>
-                        </th>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            <p class="card-text text-muted">
+                                <i class="fas fa-layer-group me-1"></i>
+                                {{ recipe.category.name|default('Sans catégorie') }}
+                            </p>
+                            <p class="card-text text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ recipe.duration }} min
+                            </p>
+                        </div>
+                        <div class="card-footer d-flex gap-2">
+                            <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit"></i> Éditer
+                            </a>
+                            {{ include('components/modal/_delete_from_index_form.html.twig', {
+                                icon: true,
+                                id: recipe.id,
+                                route: 'admin.recipe.delete',
+                                message: 'Cette recette sera définitivement supprimée.',
+                            }) }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
 
