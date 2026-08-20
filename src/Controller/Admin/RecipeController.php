@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route('/admin/recettes', name: 'admin.recipe.')]
 final class RecipeController extends AbstractController
 {
-    final public const int NUMBER_PER_PAGE = 5;
+    final public const int NUMBER_PER_PAGE = 6;
 
     public function __construct(
         private readonly RecipeRepository $recipeRepository,
@@ -83,7 +83,9 @@ final class RecipeController extends AbstractController
     #[Route('/{id}', name: 'edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function edit(Recipe $recipe, Request $request): Response
     {
-        $form = $this->createForm(RecipeType::class, $recipe);
+        $form = $this->createForm(RecipeType::class, $recipe, [
+            'action' => $this->generateUrl('admin.recipe.edit', ['id' => $recipe->getId()]),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -93,11 +95,13 @@ final class RecipeController extends AbstractController
             return $this->redirectToRoute('admin.recipe.index');
         }
 
+        $status = $form->isSubmitted() && !$form->isValid() ? 422 : 200;
+
         return $this->render('admin/recipe/edit.html.twig', [
             'recipe' => $recipe,
             'form' => $form,
             'show' => false,
-        ]);
+        ], new Response(status: $status));
     }
 
     #[Route('/{id}', name: 'delete', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]

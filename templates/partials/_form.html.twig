@@ -1,7 +1,15 @@
-{{ form_start(form) }}
+{{ form_start(form, {attr: {
+    'data-turbo': 'false',
+}}) }}
+    {{ form_errors(form) }}
+
     {% for child in form %}
-        {{ form_row(child) }}
+        {# Check if the field has already been rendered elsewhere on the page #}
+        {% if not child.rendered %}
+            {{ form_row(child) }}
+        {% endif %}
     {% endfor %}
+
     {% if not show %}
         <button class="btn btn-primary float-right">{{ button_label|default('Enregistrer') }}</button>
     {% endif %}

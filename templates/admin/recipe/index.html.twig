@@ -44,8 +44,10 @@
                             </p>
                         </div>
                         <div class="card-footer d-flex gap-2">
-                            <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit"></i> Éditer
+                            <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}"
+                               class="btn btn-primary btn-sm"
+                               data-turbo-frame="modal">
+                                <i class="fas fa-edit"></i>
                             </a>
                             {{ include('components/modal/_delete_from_index_form.html.twig', {
                                 icon: true,
@@ -57,6 +59,15 @@
                     </div>
                 </div>
             {% endfor %}
+        </div>
+    </div>
+
+    {# Modale Bootstrap avec turbo-frame à l'intérieur #}
+    <div class="modal fade" id="turbo-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <turbo-frame id="modal"></turbo-frame>
+            </div>
         </div>
     </div>
 

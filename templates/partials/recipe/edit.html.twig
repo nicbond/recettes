@@ -1,0 +1,13 @@
+<div id="thumbnail-preview-container"
+     class="bg-secondary d-flex align-items-center justify-content-center"
+     style="width: 220px; height: 220px;">
+
+    {% if recipe.thumbnail.name %}
+        <img id="thumbnail-preview"
+             src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
+             alt="Aperçu de la recette {{ recipe.title }}"
+             style="width: 100%; height: 100%; object-fit: cover;">
+    {% else %}
+        <i id="thumbnail-placeholder" class="fas fa-utensils fa-3x text-white"></i>
+    {% endif %}
+</div>

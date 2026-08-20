@@ -3,17 +3,23 @@
 {% block title %}Recette : {{ recipe.title }}{% endblock %}
 
 {% block body %}
-    <h1>Editer la recette {{ recipe.title }}</h1>
+    <turbo-frame id="modal">
+        <div class="modal-header">
+            <h5 class="modal-title">Éditer la recette {{ recipe.title }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            {{ include('partials/recipe/edit.html.twig') }}
+            {{ include('partials/_form.html.twig', {button_label: 'Editer'}) }}
+        </div>
+    </turbo-frame>
 
-    {% if recipe.thumbnail.name %}
-        <img id="thumbnail-preview"
-             src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
-             width="200">
-    {% else %}
-        <img id="thumbnail-preview" style="display:none" width="200">
+    {# Standard display if accessing the page directly (without Turbo) #}
+    {% if not app.request.headers.get('turbo-frame') %}
+        <h1>Editer la recette {{ recipe.title }}</h1>
+        {{ include('partials/recipe/edit.html.twig') }}
+        <div class="box-body">
+            {{ include('partials/_form.html.twig', {button_label: 'Editer'}) }}
+        </div>
     {% endif %}
-
-    <div class="box-body">
-        {{ include('partials/_form.html.twig', {button_label: 'Editer'}) }}
-    </div>
 {% endblock %}

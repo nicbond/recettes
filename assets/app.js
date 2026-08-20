@@ -1,6 +1,7 @@
 import './stimulus_bootstrap.js';
 import './bootstrap.js';
 import './js/thumbnail_preview.js';
+import './js/turbo-modal.js';
 /*
  * Welcome to your app's main JavaScript file!
  *
