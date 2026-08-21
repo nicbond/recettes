@@ -2,9 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Category;
 use App\Entity\Recipe;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -48,10 +46,8 @@ class RecipeType extends AbstractType
                 'required' => false,
                 'translation_domain' => 'form',
             ])
-            ->add('category', EntityType::class, [
-                'class' => Category::class,
+            ->add('category', CategoryAutocompleteField::class, [
                 'label' => 'form.recipe.category',
-                'choice_label' => 'name',
                 'required' => true,
                 'translation_domain' => 'form',
             ])
