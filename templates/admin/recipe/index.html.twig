@@ -26,9 +26,11 @@
                 <div class="col">
                     <div class="card h-100 shadow-sm">
                         {% if recipe.thumbnail.name %}
-                            <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}" class="card-img-top" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
+                            <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
+                                 class="card-img-top recipe-card-img"
+                                 alt="{{ recipe.title }}">
                         {% else %}
-                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <div class="card-img-top recipe-card-placeholder bg-secondary d-flex align-items-center justify-content-center">
                                 <i class="fas fa-utensils fa-3x text-white"></i>
                             </div>
                         {% endif %}
