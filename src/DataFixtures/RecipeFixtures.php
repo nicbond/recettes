@@ -3,13 +3,16 @@
 namespace App\DataFixtures;
 
 use App\Entity\Category;
+use App\Entity\Ingredient;
+use App\Entity\Quantity;
 use App\Entity\Recipe;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 use FakerRestaurant\Provider\fr_FR\Restaurant;
 
-class RecipeFixtures extends Fixture
+class RecipeFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
@@ -39,9 +42,42 @@ class RecipeFixtures extends Fixture
                 ->setCategory($this->getReference($categoryName, Category::class))
                 ->setDuration($faker->numberBetween(2, 60));
 
+            // Randomly select ingredient names from the IngredientFixtures constants
+            $randomIngredientNames = $faker->randomElements(
+                IngredientFixtures::INGREDIENTS,
+                $faker->numberBetween(2, 5)
+            );
+
+            foreach ($randomIngredientNames as $name) {
+                // Retrieve a random unit from the constants
+                $randomUnit = $faker->randomElement(IngredientFixtures::UNITS);
+                assert(is_string($randomUnit));
+
+                // Retrieve the ingredient using the reference saved earlier
+                $ingredient = $this->getReference('ingredient_'.$name, Ingredient::class);
+
+                $recipe->addQuantity((new Quantity())
+                    ->setQuantity((float) $faker->numberBetween(2, 250))
+                    ->setUnit($randomUnit)
+                    ->setIngredient($ingredient)
+                );
+            }
+
             $manager->persist($recipe);
         }
 
         $manager->flush();
+    }
+
+    /**
+     * This method tells Doctrine to load IngredientFixtures first !
+     *
+     * @return array<int, class-string<Fixture>>
+     */
+    public function getDependencies(): array
+    {
+        return [
+            IngredientFixtures::class,
+        ];
     }
 }

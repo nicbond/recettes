@@ -110,7 +110,7 @@ final class CategoryControllerTest extends WebTestCase
      */
     public function testDeleteCategory(): void
     {
-        $client = static::createClient();
+        $client = CategoryControllerTest::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em, 'A supprimer '.uniqid());

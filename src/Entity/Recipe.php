@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\RecipeRepository;
 use App\Validator\BanWord;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -69,9 +71,16 @@ class Recipe
     #[Assert\Image()]
     private ?File $thumbnailFile = null;
 
+    /**
+     * @var Collection<int, Quantity>
+     */
+    #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Quantity::class, cascade: ['persist'], orphanRemoval: true)]
+    private Collection $quantities;
+
     public function __construct()
     {
         $this->thumbnail = new EmbeddedFile();
+        $this->quantities = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -163,6 +172,36 @@ class Recipe
         if (null !== $thumbnailFile) {
             // Mandatory: triggers update for VichUploader
             $this->updatedAt = new \DateTime();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Quantity>
+     */
+    public function getQuantities(): Collection
+    {
+        return $this->quantities;
+    }
+
+    public function addQuantity(Quantity $quantity): static
+    {
+        if (!$this->quantities->contains($quantity)) {
+            $this->quantities->add($quantity);
+            $quantity->setRecipe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuantity(Quantity $quantity): static
+    {
+        if ($this->quantities->removeElement($quantity)) {
+            // set the owning side to null (unless already changed)
+            if ($quantity->getRecipe() === $this) {
+                $quantity->setRecipe(null);
+            }
         }
 
         return $this;
