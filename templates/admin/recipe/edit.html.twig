@@ -3,23 +3,37 @@
 {% block title %}Recette : {{ recipe.title }}{% endblock %}
 
 {% block body %}
-    <turbo-frame id="modal">
-        <div class="modal-header">
-            <h5 class="modal-title">Éditer la recette {{ recipe.title }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-            {{ include('partials/recipe/edit.html.twig') }}
-            {{ include('partials/_form.html.twig', {button_label: 'Editer'}) }}
-        </div>
-    </turbo-frame>
 
-    {# Standard display if accessing the page directly (without Turbo) #}
-    {% if not app.request.headers.get('turbo-frame') %}
-        <h1>Editer la recette {{ recipe.title }}</h1>
+    {% if app.request.headers.get('turbo-frame') == 'modal' %}
+        <turbo-frame id="modal">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Éditer la recette {{ recipe.title }}
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                {{ include('partials/recipe/edit.html.twig') }}
+                {{ include('partials/_form.html.twig', {
+                    button_label: 'Éditer',
+                }) }}
+            </div>
+        </turbo-frame>
+    {% else %}
+        <h1>Éditer la recette {{ recipe.title }}</h1>
+
         {{ include('partials/recipe/edit.html.twig') }}
+
         <div class="box-body">
-            {{ include('partials/_form.html.twig', {button_label: 'Editer'}) }}
+            {{ include('partials/_form.html.twig', {
+                button_label: 'Éditer',
+            }) }}
         </div>
+
     {% endif %}
 {% endblock %}

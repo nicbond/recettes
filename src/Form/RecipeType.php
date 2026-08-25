@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Recipe;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -62,6 +63,14 @@ class RecipeType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Ex: 5',
                 ],
+            ])
+            ->add('quantities', CollectionType::class, [
+                'entry_type' => QuantityType::class,
+                'by_reference' => false, // 'false' means we do not want it to modify the collection (use method add and remove)
+//                'entry_options' => ['label' => false],
+//                'allow_add' => true,
+//                'allow_delete' => true,
+//                'label' => false,
             ])
         ;
     }

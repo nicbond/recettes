@@ -90,7 +90,7 @@ final class RecipeControllerTest extends WebTestCase
 
         $client->request('GET', '/admin/recettes/'.$recipe->getId());
 
-        $client->submitForm('Editer', [
+        $client->submitForm('Éditer', [
             'recipe[title]' => 'Burger modifié '.uniqid(),
             'recipe[content]' => 'Contenu modifié de test',
             'recipe[duration]' => 45,

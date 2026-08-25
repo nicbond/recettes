@@ -4,6 +4,7 @@ form:
     slug: "Slug"
     thumbnailFile: "Fichier"
     category: "Catégorie"
+    ingredient: "Ingrédient"
     content: "Descriptif"
     duration: "Durée"
     helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du titre."
@@ -11,6 +12,9 @@ form:
     name: "Nom"
     slug: "Slug"
     helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du nom."
+  quantity:
+    quantity: "Quantité"
+    unit: "Unité de mesure"
   contact:
     name: "Nom"
     email: "Email"
