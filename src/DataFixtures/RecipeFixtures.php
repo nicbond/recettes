@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Ingredient;
 use App\Entity\Quantity;
 use App\Entity\Recipe;
+use App\Entity\Unit;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -49,16 +50,17 @@ class RecipeFixtures extends Fixture implements DependentFixtureInterface
             );
 
             foreach ($randomIngredientNames as $name) {
-                // Retrieve a random unit from the constants
-                $randomUnit = $faker->randomElement(IngredientFixtures::UNITS);
-                assert(is_string($randomUnit));
+                // Retrieve a random unit entity from the reference
+                $randomUnitLabel = $faker->randomElement(UnitFixtures::UNITS);
+                assert(is_string($randomUnitLabel));
+                $unit = $this->getReference('unit_'.$randomUnitLabel, Unit::class);
 
                 // Retrieve the ingredient using the reference saved earlier
                 $ingredient = $this->getReference('ingredient_'.$name, Ingredient::class);
 
                 $recipe->addQuantity((new Quantity())
                     ->setQuantity((float) $faker->numberBetween(2, 250))
-                    ->setUnit($randomUnit)
+                    ->setUnit($unit)
                     ->setIngredient($ingredient)
                 );
             }
@@ -78,6 +80,7 @@ class RecipeFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             IngredientFixtures::class,
+            UnitFixtures::class,
         ];
     }
 }

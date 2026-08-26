@@ -1,14 +1,26 @@
-<div class="quantity-item p-3 border rounded bg-light position-relative">
-    <div class="row align-items-center">
-        <div class="col">
-            {{ form_widget(form) }}
+<div class="quantity-item p-3 border rounded bg-light">
+    <div class="row align-items-end g-3">
+
+        <div class="col-md-2">
+            {{ form_row(form.quantity) }}
         </div>
+
+        <div class="col-md-4">
+            {{ form_row(form.unit) }}
+        </div>
+
+        <div class="col-md-5">
+            {{ form_row(form.ingredient) }}
+        </div>
+
         <div class="col-auto">
             <button type="button"
                     data-action="click->form-collection#removeElement"
-                    class="btn btn-danger btn-sm mt-2">
-                <i class="fas fa-trash"></i> Supprimer
+                    class="btn btn-outline-danger"
+                    title="Supprimer cet ingrédient">
+                <i class="fas fa-trash"></i>
             </button>
         </div>
+
     </div>
 </div>

@@ -73,6 +73,9 @@ class Recipe
 
     /**
      * @var Collection<int, Quantity>
+     *
+     * Note: orphanRemoval is set to true to prevent orphan quantities from remaining
+     * in the database without an associated recipe, which would cause data inconsistency
      */
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Quantity::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $quantities;

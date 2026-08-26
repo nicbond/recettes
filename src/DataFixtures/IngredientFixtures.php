@@ -15,10 +15,6 @@ class IngredientFixtures extends Fixture
         'Ail', 'Echalote', 'Herbes fraîches (ciboulette, persil, etc.)',
     ];
 
-    public const array UNITS = [
-        'g', 'kg', 'l', 'ml', 'cl', 'dl', 'cuillère à soupe', 'cuillère à café', 'pincée', 'verre',
-    ];
-
     public function load(ObjectManager $manager): void
     {
         foreach (self::INGREDIENTS as $name) {

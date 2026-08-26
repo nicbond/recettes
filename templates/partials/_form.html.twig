@@ -6,7 +6,17 @@
     {# Automatic loop for ALL fields (except the 'quantities' collection) #}
     {% for child in form %}
         {% if child.vars.name != 'quantities' and not child.rendered %}
-            {{ form_row(child) }}
+            {% if child.vars.name == 'duration' %}
+                {{ form_label(child) }}
+                <div class="input-group">
+                    {{ form_widget(child) }}
+                    <span class="input-group-text">min</span>
+                </div>
+                {{ form_help(child) }}
+                {{ form_errors(child) }}
+            {% else %}
+                {{ form_row(child) }}
+            {% endif %}
         {% endif %}
     {% endfor %}
 

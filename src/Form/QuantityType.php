@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Entity\Quantity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -19,7 +18,7 @@ class QuantityType extends AbstractType
                 'scale' => 2,
                 'translation_domain' => 'form',
             ])
-            ->add('unit', TextType::class, [
+            ->add('unit', UnitAutocompleteField::class, [
                 'label' => 'form.quantity.unit',
                 'translation_domain' => 'form',
             ])

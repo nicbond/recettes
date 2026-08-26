@@ -124,6 +124,10 @@ python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsocknam
 ## Compile assets (CSS, JS)
 - ``php bin/console asset-map:compile``
 
+## Database for migration
+- ``php bin/console make:migration``
+- ``php bin/console doctrine:migrations:migrate``
+
 ## Sending emails
 
 Mailpit is used locally to simulate email delivery.
