@@ -67,10 +67,9 @@ class RecipeType extends AbstractType
             ->add('quantities', CollectionType::class, [
                 'entry_type' => QuantityType::class,
                 'by_reference' => false, // 'false' means we do not want it to modify the collection (use method add and remove)
-//                'entry_options' => ['label' => false],
-//                'allow_add' => true,
-//                'allow_delete' => true,
-//                'label' => false,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'entry_options' => ['label' => false],
             ])
         ;
     }

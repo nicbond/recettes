@@ -3,14 +3,44 @@
 }}) }}
     {{ form_errors(form) }}
 
+    {# Automatic loop for ALL fields (except the 'quantities' collection) #}
     {% for child in form %}
-        {# Check if the field has already been rendered elsewhere on the page #}
-        {% if not child.rendered %}
+        {% if child.vars.name != 'quantities' and not child.rendered %}
             {{ form_row(child) }}
         {% endif %}
     {% endfor %}
 
+    {# Area dedicated to collecting quantities, positioned at the very bottom #}
+    {% if form.quantities is defined %}
+        <div class="mb-4"
+             data-controller="form-collection"
+             data-prototype="{% apply escape %}{{ include('partials/recipe/_quantity_row.html.twig', {form: form.quantities.vars.prototype}) }}{% endapply %}">
+
+            {{ form_label(form.quantities, 'Ingrédients et Quantités', {label_attr: {class: 'form-label fw-bold'}}) }}
+
+            {# Dynamic container where ingredient lines are inserted #}
+            <div data-form-collection-target="container" class="d-flex flex-column gap-3 mb-3">
+                {% for quantityChild in form.quantities %}
+                    {{ include('partials/recipe/_quantity_row.html.twig', {form: quantityChild}) }}
+                {% endfor %}
+            </div>
+
+            <button type="button"
+                    data-action="click->form-collection#addElement"
+                    class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Ajouter un ingrédient
+            </button>
+
+            {{ form_errors(form.quantities) }}
+        </div>
+
+        {# Notify Twig that the collection has been rendered to avoid duplication #}
+        {% do form.quantities.setRendered() %}
+    {% endif %}
+
     {% if not show %}
-        <button class="btn btn-primary float-right">{{ button_label|default('Enregistrer') }}</button>
+        <div class="mt-4 clearfix">
+            <button class="btn btn-primary float-right">{{ button_label|default('Enregistrer') }}</button>
+        </div>
     {% endif %}
 {{ form_end(form) }}
