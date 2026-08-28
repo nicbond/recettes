@@ -36,6 +36,9 @@ class Recipe
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank(
+        message: 'Le titre de la recette est obligatoire.',
+    )]
     #[Assert\Length(
         min: 5,
         minMessage: 'Le titre doit être supèrieur à {{ limit }} caractères.',
@@ -45,23 +48,28 @@ class Recipe
     private string $title;
 
     #[ORM\Column(length: 255, unique: true)]
+    // Automatically generates the slug from the recipe title.
     #[Gedmo\Slug(fields: ['title'])]
     #[Assert\Regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', message: 'Invalid slug')]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'Le descriptif de la recette est obligatoire.')]
     #[Assert\Length(
         min: 5,
-        minMessage: 'Le descriptif doit être supèrieur à {{ limit }} caractères.'
+        minMessage: 'Le descriptif doit être supérieur à {{ limit }} caractères.'
     )]
-    private ?string $content = null;
+    private string $content = '';
 
-    #[ORM\Column(nullable: true)]
-    #[Assert\Positive]
-    #[Assert\LessThan(value: 1440)]
+    #[ORM\Column]
+    #[Assert\NotBlank(message: 'La durée est obligatoire.')]
+    #[Assert\Positive(message: 'La durée doit être supérieure à 0.')]
+    #[Assert\LessThan(value: 1440, message: 'La durée doit être inférieure à 1440 minutes.')]
     private ?int $duration = null;
 
     #[ORM\ManyToOne(inversedBy: 'recipes')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Veuillez sélectionner une catégorie.')]
     private ?Category $category = null;
 
     #[ORM\Embedded(class: EmbeddedFile::class)]
@@ -79,6 +87,9 @@ class Recipe
      */
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Quantity::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $quantities;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 0])]
+    private bool $online = false;
 
     public function __construct()
     {
@@ -115,7 +126,7 @@ class Recipe
         return $this;
     }
 
-    public function getContent(): ?string
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -208,5 +219,22 @@ class Recipe
         }
 
         return $this;
+    }
+
+    public function getOnline(): bool
+    {
+        return (bool) $this->online;
+    }
+
+    public function setOnline(bool $online): self
+    {
+        $this->online = $online;
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->title ?? 'Nouvelle recette';
     }
 }

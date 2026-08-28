@@ -1,11 +1,11 @@
 <div class="quantity-item p-3 border rounded bg-light">
     <div class="row align-items-end g-3">
 
-        <div class="col-md-2">
+        <div class="col-md-3">
             {{ form_row(form.quantity) }}
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             {{ form_row(form.unit) }}
         </div>
 
@@ -13,10 +13,14 @@
             {{ form_row(form.ingredient) }}
         </div>
 
-        <div class="col-auto">
+        {# Convert the column into a flexbox aligned to the bottom #}
+        {# A flexbox is A CSS layout mode that allows for aligning and distributing space between elements within a container, even when their size is unknown or dynamic. #}
+        <div class="col-md-1 d-flex align-items-end">
             <button type="button"
                     data-action="click->form-collection#removeElement"
-                    class="btn btn-outline-danger"
+                    class="btn btn-outline-danger w-100"
+                    style="margin-bottom: 1rem;"
+                    {# Compensates for the default bottom margin of the Bootstrap form_row so that the delete button aligns with the other fields #}
                     title="Supprimer cet ingrédient">
                 <i class="fas fa-trash"></i>
             </button>

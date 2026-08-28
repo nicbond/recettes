@@ -2,7 +2,7 @@
 
 namespace App\Tests\Controller\Admin;
 
-use App\Entity\Category;
+use App\DataFixtures\Traits\FixturesTrait;
 use App\Repository\CategoryRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -11,15 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class CategoryControllerTest extends WebTestCase
 {
-    private function createCategory(EntityManagerInterface $em, string $name = 'Apéritif'): Category
-    {
-        $category = new Category();
-        $category->setName($name);
-        $em->persist($category);
-        $em->flush();
-
-        return $category;
-    }
+    use FixturesTrait;
 
     public function testIndex(): void
     {

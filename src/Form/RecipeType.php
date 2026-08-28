@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Recipe;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -54,15 +55,21 @@ class RecipeType extends AbstractType
             ])
             ->add('content', TextareaType::class, [
                 'label' => 'form.recipe.content',
+                'required' => true,
                 'translation_domain' => 'form',
             ])
             ->add('duration', IntegerType::class, [
-                'required' => false,
+                'required' => true,
                 'label' => 'form.recipe.duration',
                 'translation_domain' => 'form',
                 'attr' => [
                     'placeholder' => 'Ex: 5',
                 ],
+            ])
+            ->add('online', CheckboxType::class, [
+                'label' => 'form.recipe.online',
+                'required' => false,
+                'translation_domain' => 'form',
             ])
             ->add('quantities', CollectionType::class, [
                 'entry_type' => QuantityType::class,

@@ -64,7 +64,11 @@ final class RecipeController extends AbstractController
     public function new(Request $request): RedirectResponse|Response
     {
         $recipe = new Recipe();
-        $form = $this->createForm(RecipeType::class, $recipe);
+        $form = $this->createForm(RecipeType::class, $recipe, [
+            'attr' => [
+                'novalidate' => 'novalidate',
+            ],
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

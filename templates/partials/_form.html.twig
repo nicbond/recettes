@@ -6,17 +6,20 @@
     {# Automatic loop for ALL fields (except the 'quantities' collection) #}
     {% for child in form %}
         {% if child.vars.name != 'quantities' and not child.rendered %}
-            {% if child.vars.name == 'duration' %}
-                {{ form_label(child) }}
-                <div class="input-group">
-                    {{ form_widget(child) }}
-                    <span class="input-group-text">min</span>
-                </div>
-                {{ form_help(child) }}
-                {{ form_errors(child) }}
-            {% else %}
-                {{ form_row(child) }}
-            {% endif %}
+            {# Adding this div to ensure space for all fields #}
+            <div class="mb-3">
+                {% if child.vars.name == 'duration' %}
+                    {{ form_label(child) }}
+                    <div class="input-group">
+                        {{ form_widget(child) }}
+                        <span class="input-group-text">min</span>
+                    </div>
+                    {{ form_help(child) }}
+                    {{ form_errors(child) }}
+                {% else %}
+                    {{ form_row(child) }}
+                {% endif %}
+            </div>
         {% endif %}
     {% endfor %}
 

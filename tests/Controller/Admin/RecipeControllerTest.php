@@ -2,25 +2,18 @@
 
 namespace App\Tests\Controller\Admin;
 
-use App\Entity\Recipe;
+use App\DataFixtures\Traits\FixturesTrait;
+use App\Entity\Category;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
 
 final class RecipeControllerTest extends WebTestCase
 {
-    private function createRecipe(EntityManagerInterface $em, string $title = 'Recette'): Recipe
-    {
-        $recipe = new Recipe();
-        $recipe->setTitle($title.' '.uniqid());
-        $recipe->setContent('Contenu de la recette de test');
-        $recipe->setDuration(30); // inférieure à 60 → apparaît dans la liste
-        $em->persist($recipe);
-        $em->flush();
-
-        return $recipe;
-    }
+    use FixturesTrait;
 
     public function testIndex(): void
     {
@@ -41,13 +34,38 @@ final class RecipeControllerTest extends WebTestCase
     public function testCreateRecipe(): void
     {
         $client = RecipeControllerTest::createClient();
-        $client->request('GET', '/admin/recettes/create');
 
-        $client->submitForm('Créer', [
+        $doctrine = $client->getContainer()->get('doctrine');
+        assert($doctrine instanceof ManagerRegistry);
+        $em = $doctrine->getManager();
+        assert($em instanceof EntityManagerInterface);
+
+        $category = new Category();
+        $category->setName('Plat principal');
+        $em->persist($category);
+        $em->flush();
+
+        // We perform a GET request to open the session and retrieve the form.
+        $crawler = $client->request('GET', '/admin/recettes/create');
+
+        // The HTML form is extracted.
+        $form = $crawler->selectButton('Créer')->form();
+
+        // We are disabling strict validation of HTML options!
+        // Cela empêche Symfony de râler si la liste déroulante lui semble vide dans le test
+        /** @var ChoiceFormField $categoryField */
+        $categoryField = $form['recipe[category]'];
+        $categoryField->disableValidation();
+
+        $form->setValues([
             'recipe[title]' => 'Burger '.uniqid(),
             'recipe[content]' => 'Contenu de la recette test',
             'recipe[duration]' => 30,
+            'recipe[online]' => false,
+            'recipe[category]' => $category->getId(),
         ]);
+
+        $client->submit($form);
 
         self::assertResponseRedirects('/admin/recettes/');
         $client->followRedirect();
@@ -88,12 +106,17 @@ final class RecipeControllerTest extends WebTestCase
         assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em);
 
+        $category = $recipe->getCategory();
+        assert(null !== $category);
+
         $client->request('GET', '/admin/recettes/'.$recipe->getId());
 
         $client->submitForm('Éditer', [
             'recipe[title]' => 'Burger modifié '.uniqid(),
             'recipe[content]' => 'Contenu modifié de test',
             'recipe[duration]' => 45,
+            'recipe[online]' => false,
+            'recipe[category]' => $category->getId(),
         ]);
 
         self::assertResponseRedirects('/admin/recettes/');

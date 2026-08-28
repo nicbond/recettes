@@ -13,6 +13,10 @@ This personal project was created to experiment with modern Symfony best practic
 - Recipe image upload and preview
 - Image validation (JPEG, PNG and WebP)
 - Image resizing and WebP support
+- Ingredient and quantity management when creating or editing recipes
+- Recipes can be created without ingredients
+- Online/offline recipe status management
+- Offline recipes can be prepared before being published through the API
 - Category autocomplete with Symfony UX Autocomplete
 - Pagination and sortable recipe listings
 - Email notifications
@@ -64,6 +68,8 @@ The project demonstrates:
 - Separation of responsibilities
 - Doctrine ORM relationships
 - Fetch joins to avoid N+1 query problems
+- Recipe publication state management through an `online` flag
+- Separation between recipe creation and recipe publication
 
 ## Administration
 
@@ -71,6 +77,9 @@ The project includes a dedicated administration back-office with:
 
 - Recipe management
 - Category management
+- Ingredient and quantity management
+- Recipe creation without requiring ingredients
+- Online/offline recipe status management
 - Responsive sidebar navigation
 - Sortable recipe listings
 - Pagination
@@ -92,7 +101,19 @@ Uploaded images are validated using Symfony Validator:
 
 The administration interface also provides a client-side preview when selecting a new image.
 
+## Recipe Publication
+
+Recipes have an `online` status that controls whether they can be exposed through the API.
+
+When creating a recipe, ingredients are optional. This allows an administrator to create and prepare a recipe progressively without having to provide all ingredients immediately.
+
+- `online = false`: the recipe remains unavailable to the front-end API
+- `online = true`: the recipe can be exposed through the API with all the ingredients
+
+This separates the recipe creation workflow from its publication and allows recipes to be prepared before being made available to users.
+
 ## Docker
+
 The project runs in a Docker-based development environment using Docker Compose.
 The development environment includes:
 
@@ -163,6 +184,7 @@ If you prefer to run Mailpit directly on macOS instead of using Docker, you can 
 ## Testing
 
 ### Setup the test database
+
 Run the following commands inside your docker container:
 
 - ``php bin/console doctrine:database:create --env=test``
@@ -170,22 +192,29 @@ Run the following commands inside your docker container:
 - ``php bin/console doctrine:fixtures:load --env=test -n``
 
 ### Grant privileges to the test database (if needed)
+
 If you get an "Access denied" error, run the following command:
+
 - ``docker exec -it <mysql_container_name> mysql -u root -proot -e "GRANT ALL PRIVILEGES ON recettes_test.* TO 'dev'@'%'; FLUSH PRIVILEGES;"``
 
 ### Run the tests
+
 - ``php bin/phpunit``
 
 ### Run a specific test file
+
 - ``php bin/phpunit tests/Controller/Admin/CategoryControllerTest.php``
 
 ### Run a specific test method
+
 - ``php bin/phpunit --filter testIndex``
 
 ### Run All tests with detailed output
+
 - ``php bin/phpunit --testdox``
 
 ### Test database behavior
+
 The project uses `dama/doctrine-test-bundle` to ensure test isolation. Each test runs inside a transaction that is automatically rolled back after execution, meaning:
 
 - The test database is always clean between test runs
@@ -210,3 +239,4 @@ This project is continuously evolving and is used to experiment with:
 - Docker-based development environments
 - Performance and Doctrine query optimization
 - Modern administration interfaces
+- Progressive recipe creation and publication workflows
