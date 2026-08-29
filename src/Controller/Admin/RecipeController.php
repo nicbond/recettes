@@ -7,6 +7,7 @@ use App\Form\RecipeType;
 use App\Repository\RecipeRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,11 +17,11 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route('/admin/recettes', name: 'admin.recipe.')]
 final class RecipeController extends AbstractController
 {
-    final public const int NUMBER_PER_PAGE = 6;
-
     public function __construct(
         private readonly RecipeRepository $recipeRepository,
         private readonly PaginatorInterface $paginator,
+        #[Autowire('%number_per_page_recipe%')]
+        private readonly int $numberPerPageRecipe,
     ) {
     }
 
@@ -32,7 +33,7 @@ final class RecipeController extends AbstractController
         $pagination = $this->paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            self::NUMBER_PER_PAGE
+            $this->numberPerPageRecipe
         );
 
         return $this->render('admin/recipe/index.html.twig', [

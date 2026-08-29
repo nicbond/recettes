@@ -27,15 +27,25 @@
                         <th scope="row">{{ category.name }}</th>
                         <th>
                             <div class="d-flex gap-2">
-                                <a class="btn btn-primary" href="{{ path('admin.category.edit', {id: category.id}) }}">
+                                <a class="btn btn-primary btn-sm" href="{{ path('admin.category.edit', {id: category.id}) }}">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                {{ include(('components/modal/_delete_from_index_form.html.twig'), {
-                                    icon: true,
-                                    id: category.id,
-                                    route: 'admin.category.delete',
-                                    message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
-                                }) }}
+
+                                {% if category.recipes|length > 0 %}
+                                    {{ include('components/modal/category/_cannot_delete_form.html.twig', {
+                                        icon: true,
+                                        id: category.id,
+                                        name: category.name,
+                                        recipes: category.recipes,
+                                    }) }}
+                                {% else %}
+                                    {{ include('components/modal/_delete_from_index_form.html.twig', {
+                                        icon: true,
+                                        id: category.id,
+                                        route: 'admin.category.delete',
+                                        message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
+                                    }) }}
+                                {% endif %}
                             </div>
                         </th>
                     </tr>
@@ -46,6 +56,6 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mt-3">
-        {{ include(('components/pagination/pagination.html.twig'), {pagination: pagination}) }}
+        {{ include('components/pagination/pagination.html.twig', {pagination: pagination}) }}
     </div>
 {% endblock %}

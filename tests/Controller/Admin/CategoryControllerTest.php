@@ -3,6 +3,7 @@
 namespace App\Tests\Controller\Admin;
 
 use App\DataFixtures\Traits\FixturesTrait;
+use App\Entity\Recipe;
 use App\Repository\CategoryRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -151,5 +152,81 @@ final class CategoryControllerTest extends WebTestCase
         $existingCategory = $repository->find($category->getId());
 
         self::assertNotNull($existingCategory);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testDeleteCategoryLinkedToRecipeIsNotDeleted(): void
+    {
+        $client = CategoryControllerTest::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
+
+        $category = $this->createCategory($em, 'Catégorie liée '.uniqid());
+
+        $recipe = new Recipe();
+        $recipe->setTitle('Recette liée '.uniqid());
+        $recipe->setContent('Contenu de test');
+        $recipe->setDuration(30);
+        $recipe->setCategory($category);
+        $em->persist($recipe);
+        $em->flush();
+
+        $categoryId = $category->getId();
+
+        // Retrieves the token from the HTML
+        $crawler = $client->request('GET', '/admin/categories/');
+        $form = $crawler->filter('form[action="/admin/categories/'.$categoryId.'"]');
+        $csrfToken = $form->count() > 0
+            ? $form->filter('input[name="_token"]')->attr('value')
+            : 'fake_token';
+
+        $client->request('DELETE', '/admin/categories/'.$categoryId, [
+            '_token' => $csrfToken,
+        ]);
+
+        $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
+        assert($connection instanceof Connection);
+        $result = $connection->fetchOne(
+            'SELECT id FROM category WHERE id = ?',
+            [$categoryId]
+        );
+
+        self::assertNotFalse($result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testDeleteCategoryNotLinkedToRecipeIsDeleted(): void
+    {
+        $client = CategoryControllerTest::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
+
+        $category = $this->createCategory($em, 'Catégorie sans recette '.uniqid());
+        $categoryId = $category->getId();
+
+        // Retrieves the token from the HTML
+        $crawler = $client->request('GET', '/admin/categories/');
+        $csrfToken = $crawler
+            ->filter('form[action="/admin/categories/'.$categoryId.'"] input[name="_token"]')
+            ->attr('value');
+
+        $client->request('DELETE', '/admin/categories/'.$categoryId, [
+            '_token' => $csrfToken,
+        ]);
+
+        self::assertResponseRedirects('/admin/categories/');
+
+        $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
+        assert($connection instanceof Connection);
+        $result = $connection->fetchOne(
+            'SELECT id FROM category WHERE id = ?',
+            [$categoryId]
+        );
+
+        self::assertFalse($result);
     }
 }

@@ -30,9 +30,12 @@ class Category
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(
+        message: 'Le nom de la catégorie est obligatoire.',
+    )]
     #[Assert\Length(
         min: 5,
-        minMessage: 'Le nom doit être supèrieur à {{ limit }} caractères.',
+        minMessage: 'Le nom de la catégorie doit être supèrieur à {{ limit }} caractères.',
     )]
     private string $name = '';
 
@@ -57,7 +60,7 @@ class Category
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }

@@ -7,6 +7,7 @@ use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,11 +17,11 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route('/admin/categories', name: 'admin.category.')]
 final class CategoryController extends AbstractController
 {
-    final public const int NUMBER_PER_PAGE = 2;
-
     public function __construct(
         private readonly CategoryRepository $categoryRepository,
         private readonly PaginatorInterface $paginator,
+        #[Autowire('%number_per_page_category%')]
+        private readonly int $numberPerPageCategory,
     ) {
     }
 
@@ -32,7 +33,7 @@ final class CategoryController extends AbstractController
         $pagination = $this->paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            self::NUMBER_PER_PAGE
+            $this->numberPerPageCategory
         );
 
         return $this->render('admin/category/index.html.twig', [
@@ -44,7 +45,11 @@ final class CategoryController extends AbstractController
     public function new(Request $request): RedirectResponse|Response
     {
         $category = new Category();
-        $form = $this->createForm(CategoryType::class, $category);
+        $form = $this->createForm(CategoryType::class, $category, [
+            'attr' => [
+                'novalidate' => 'novalidate',
+            ],
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -84,6 +89,12 @@ final class CategoryController extends AbstractController
     public function delete(Request $request, Category $category): RedirectResponse
     {
         if ($this->isCsrfTokenValid('delete'.$category->getId(), $request->request->getString('_token'))) {
+            if ($category->getRecipes()->count() > 0) {
+                $this->addFlash('danger', 'Impossible de supprimer cette catégorie car elle est liée à des recettes.');
+
+                return $this->redirectToRoute('admin.category.index');
+            }
+
             $this->categoryRepository->remove($category, true);
             $this->addFlash('success', 'Catégorie supprimée avec succès');
         }

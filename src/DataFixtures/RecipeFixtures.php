@@ -20,7 +20,7 @@ class RecipeFixtures extends Fixture implements DependentFixtureInterface
         $faker = Factory::create('fr_FR');
         $faker->addProvider(new Restaurant($faker));
 
-        $categories = ['Plat chaud', 'Dessert', 'Entrée', 'Goûter'];
+        $categories = ['Plat chaud', 'Dessert', 'Entrée', 'Goûter', 'Accompagnements', 'Brunch', 'Boissons et Cocktails'];
         foreach ($categories as $c) {
             $category = (new Category())
                 ->setName($c)
