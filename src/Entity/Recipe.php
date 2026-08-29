@@ -59,7 +59,7 @@ class Recipe
         min: 5,
         minMessage: 'Le descriptif doit être supérieur à {{ limit }} caractères.'
     )]
-    private string $content = '';
+    private ?string $content = null;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'La durée est obligatoire.')]
@@ -126,12 +126,12 @@ class Recipe
         return $this;
     }
 
-    public function getContent(): string
+    public function getContent(): ?string
     {
         return $this->content;
     }
 
-    public function setContent(string $content): self
+    public function setContent(?string $content): static
     {
         $this->content = $content;
 
