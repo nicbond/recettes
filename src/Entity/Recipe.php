@@ -57,7 +57,9 @@ class Recipe
     #[Assert\NotBlank(message: 'Le descriptif de la recette est obligatoire.')]
     #[Assert\Length(
         min: 5,
-        minMessage: 'Le descriptif doit être supérieur à {{ limit }} caractères.'
+        max: 2000,
+        minMessage: 'Le descriptif doit être supérieur à {{ limit }} caractères.',
+        maxMessage: 'Le descriptif ne peut pas dépasser {{ limit }} caractères.',
     )]
     private ?string $content = null;
 

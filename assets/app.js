@@ -2,6 +2,7 @@ import './stimulus_bootstrap.js';
 import './bootstrap.js';
 import './js/thumbnail_preview.js';
 import './js/turbo-modal.js';
+import './js/character_counter.js';
 /*
  * Welcome to your app's main JavaScript file!
  *

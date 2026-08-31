@@ -57,6 +57,9 @@ class RecipeType extends AbstractType
                 'label' => 'form.recipe.content',
                 'required' => true,
                 'translation_domain' => 'form',
+                'attr' => [
+                    'maxlength' => 2000,
+                ],
             ])
             ->add('duration', IntegerType::class, [
                 'required' => true,
