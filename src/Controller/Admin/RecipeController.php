@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Recipe;
+use App\Form\RecipeThumbnailType;
 use App\Form\RecipeType;
 use App\Repository\RecipeRepository;
 use Knp\Component\Pager\PaginatorInterface;
@@ -118,5 +119,28 @@ final class RecipeController extends AbstractController
         }
 
         return $this->redirectToRoute('admin.recipe.index');
+    }
+
+    #[Route('/{id}/edit-thumbnail', name: 'edit_thumbnail', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
+    public function editThumbnail(Recipe $recipe, Request $request): Response
+    {
+        $form = $this->createForm(RecipeThumbnailType::class, $recipe, [
+            'action' => $this->generateUrl('admin.recipe.edit_thumbnail', ['id' => $recipe->getId()]),
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->recipeRepository->save($recipe, true);
+            $this->addFlash('success', 'Image mise à jour avec succès.');
+
+            return $this->redirectToRoute('admin.recipe.index');
+        }
+
+        $status = $form->isSubmitted() && !$form->isValid() ? 422 : 200;
+
+        return $this->render('partials/recipe/edit_thumbnail.html.twig', [
+            'recipe' => $recipe,
+            'form' => $form,
+        ], new Response(status: $status));
     }
 }

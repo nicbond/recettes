@@ -183,6 +183,15 @@ If you prefer to run Mailpit directly on macOS instead of using Docker, you can 
 
 ## Testing
 
+For all tests, we run them with CSRF enabled because:
+- We are testing under real-world conditions—if CSRF is active in production, it should be active in tests too.
+- We ensure the CSRF token is correctly handled in your forms.
+- We avoid false positives—a test that passes only because CSRF is disabled does not reflect reality.
+
+Disabling CSRF during testing is a shortcut that can mask bugs. 
+Retrieving the token from the HTML, as we do, more closely mirrors actual user behavior.
+The tests reflect the application's actual behavior.
+
 ### Setup the test database
 
 Run the following commands inside your docker container:

@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Field\ChoiceFormField;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final class RecipeControllerTest extends WebTestCase
 {
@@ -131,6 +132,80 @@ final class RecipeControllerTest extends WebTestCase
         $client->request('GET', '/admin/recettes/99999');
 
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testEditThumbnailPageNotFound(): void
+    {
+        $client = RecipeControllerTest::createClient();
+        $client->request('GET', '/admin/recettes/99999/edit-thumbnail');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testEditThumbnailWithValidFile(): void
+    {
+        $client = RecipeControllerTest::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
+        $recipe = $this->createRecipe($em);
+
+        $uploadedFile = new UploadedFile(
+            __DIR__.'/../../fixtures/valid_image.png',
+            'valid_image.png',
+            'image/png',
+            null,
+            true
+        );
+
+        // Initialize the session with a GET request first
+        $crawler = $client->request('GET', '/admin/recettes/'.$recipe->getId().'/edit-thumbnail');
+
+        // Retrieves the CSRF token from the HTML form
+        $csrfToken = $crawler->filter('input[name="recipe_thumbnail[_token]"]')->attr('value');
+
+        // The solution using $client->request('POST', ...) is the most robust approach here.
+        // It bypasses the Crawler's limitations regarding the asynchronous rendering of the Turbo modal,
+        // while cleanly passing the file and CSRF token to Symfony.
+        $client->request(
+            'POST',
+            '/admin/recettes/'.$recipe->getId().'/edit-thumbnail',
+            [
+                'recipe_thumbnail' => [
+                    'thumbnailFile' => $uploadedFile,
+                    '_token' => $csrfToken,
+                ],
+            ]
+        );
+
+        self::assertResponseRedirects('/admin/recettes/');
+    }
+
+    public function testEditThumbnailWithInvalidFile(): void
+    {
+        $client = RecipeControllerTest::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
+        $recipe = $this->createRecipe($em);
+
+        $client->request('GET', '/admin/recettes/'.$recipe->getId().'/edit-thumbnail');
+
+        $uploadedFile = new UploadedFile(
+            __DIR__.'/../../fixtures/invalid_file.txt',
+            'invalid_file.txt',
+            'text/plain',
+            null,
+            true
+        );
+
+        // Why POST method et not PATCH, because it's not an API
+        // Only the admin back office can create, modify, or delete: It is a business decision.
+        $client->request('POST', '/admin/recettes/'.$recipe->getId().'/edit-thumbnail',
+            [
+                'recipe_thumbnail' => ['thumbnailFile' => $uploadedFile],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(422);
     }
 
     /**

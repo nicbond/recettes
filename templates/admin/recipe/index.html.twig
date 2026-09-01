@@ -26,13 +26,21 @@
                 <div class="col">
                     <div class="card h-100 shadow-sm">
                         {% if recipe.thumbnail.name %}
-                            <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
-                                 class="card-img-top recipe-card-img"
-                                 alt="{{ recipe.title }}">
+                            <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
+                               data-turbo-frame="modal"
+                               style="cursor: pointer;">
+                                <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
+                                     class="card-img-top recipe-card-img"
+                                     alt="{{ recipe.title }}">
+                            </a>
                         {% else %}
-                            <div class="card-img-top recipe-card-placeholder bg-secondary d-flex align-items-center justify-content-center">
-                                <i class="fas fa-utensils fa-3x text-white"></i>
-                            </div>
+                            <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
+                               data-turbo-frame="modal"
+                               style="cursor: pointer;">
+                                <div class="card-img-top recipe-card-placeholder bg-secondary d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-utensils fa-3x text-white"></i>
+                                </div>
+                            </a>
                         {% endif %}
                         <div class="card-body">
                             <h5 class="card-title">{{ recipe.title }}</h5>
@@ -64,9 +72,9 @@
         </div>
     </div>
 
-    {# Modale Bootstrap avec turbo-frame à l'intérieur #}
+    {# This is the empty Bootstrap modal waiting to be populated by Turbo Frame. #}
     <div class="modal fade" id="turbo-modal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-w900">
             <div class="modal-content">
                 <turbo-frame id="modal"></turbo-frame>
             </div>

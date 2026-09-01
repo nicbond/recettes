@@ -221,3 +221,14 @@ body {
 .table-actions-col {
     width: 200px;
 }
+
+/* ==========================================================
+   MODALES
+   ========================================================== */
+
+/* Écrase la largeur par défaut pour imposer 900px sur grand écran */
+@media (min-width: 992px) {
+    .modal-w900 {
+        max-width: 900px !important;
+    }
+}

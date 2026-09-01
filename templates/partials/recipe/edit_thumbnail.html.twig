@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <turbo-frame id="modal">
+        <div class="modal-header">
+            <h5 class="modal-title">Modifier l'image de {{ recipe.title }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+            {% if recipe.thumbnail.name %}
+                <img id="thumbnail-preview"
+                     src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
+                     class="img-fluid mb-3 rounded"
+                     alt="{{ recipe.title }}"
+                     style="max-height: 300px; object-fit: cover;">
+            {% else %}
+                <img id="thumbnail-preview"
+                     style="display:none"
+                     class="img-fluid mb-3 rounded"
+                     alt="{{ recipe.title }}">
+            {% endif %}
+
+            {{ form_start(form, {attr: {'data-turbo': 'false'}}) }}
+            {{ form_row(form.thumbnailFile) }}
+            <button class="btn btn-primary mt-2">Mettre à jour l'image</button>
+            {{ form_end(form) }}
+        </div>
+    </turbo-frame>
+{% endblock %}

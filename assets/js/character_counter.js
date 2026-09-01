@@ -1,12 +1,10 @@
-// jQuery is already included in the project for other features, but for this simple counter
-// I opted for vanilla JS to avoid unnecessarily increasing the page size!
-document.addEventListener('DOMContentLoaded', function () {
+function initCharacterCounter() {
     const textarea = document.querySelector('#recipe_content');
 
-    if (!textarea) return;
+    if (!textarea || textarea.parentNode.querySelector('.js-counter-added')) return;
 
     const counter = document.createElement('div');
-    counter.classList.add('form-text', 'text-muted', 'text-end');
+    counter.classList.add('form-text', 'text-muted', 'text-end', 'js-counter-added');
     textarea.parentNode.appendChild(counter);
 
     function updateCounter() {
@@ -21,4 +19,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     textarea.addEventListener('input', updateCounter);
     updateCounter();
+}
+
+// 1. (First visit / Refresher)
+document.addEventListener('DOMContentLoaded', function () {
+    initCharacterCounter();
 });
+
+// 2. (Page change / "New" page)
+document.addEventListener('turbo:load', function () {
+    initCharacterCounter();
+});
+
+// 3.(Modal opening / "Edit" page)
+document.addEventListener('turbo:frame-load', function () {
+    initCharacterCounter();
+});
+
