@@ -1,24 +1,22 @@
-<div class="quantity-item p-3 border rounded bg-light">
+<div class="quantity-item quantity-item-box">
+    <button type="button"
+            data-action="click->form-collection#removeElement"
+            class="btn-close quantity-item-close"
+            title="Supprimer cet ingrédient"
+            aria-label="Supprimer cet ingrédient">
+    </button>
+
     <div class="row align-items-end g-2">
-        <div class="col-md-2">
+        <div class="col-md-3">
             {{ form_row(form.quantity) }}
         </div>
+
         <div class="col-md-4">
             {{ form_row(form.unit) }}
         </div>
+
         <div class="col-md-5">
             {{ form_row(form.ingredient) }}
         </div>
-
-        <div class="col-md-1 d-flex justify-content-end">
-            <button type="button"
-                    data-action="click->form-collection#removeElement"
-                    class="btn btn-outline-danger btn-sm w-100"
-                    style="margin-bottom: 1rem;"
-                    title="Supprimer cet ingrédient">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-
     </div>
 </div>
