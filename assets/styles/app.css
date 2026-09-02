@@ -308,3 +308,36 @@ body {
     border: 1px solid #dee2e6;
 }
 
+/* ==========================================================
+   RECETTES - EFFET HOVER COUVERTURE IMAGE PAGE INDEX
+   ========================================================== */
+
+.recipe-card-image-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.recipe-image-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.65);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 2;
+}
+
+/* Événement de survol : révèle l'overlay textuel */
+.recipe-card-image-wrapper:hover .recipe-image-hover-overlay {
+    opacity: 1;
+}
+
+

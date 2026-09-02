@@ -25,23 +25,30 @@
             {% for recipe in pagination %}
                 <div class="col">
                     <div class="card h-100 shadow-sm">
-                        {% if recipe.thumbnail.name %}
-                            <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
-                               data-turbo-frame="modal"
-                               style="cursor: pointer;">
-                                <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
-                                     class="card-img-top recipe-card-img"
-                                     alt="{{ recipe.title }}">
-                            </a>
-                        {% else %}
-                            <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
-                               data-turbo-frame="modal"
-                               style="cursor: pointer;">
-                                <div class="card-img-top recipe-card-placeholder bg-secondary d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-utensils fa-3x text-white"></i>
-                                </div>
-                            </a>
-                        {% endif %}
+                        <div class="recipe-card-image-wrapper">
+                            {% if recipe.thumbnail.name %}
+                                <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
+                                   data-turbo-frame="modal">
+                                    <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
+                                         class="card-img-top recipe-card-img"
+                                         alt="{{ recipe.title }}">
+                                    <span class="recipe-image-hover-overlay">
+                                        <i class="fas fa-edit me-1"></i> Modifier l'image
+                                    </span>
+                                </a>
+                            {% else %}
+                                <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
+                                   data-turbo-frame="modal">
+                                    <div class="card-img-top recipe-card-placeholder bg-secondary d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-utensils fa-3x text-white"></i>
+                                    </div>
+                                    <span class="recipe-image-hover-overlay">
+                                        <i class="fas fa-plus me-1"></i> Ajouter une image
+                                    </span>
+                                </a>
+                            {% endif %}
+                        </div>
+
                         <div class="card-body">
                             <h5 class="card-title">{{ recipe.title }}</h5>
                             <p class="card-text text-muted">
@@ -72,9 +79,8 @@
         </div>
     </div>
 
-    {# This is the empty Bootstrap modal waiting to be populated by Turbo Frame. #}
     <div class="modal fade" id="turbo-modal" tabindex="-1">
-        <div class="modal-dialog modal-w900">
+        <div class="modal-dialog modal-w1000">
             <div class="modal-content">
                 <turbo-frame id="modal"></turbo-frame>
             </div>
