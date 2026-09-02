@@ -233,6 +233,42 @@ body {
     }
 }
 
+/* Écrase la largeur par défaut pour imposer 1000px sur grand écran */
+@media (min-width: 1200px) {
+    .modal-w1000 {
+        max-width: 1000px !important;
+    }
+}
+
+/* Titre principal centré dans le header */
+.modal-title-centered {
+    width: 100%;
+    text-align: center;
+}
+
+/* Zone d'aperçu de l'image de la recette */
+.modal-thumbnail-preview {
+    max-height: 350px;
+    object-fit: cover;
+}
+
+/* Bloc gris alternatif avec l'icône ustensiles nettoyé du HTML */
+.modal-thumbnail-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 250px;
+    min-height: 250px;
+    background-color: #6c757d; /* Équivalent bg-secondary de Bootstrap */
+    color: #fff; /* Équivalent text-white de Bootstrap */
+}
+
+/* Conteneur pour aligner le bouton de soumission */
+.modal-actions-container {
+    display: flex;
+    justify-content: flex-start;
+}
+
 /* ==========================================================
    RECETTES - INGRÉDIENTS (COLLECTION)
    ========================================================== */
