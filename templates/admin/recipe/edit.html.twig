@@ -18,7 +18,7 @@
             </div>
 
             <div class="modal-body">
-                {{ include('partials/recipe/edit.html.twig') }}
+                {{ include('partials/recipe/thumbnail.html.twig') }}
                 {{ include('partials/_form.html.twig', {
                     button_label: 'Éditer',
                 }) }}
@@ -27,7 +27,7 @@
     {% else %}
         <h1>Éditer la recette {{ recipe.title }}</h1>
 
-        {{ include('partials/recipe/edit.html.twig') }}
+        {{ include('partials/recipe/thumbnail.html.twig') }}
 
         <div class="box-body">
             {{ include('partials/_form.html.twig', {

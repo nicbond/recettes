@@ -18,7 +18,7 @@ class QuantityType extends AbstractType
                 'scale' => 2,
                 'translation_domain' => 'form',
                 'attr' => [
-                    'placeholder' => 'Ex: 1 ou 2.50 (virgule interdite)',
+                    'placeholder' => 'Ex: 1 ou 2,50',
                 ],
             ])
             ->add('unit', UnitAutocompleteField::class, [

@@ -1,8 +1,7 @@
 <div id="thumbnail-preview-container"
-     class="bg-secondary d-flex align-items-center justify-content-center"
-     style="width: 220px; height: 220px;">
-
-    {% if recipe.thumbnail.name %}
+     class="bg-secondary d-flex align-items-center justify-content-center mb-3"
+     style="width: 200px; height: 200px; overflow: hidden;">
+    {% if recipe is defined and recipe.thumbnail is defined and recipe.thumbnail.name %}
         <img id="thumbnail-preview"
              src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
              alt="Aperçu de la recette {{ recipe.title }}"

@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Ingredient;
 use App\Entity\Quantity;
 use App\Entity\Recipe;
+use App\Entity\Tag;
 use App\Entity\Unit;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -65,6 +66,17 @@ class RecipeFixtures extends Fixture implements DependentFixtureInterface
                 );
             }
 
+            // Randomly selects between 1 and 4 tag names from TagFixtures
+            $randomTagNames = $faker->randomElements(
+                TagFixtures::TAGS,
+                $faker->numberBetween(1, 4)
+            );
+
+            foreach ($randomTagNames as $tagName) {
+                $tag = $this->getReference('tag_'.$tagName, Tag::class);
+                $recipe->addTag($tag);
+            }
+
             $manager->persist($recipe);
         }
 
@@ -80,6 +92,7 @@ class RecipeFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             IngredientFixtures::class,
+            TagFixtures::class,
             UnitFixtures::class,
         ];
     }

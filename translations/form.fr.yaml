@@ -4,12 +4,17 @@ form:
     slug: "Slug"
     thumbnailFile: "Fichier"
     category: "Catégorie"
+    tag: "Tags"
     ingredient: "Ingrédient"
     content: "Descriptif"
     duration: "Durée"
     online: "En ligne"
     helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du titre."
   category:
+    name: "Nom"
+    slug: "Slug"
+    helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du nom."
+  tag:
     name: "Nom"
     slug: "Slug"
     helpSlug: "Si vous souhaitez spécifier votre slug, renseignez-le sinon il se créera automatiquement à partir du nom."

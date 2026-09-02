@@ -93,10 +93,17 @@ class Recipe
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 0])]
     private bool $online = false;
 
+    /**
+     * @var Collection<int, Tag>
+     */
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'recipes')]
+    private Collection $tags;
+
     public function __construct()
     {
         $this->thumbnail = new EmbeddedFile();
         $this->quantities = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -238,5 +245,29 @@ class Recipe
     public function __toString(): string
     {
         return $this->title ?? 'Nouvelle recette';
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): static
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): static
+    {
+        $this->tags->removeElement($tag);
+
+        return $this;
     }
 }

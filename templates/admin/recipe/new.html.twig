@@ -5,6 +5,7 @@
 {% block body %}
     <h1>Créer une recette</h1>
     <div class="box-body">
+        {{ include('partials/recipe/thumbnail.html.twig') }}
         {{ include('partials/_form.html.twig', {button_label: 'Créer'}) }}
     </div>
 {% endblock %}

@@ -38,6 +38,11 @@ class RecipeType extends AbstractType
                 'required' => true,
                 'translation_domain' => 'form',
             ])
+            ->add('tags', TagAutocompleteField::class, [
+                'label' => 'form.recipe.tag',
+                'required' => false,
+                'translation_domain' => 'form',
+            ])
             ->add('content', TextareaType::class, [
                 'label' => 'form.recipe.content',
                 'required' => true,

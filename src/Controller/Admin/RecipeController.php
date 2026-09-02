@@ -138,7 +138,7 @@ final class RecipeController extends AbstractController
 
         $status = $form->isSubmitted() && !$form->isValid() ? 422 : 200;
 
-        return $this->render('partials/recipe/edit_thumbnail.html.twig', [
+        return $this->render('partials/recipe/edit_thumbnail_modal.html.twig', [
             'recipe' => $recipe,
             'form' => $form,
         ], new Response(status: $status));

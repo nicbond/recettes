@@ -76,6 +76,7 @@ mysql: ## Reset the database and load fixtures
 	$(SYMFONY) doctrine:schema:update --force
 	$(SYMFONY) doctrine:schema:validate
 	@echo '\033[1;32mDatabase up\033[0m';
+	$(MAKE) fixture
 	$(MAKE) mysql-test
 
 fixture: ## Reload fixtures
