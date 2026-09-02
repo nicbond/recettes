@@ -289,3 +289,22 @@ body {
     z-index: 10;
 }
 
+/* ==========================================================
+   RECETTES - IMAGE - NEW
+   ========================================================== */
+
+/* Conteneur de l'image dans le formulaire standard */
+.recipe-form-image-wrapper {
+    max-width: 400px;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+/* Force l'image injectée par le JS à garder un ratio fixe et harmonieux */
+.recipe-form-image-wrapper img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border: 1px solid #dee2e6;
+}
+

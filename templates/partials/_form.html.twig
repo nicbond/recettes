@@ -18,6 +18,15 @@
                     {{ form_errors(child) }}
                 {% else %}
                     {{ form_row(child) }}
+
+                    {% if child.vars.name == 'thumbnailForm' %}
+                        <div id="thumbnail-preview-container" class="mt-2 recipe-form-image-wrapper">
+                            <div id="thumbnail-preview"
+                                 class="rounded shadow-sm modal-thumbnail-placeholder">
+                                <i class="fas fa-utensils fa-4x"></i>
+                            </div>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endif %}
