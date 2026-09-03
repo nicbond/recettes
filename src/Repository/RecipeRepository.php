@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Recipe;
+use App\Entity\Tag;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -19,15 +21,39 @@ class RecipeRepository extends ServiceEntityRepository
         parent::__construct($registry, Recipe::class);
     }
 
-    public function findWithDurationLowerThan(int $duration): QueryBuilder
+    /**
+     * @param array{
+     *     title?: string,
+     *     category?: Category|null,
+     *     tags?: list<Tag>
+     * } $data
+     */
+    public function findWithDurationLowerThan(int $duration, array $data = []): QueryBuilder
     {
-        return $this->createQueryBuilder('recipe')
-            ->select('recipe', 'category')
+        $qb = $this->createQueryBuilder('recipe')
+            ->select('recipe', 'category', 'tag')
             ->leftJoin('recipe.category', 'category')
-            ->where('recipe.duration <= :val')
+            ->leftJoin('recipe.tags', 'tag')
+            ->where('recipe.duration < :val')
             ->setParameter('val', $duration)
-            ->orderBy('recipe.duration', 'ASC')
-        ;
+            ->orderBy('recipe.duration', 'ASC');
+
+        if (isset($data['title']) && '' !== $data['title']) {
+            $qb->andWhere('LOWER(recipe.title) LIKE LOWER(:title)')
+                ->setParameter('title', '%'.$data['title'].'%');
+        }
+
+        if (isset($data['category'])) {
+            $qb->andWhere('category = :category')
+                ->setParameter('category', $data['category']);
+        }
+
+        if (isset($data['tags']) && [] !== $data['tags']) {
+            $qb->andWhere('tag IN (:tags)')
+                ->setParameter('tags', $data['tags']);
+        }
+
+        return $qb;
     }
 
     /**

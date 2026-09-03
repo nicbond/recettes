@@ -2,7 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\DTO\RecipeFilterDTO;
 use App\Entity\Recipe;
+use App\Form\RecipeFilterType;
 use App\Form\RecipeThumbnailType;
 use App\Form\RecipeType;
 use App\Repository\RecipeRepository;
@@ -29,7 +31,28 @@ final class RecipeController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(Request $request): Response
     {
-        $query = $this->recipeRepository->findWithDurationLowerThan(60);
+        $filter = new RecipeFilterDTO();
+
+        $filterForm = $this->createForm(RecipeFilterType::class, $filter);
+        $filterForm->handleRequest($request);
+
+        $filters = [];
+        if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+            /** @var RecipeFilterDTO $data */
+            $data = $filterForm->getData();
+
+            if (null !== $data->title) {
+                $filters['title'] = $data->title;
+            }
+            if (null !== $data->category) {
+                $filters['category'] = $data->category;
+            }
+            if (!empty($data->tags)) {
+                $filters['tags'] = $data->tags;
+            }
+        }
+
+        $query = $this->recipeRepository->findWithDurationLowerThan(60, $filters);
 
         $pagination = $this->paginator->paginate(
             $query,
@@ -39,6 +62,7 @@ final class RecipeController extends AbstractController
 
         return $this->render('admin/recipe/index.html.twig', [
             'pagination' => $pagination,
+            'filterForm' => $filterForm,
         ]);
     }
 

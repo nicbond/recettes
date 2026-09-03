@@ -5,16 +5,55 @@
 {% block body %}
     <h1>Liste des recettes</h1>
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            {{ form_start(filterForm, {
+                attr: {
+                    class: 'row g-3 align-items-end',
+                },
+            }) }}
+
+            <div class="col-md-4">
+                {{ form_widget(filterForm.title) }}
+            </div>
+
+            <div class="col-md-3">
+                {{ form_widget(filterForm.category) }}
+            </div>
+
+            <div class="col-md-3">
+                {{ form_widget(filterForm.tags) }}
+            </div>
+
+            <div class="col-md-auto d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-1"></i>
+                    Filtrer
+                </button>
+
+                <a href="{{ path('admin.recipe.index') }}"
+                   class="btn btn-outline-danger"
+                   title="Réinitialiser tous les filtres"
+                   aria-label="Réinitialiser les filtres">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+
+            {{ form_end(filterForm) }}
+        </div>
+    </div>
+
     <div class="d-flex justify-content-end mb-3">
         <a href="{{ path('admin.recipe.create') }}" class="btn btn-primary">Ajouter une nouvelle recette</a>
     </div>
 
     <div class="border-top border-primary border-3 pt-3">
-        <div class="d-flex gap-3 mb-3">
+        <div class="d-flex justify-content-start gap-3 mb-3">
             <span>
                 {{ knp_pagination_sortable(pagination, 'Titre', 'recipe.title') }}
                 <i class="fas fa-{{ sortDirectionIcon('recipe.title', pagination.params) }}"></i>
             </span>
+
             <span>
                 {{ knp_pagination_sortable(pagination, 'Catégorie', 'category.name') }}
                 <i class="fas fa-{{ sortDirectionIcon('category.name', pagination.params) }}"></i>
@@ -25,60 +64,92 @@
             {% for recipe in pagination %}
                 <div class="col">
                     <div class="card h-100 shadow-sm">
+
+                        {# Image + overlay + tags #}
                         <div class="recipe-card-image-wrapper">
-                            {% if recipe.thumbnail.name %}
-                                <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
-                                   data-turbo-frame="modal">
+                            <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
+                               data-turbo-frame="modal"
+                               class="d-block">
+
+                                {% if recipe.thumbnail.name %}
                                     <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
                                          class="card-img-top recipe-card-img"
                                          alt="{{ recipe.title }}">
+
                                     <span class="recipe-image-hover-overlay">
                                         <i class="fas fa-edit me-1"></i> Modifier l'image
                                     </span>
-                                </a>
-                            {% else %}
-                                <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
-                                   data-turbo-frame="modal">
+                                {% else %}
                                     <div class="card-img-top recipe-card-placeholder bg-secondary d-flex align-items-center justify-content-center">
                                         <i class="fas fa-utensils fa-3x text-white"></i>
                                     </div>
+
                                     <span class="recipe-image-hover-overlay">
                                         <i class="fas fa-plus me-1"></i> Ajouter une image
                                     </span>
-                                </a>
+                                {% endif %}
+                            </a>
+
+                            {% if recipe.tags|length > 0 %}
+                                <div class="position-absolute bottom-0 start-0 p-2 d-flex flex-wrap gap-1">
+                                    {% for tag in recipe.tags %}
+                                        <span class="badge bg-primary bg-opacity-75">
+                                            {{ tag.name }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
                             {% endif %}
                         </div>
 
+                        {# Recipe informations #}
                         <div class="card-body">
-                            <h5 class="card-title">{{ recipe.title }}</h5>
-                            <p class="card-text text-muted">
-                                <i class="fas fa-layer-group me-1"></i>
-                                {{ recipe.category.name|default('Sans catégorie') }}
-                            </p>
-                            <p class="card-text text-muted">
-                                <i class="fas fa-clock me-1"></i>
-                                {{ recipe.duration }} min
-                            </p>
+                            <h5 class="card-title">
+                                {{ recipe.title }}
+                            </h5>
+
+                            {% if recipe.category %}
+                                <p class="card-text text-muted mb-1">
+                                    <i class="fas fa-layer-group me-1"></i>
+                                    {{ recipe.category.name }}
+                                </p>
+                            {% else %}
+                                <p class="card-text text-muted mb-1">
+                                    <i class="fas fa-layer-group me-1"></i>
+                                    Sans catégorie
+                                </p>
+                            {% endif %}
+
+                            {% if recipe.duration %}
+                                <p class="card-text text-muted mb-0">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ recipe.duration }} min
+                                </p>
+                            {% endif %}
                         </div>
+
+                        {# Actions #}
                         <div class="card-footer d-flex gap-2">
                             <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}"
                                class="btn btn-primary btn-sm"
                                data-turbo-frame="modal">
                                 <i class="fas fa-edit"></i>
                             </a>
+
                             {{ include('components/modal/_delete_from_index_form.html.twig', {
                                 icon: true,
                                 id: recipe.id,
                                 route: 'admin.recipe.delete',
-                                message: 'Cette recette sera définitivement supprimée.',
+                                message: 'Cette recette sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
                             }) }}
                         </div>
+
                     </div>
                 </div>
             {% endfor %}
         </div>
     </div>
 
+    {# Modal Turbo #}
     <div class="modal fade" id="turbo-modal" tabindex="-1">
         <div class="modal-dialog modal-w1000">
             <div class="modal-content">
