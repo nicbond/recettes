@@ -98,24 +98,27 @@ final class CategoryControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
-    /**
-     * @throws Exception
-     */
     public function testDeleteCategory(): void
     {
         $client = CategoryControllerTest::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
-        $category = $this->createCategory($em, 'A supprimer '.uniqid());
+
+        // 1. Assign a strategic name for sorting
+        $categoryName = 'ZZZ_A_supprimer_'.uniqid();
+        $category = $this->createCategory($em, $categoryName);
         $categoryId = $category->getId();
 
-        // Visit the page to initialize the session AND retrieve the token from the HTML
-        $crawler = $client->request('GET', '/admin/categories/');
+        // 2. FIX: Force descending sort by name in the URL.
+        // Our "ZZZ_" category will thus appear AT THE VERY TOP of page 1.
+        $crawler = $client->request('GET', '/admin/categories/?sort=category.name&direction=desc');
+        self::assertResponseIsSuccessful();
 
-        // Retrieves the CSRF token directly from the deletion form on the page
-        $form = $crawler->filter('form[action*="'.$categoryId.'"]')->first();
-        $csrfToken = $form->filter('input[name="_token"]')->attr('value');
+        // 3. Extracting the token from the actual HTML
+        $formNode = $crawler->filter('form[action*="/admin/categories/'.$categoryId.'"] input[name="_token"]')->first();
+        $csrfToken = $formNode->attr('value');
 
+        // 4. Submitting the deletion using the expected DELETE method
         $client->request('DELETE', '/admin/categories/'.$categoryId, [
             '_token' => $csrfToken,
         ]);
@@ -126,11 +129,7 @@ final class CategoryControllerTest extends WebTestCase
 
         $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
         assert($connection instanceof Connection);
-        $result = $connection->fetchOne(
-            'SELECT id FROM category WHERE id = ?',
-            [$categoryId]
-        );
-
+        $result = $connection->fetchOne('SELECT id FROM category WHERE id = ?', [$categoryId]);
         self::assertFalse($result);
     }
 
@@ -175,58 +174,24 @@ final class CategoryControllerTest extends WebTestCase
 
         $categoryId = $category->getId();
 
-        // Retrieves the token from the HTML
-        $crawler = $client->request('GET', '/admin/categories/');
-        $form = $crawler->filter('form[action="/admin/categories/'.$categoryId.'"]');
-        $csrfToken = $form->count() > 0
-            ? $form->filter('input[name="_token"]')->attr('value')
-            : 'fake_token';
+        // Using the same secure sort by category.id
+        $crawler = $client->request('GET', '/admin/categories/?sort=category.id&direction=desc');
+        self::assertResponseIsSuccessful();
 
-        $client->request('DELETE', '/admin/categories/'.$categoryId, [
-            '_token' => $csrfToken,
-        ]);
-
-        $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
-        assert($connection instanceof Connection);
-        $result = $connection->fetchOne(
-            'SELECT id FROM category WHERE id = ?',
-            [$categoryId]
-        );
-
-        self::assertNotFalse($result);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function testDeleteCategoryNotLinkedToRecipeIsDeleted(): void
-    {
-        $client = CategoryControllerTest::createClient();
-        $em = $client->getContainer()->get(EntityManagerInterface::class);
-        assert($em instanceof EntityManagerInterface);
-
-        $category = $this->createCategory($em, 'Catégorie sans recette '.uniqid());
-        $categoryId = $category->getId();
-
-        // Retrieves the token from the HTML
-        $crawler = $client->request('GET', '/admin/categories/');
-        $csrfToken = $crawler
-            ->filter('form[action="/admin/categories/'.$categoryId.'"] input[name="_token"]')
-            ->attr('value');
+        $formNode = $crawler->filter('form[action*="/admin/categories/'.$categoryId.'"] input[name="_token"]')->first();
+        $csrfToken = $formNode->attr('value');
 
         $client->request('DELETE', '/admin/categories/'.$categoryId, [
             '_token' => $csrfToken,
         ]);
 
         self::assertResponseRedirects('/admin/categories/');
+        $client->followRedirect();
+        self::assertSelectorExists('.alert-danger');
 
         $connection = $client->getContainer()->get('doctrine.dbal.default_connection');
         assert($connection instanceof Connection);
-        $result = $connection->fetchOne(
-            'SELECT id FROM category WHERE id = ?',
-            [$categoryId]
-        );
-
-        self::assertFalse($result);
+        $result = $connection->fetchOne('SELECT id FROM category WHERE id = ?', [$categoryId]);
+        self::assertNotFalse($result);
     }
 }
