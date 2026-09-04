@@ -6,6 +6,7 @@
 parameters:
     number_per_page_recipe: '%env(int:NUMBER_PER_PAGE_RECIPE)%'
     number_per_page_category: '%env(int:NUMBER_PER_PAGE_CATEGORY)%'
+    number_per_page_tags: '%env(int:NUMBER_PER_PAGE_TAGS)%'
 
 services:
     # default configuration for services in *this* file

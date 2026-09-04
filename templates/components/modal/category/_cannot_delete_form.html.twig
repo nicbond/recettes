@@ -14,13 +14,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
-                <p>Désolé, vous ne pouvez pas supprimer la catégorie <strong>{{ name }}</strong> car celle-ci est liée aux recettes suivantes :</p>
+                <p>{{ warning }} <strong>{{ name }}</strong> {{ reason }}</p>
                 <ul>
                     {% for recipe in recipes %}
                         <li>{{ recipe.title }}</li>
                     {% endfor %}
                 </ul>
-                <p class="text-muted">Veuillez d'abord modifier ou supprimer ces recettes avant de supprimer cette catégorie.</p>
+                <p class="text-muted">{{ message }}</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>

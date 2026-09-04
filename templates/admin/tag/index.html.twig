@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des tags{% endblock %}
+
+{% block body %}
+    <h1>Liste des tags</h1>
+
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ path('admin.tag.create') }}" class="btn btn-primary">Ajouter un nouveau tag</a>
+    </div>
+
+    <div class="border-top border-primary border-3">
+        <div class="box-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">
+                        {{ knp_pagination_sortable(pagination, 'Tag', 'tag.name') }}
+                        <i class="fas fa-{{ sortDirectionIcon('tag.name', pagination.params) }}"></i>
+                    </th>
+                    <th class="table-actions-col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for tag in pagination %}
+                    <tr>
+                        <th scope="row">{{ tag.name }}</th>
+                        <th>
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-primary btn-sm" href="{{ path('admin.tag.edit', {id: tag.id}) }}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                {% if tag.recipes|length > 0 %}
+                                    {{ include('components/modal/category/_cannot_delete_form.html.twig', {
+                                        icon: true,
+                                        id: tag.id,
+                                        name: tag.name,
+                                        recipes: tag.recipes,
+                                        warning: 'Désolé, vous ne pouvez pas supprimer le tag',
+                                        reason: 'car celui-ci est lié aux recettes suivantes :',
+                                        message: 'Veuillez d\'abord modifier ou supprimer ces recettes avant de supprimer ce tag.',
+                                    }) }}
+                                {% else %}
+                                    {{ include('components/modal/_delete_from_index_form.html.twig', {
+                                        icon: true,
+                                        id: tag.id,
+                                        route: 'admin.tag.delete',
+                                        message: 'Ce tag sera définitivement supprimé et ne sera plus affiché.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
+                                    }) }}
+                                {% endif %}
+                            </div>
+                        </th>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        {{ include('components/pagination/pagination.html.twig', {pagination: pagination}) }}
+    </div>
+{% endblock %}

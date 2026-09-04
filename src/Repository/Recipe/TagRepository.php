@@ -1,32 +1,32 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Recipe;
 
-use App\Entity\Category;
+use App\Entity\Tag;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Category>
+ * @extends ServiceEntityRepository<Tag>
  */
-class CategoryRepository extends ServiceEntityRepository
+class TagRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Category::class);
+        parent::__construct($registry, Tag::class);
     }
 
-    public function findAllCategoryByQueryBuilder(): QueryBuilder
+    public function findAllTagsByQueryBuilder(): QueryBuilder
     {
-        return $this->createQueryBuilder('category')
-            ->select('category', 'recipe')
-            ->leftJoin('category.recipes', 'recipe')
-            ->orderBy('category.name', 'ASC')
+        return $this->createQueryBuilder('tag')
+            ->select('tag', 'recipe')
+            ->leftJoin('tag.recipes', 'recipe')
+            ->orderBy('tag.name', 'ASC')
         ;
     }
 
-    public function save(Category $entity, bool $flush = false): void
+    public function save(Tag $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -40,7 +40,7 @@ class CategoryRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function remove(Category $entity, bool $flush = false): void
+    public function remove(Tag $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 

@@ -37,6 +37,9 @@
                                         id: category.id,
                                         name: category.name,
                                         recipes: category.recipes,
+                                        warning: 'Désolé, vous ne pouvez pas supprimer cette catégorie',
+                                        reason: 'car celle-ci est liée aux recettes suivantes :',
+                                        message: 'Veuillez d\'abord modifier ou supprimer ces recettes avant de supprimer ctte catégorie.',
                                     }) }}
                                 {% else %}
                                     {{ include('components/modal/_delete_from_index_form.html.twig', {

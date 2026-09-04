@@ -91,6 +91,11 @@
                             <i class="fa-solid fa-layer-group"></i>
                             <span>Liste des catégories</span>
                         </a>
+
+                        <a href="{{ path('admin.tag.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.tag.' ? 'active' : '' }}">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <span>Liste des tags</span>
+                        </a>
                     </div>
                 </div>
             </div>

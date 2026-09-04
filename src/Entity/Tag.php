@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\TagRepository;
+use App\Repository\Recipe\TagRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,6 +27,13 @@ class Tag
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(
+        message: 'Le nom du tag est obligatoire.',
+    )]
+    #[Assert\Length(
+        min: 3,
+        minMessage: 'Le nom du tag doit être supèrieur à {{ limit }} caractères.',
+    )]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, unique: true)]
