@@ -5,6 +5,38 @@
 {% block body %}
     <h1>Liste des catégories</h1>
 
+    <div class="filter-bar-container">
+        <div class="filter-bar-body">
+            {{ form_start(filterForm, {
+                attr: {
+                    class: 'row g-2 align-items-center',
+                },
+            }) }}
+
+            <div class="col-md-auto filter-bar-select-width">
+                <div class="position-relative">
+                    {{ form_widget(filterForm.category) }}
+                </div>
+            </div>
+
+            <div class="col-md-auto filter-bar-actions">
+                <button type="submit" class="btn btn-primary d-flex align-items-center">
+                    <i class="fas fa-filter me-2"></i>
+                    Filtrer
+                </button>
+
+                <a href="{{ path('admin.category.index') }}"
+                   class="btn btn-danger d-flex align-items-center justify-content-center"
+                   title="Réinitialiser tous les filtres"
+                   aria-label="Réinitialiser les filtres">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+
+            {{ form_end(filterForm) }}
+        </div>
+    </div>
+
     <div class="d-flex justify-content-end mb-3">
         <a href="{{ path('admin.category.create') }}" class="btn btn-primary">Ajouter une nouvelle catégorie</a>
     </div>

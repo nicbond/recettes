@@ -17,13 +17,25 @@ class CategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Category::class);
     }
 
-    public function findAllCategoryByQueryBuilder(): QueryBuilder
+    /**
+     * @param array{
+     *     category?: Category|null,
+     * } $data
+     */
+    public function findAllCategoryByQueryBuilderAndFilter(array $data = []): QueryBuilder
     {
-        return $this->createQueryBuilder('category')
+        $qb = $this->createQueryBuilder('category')
             ->select('category', 'recipe')
             ->leftJoin('category.recipes', 'recipe')
             ->orderBy('category.name', 'ASC')
         ;
+
+        if (isset($data['category'])) {
+            $qb->andWhere('category = :category')
+                ->setParameter('category', $data['category']);
+        }
+
+        return $qb;
     }
 
     public function save(Category $entity, bool $flush = false): void

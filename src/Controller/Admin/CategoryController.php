@@ -2,7 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\DTO\CategoryFilterDTO;
 use App\Entity\Category;
+use App\Form\CategoryFilterType;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
 use Knp\Component\Pager\PaginatorInterface;
@@ -28,7 +30,22 @@ final class CategoryController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(Request $request): Response
     {
-        $query = $this->categoryRepository->findAllCategoryByQueryBuilder();
+        $filter = new CategoryFilterDTO();
+
+        $filterForm = $this->createForm(CategoryFilterType::class, $filter);
+        $filterForm->handleRequest($request);
+
+        $filters = [];
+        if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+            /** @var CategoryFilterDTO $data */
+            $data = $filterForm->getData();
+
+            if (null !== $data->category) {
+                $filters['category'] = $data->category;
+            }
+        }
+
+        $query = $this->categoryRepository->findAllCategoryByQueryBuilderAndFilter($filters);
 
         $pagination = $this->paginator->paginate(
             $query,
@@ -38,6 +55,7 @@ final class CategoryController extends AbstractController
 
         return $this->render('admin/category/index.html.twig', [
             'pagination' => $pagination,
+            'filterForm' => $filterForm,
         ]);
     }
 

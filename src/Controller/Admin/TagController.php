@@ -2,7 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\DTO\TagFilterDTO;
 use App\Entity\Tag;
+use App\Form\TagFilterType;
 use App\Form\TagType;
 use App\Repository\Recipe\TagRepository;
 use Knp\Component\Pager\PaginatorInterface;
@@ -28,7 +30,21 @@ final class TagController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(Request $request): Response
     {
-        $query = $this->tagRepository->findAllTagsByQueryBuilder();
+        $filter = new TagFilterDTO();
+
+        $filterForm = $this->createForm(TagFilterType::class, $filter);
+        $filterForm->handleRequest($request);
+
+        $filters = [];
+        if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+            /** @var TagFilterDTO $data */
+            $data = $filterForm->getData();
+            if (!empty($data->tags)) {
+                $filters['tags'] = $data->tags;
+            }
+        }
+
+        $query = $this->tagRepository->findAllTagsByQueryBuilderAndFilter($filters);
 
         $pagination = $this->paginator->paginate(
             $query,
@@ -38,6 +54,7 @@ final class TagController extends AbstractController
 
         return $this->render('admin/tag/index.html.twig', [
             'pagination' => $pagination,
+            'filterForm' => $filterForm,
         ]);
     }
 

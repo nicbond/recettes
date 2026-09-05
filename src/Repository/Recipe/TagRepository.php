@@ -17,13 +17,25 @@ class TagRepository extends ServiceEntityRepository
         parent::__construct($registry, Tag::class);
     }
 
-    public function findAllTagsByQueryBuilder(): QueryBuilder
+    /**
+     * @param array{
+     *     tags?: list<Tag>
+     * } $data
+     */
+    public function findAllTagsByQueryBuilderAndFilter(array $data = []): QueryBuilder
     {
-        return $this->createQueryBuilder('tag')
+        $qb = $this->createQueryBuilder('tag')
             ->select('tag', 'recipe')
             ->leftJoin('tag.recipes', 'recipe')
             ->orderBy('tag.name', 'ASC')
         ;
+
+        if (isset($data['tags']) && [] !== $data['tags']) {
+            $qb->andWhere('tag IN (:tags)')
+                ->setParameter('tags', $data['tags']);
+        }
+
+        return $qb;
     }
 
     public function save(Tag $entity, bool $flush = false): void
