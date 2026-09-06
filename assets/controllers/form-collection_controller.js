@@ -29,6 +29,12 @@ export default class extends Controller {
         this.containerTarget.append(newRow)
         this.index++
 
+        // Dispatch an event so Stimulus reconnects the controllers on the new row
+        this.element.dispatchEvent(new CustomEvent('form-collection:add', {
+            bubbles: true,
+            detail: { element: newRow }
+        }))
+
         // Release the global lock after 50 milliseconds (MANDATORY)
         setTimeout(() => {
             globalIsProcessing = false;
@@ -40,5 +46,3 @@ export default class extends Controller {
         e.target.closest('.quantity-item').remove()
     }
 }
-
-

@@ -17,6 +17,10 @@ class IngredientAutocompleteField extends AbstractType
             'class' => Ingredient::class,
             'choice_label' => 'name',
             'placeholder' => 'Choisir un ingrédient',
+            'attr' => [
+                'data-controller' => 'ingredient-autocomplete',
+                'data-ingredient-autocomplete-url-value' => '/ingredient/create-ajax',
+            ],
         ]);
     }
 
