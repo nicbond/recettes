@@ -8,9 +8,8 @@ This personal project was created to experiment with modern Symfony best practic
 
 * Recipe management
 * Category management
-* Ingredient and quantity management
-* Unit management
-* Full CRUD operations
+* Ingredient creation on-the-fly via Tom Select autocomplete (during recipe creation) or via fixtures
+* Tag management
 * Form validation
 * Character counter on recipe content fields
 * Recipe image upload and preview
