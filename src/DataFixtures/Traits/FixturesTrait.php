@@ -4,6 +4,7 @@ namespace App\DataFixtures\Traits;
 
 use App\Entity\Category;
 use App\Entity\Recipe;
+use App\Entity\Tag;
 use Doctrine\ORM\EntityManagerInterface;
 
 trait FixturesTrait
@@ -34,5 +35,15 @@ trait FixturesTrait
         $em->flush();
 
         return $recipe;
+    }
+
+    private function createTag(EntityManagerInterface $em, string $name = 'facile'): Tag
+    {
+        $tag = new Tag();
+        $tag->setName($name.' '.uniqid());
+        $em->persist($tag);
+        $em->flush();
+
+        return $tag;
     }
 }
