@@ -37,6 +37,9 @@
 
 <body>
 
+{# State detection: Full access if NOT on the maintenance page #}
+{% set has_full_access = app.current_route != 'maintenance' %}
+
 <div class="admin-layout">
 
     {# ==========================================================
@@ -44,76 +47,72 @@
     ========================================================== #}
     <aside class="admin-sidebar">
 
-        {# Logo / title #}
-        <div class="admin-sidebar-header">
-            <a
-                    href="{{ path('admin.recipe.index') }}"
-                    class="admin-brand"
-            >
-                <i class="fa-solid fa-screwdriver-wrench"></i>
-                <span>Administration</span>
-            </a>
-        </div>
-
-        {# Navigation #}
-        <nav class="admin-nav">
-
-            <div class="admin-nav-section">
-                        <span class="admin-nav-section-title">
-                            Gestion
-                        </span>
-
-                <a href="{{ path('contact') }}"
-                   class="admin-nav-link {{ app.current_route starts with 'contact' ? 'active' : '' }}">
-                    <i class="fa-solid fa-address-book"></i>
-                    <span>Contact</span>
+        {% if has_full_access %}
+            {# Logo / title - Always visible (authorized IP sees everything; blocked IP sees an empty column with just this title) #}
+            <div class="admin-sidebar-header">
+                <a href="{{ path('admin.recipe.index') }}" class="admin-brand">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>Administration</span>
                 </a>
+            </div>
+        {% endif %}
 
-                {# Dropdown Recettes #}
-                <div class="admin-nav-dropdown {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'open' : '' }}">
-                    <button
-                            class="admin-nav-link admin-nav-dropdown-toggle {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'active' : '' }}"
-                            type="button"
-                            onclick="this.closest('.admin-nav-dropdown').classList.toggle('open')"
-                    >
-                        <i class="fa-solid fa-book-open"></i>
-                        <span>Recettes</span>
-                        <i class="fa-solid fa-chevron-down admin-nav-chevron"></i>
-                    </button>
+        {# Navigation - Visible ONLY if the IP is authorized and accessing the site #}
+        <nav class="admin-nav">
+            {% if has_full_access %}
+                <div class="admin-nav-section">
+                    <span class="admin-nav-section-title">
+                        Gestion
+                    </span>
 
-                    <div class="admin-nav-dropdown-menu">
-                        <a href="{{ path('admin.recipe.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.recipe.' ? 'active' : '' }}">
-                            <i class="fa-solid fa-utensils"></i>
-                            <span>Liste des recettes</span>
-                        </a>
+                    <a href="{{ path('contact') }}"
+                       class="admin-nav-link {{ app.current_route starts with 'contact' ? 'active' : '' }}">
+                        <i class="fa-solid fa-address-book"></i>
+                        <span>Contact</span>
+                    </a>
 
-                        <a href="{{ path('admin.category.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.category.' ? 'active' : '' }}">
-                            <i class="fa-solid fa-layer-group"></i>
-                            <span>Liste des catégories</span>
-                        </a>
+                    {# Dropdown Recipes #}
+                    <div class="admin-nav-dropdown {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'open' : '' }}">
+                        <button
+                                class="admin-nav-link admin-nav-dropdown-toggle {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'active' : '' }}"
+                                type="button"
+                                onclick="this.closest('.admin-nav-dropdown').classList.toggle('open')"
+                        >
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>Recettes</span>
+                            <i class="fa-solid fa-chevron-down admin-nav-chevron"></i>
+                        </button>
 
-                        <a href="{{ path('admin.tag.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.tag.' ? 'active' : '' }}">
-                            <i class="fa-solid fa-hashtag"></i>
-                            <span>Liste des tags</span>
-                        </a>
+                        <div class="admin-nav-dropdown-menu">
+                            <a href="{{ path('admin.recipe.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.recipe.' ? 'active' : '' }}">
+                                <i class="fa-solid fa-utensils"></i>
+                                <span>Liste des recettes</span>
+                            </a>
+
+                            <a href="{{ path('admin.category.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.category.' ? 'active' : '' }}">
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span>Liste des catégories</span>
+                            </a>
+
+                            <a href="{{ path('admin.tag.index') }}" class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.tag.' ? 'active' : '' }}">
+                                <i class="fa-solid fa-hashtag"></i>
+                                <span>Liste des tags</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            {% endif %}
         </nav>
 
-        {# Bottom of the sidebar #}
+        {# Bottom of the sidebar - Visible ONLY if the IP is authorized and accessing the site #}
         <div class="admin-sidebar-footer">
-
-            <a
-                    href="{{ path('home') }}"
-                    class="admin-nav-link"
-            >
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Retour à l'accueil</span>
-            </a>
-
+            {% if has_full_access %}
+                <a href="{{ path('home') }}" class="admin-nav-link">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Retour à l'accueil</span>
+                </a>
+            {% endif %}
         </div>
-
     </aside>
 
     {# ==========================================================
