@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Recipe;
 
-use App\Repository\RecipeRepository;
+use App\Repository\Recipe\RecipeRepository;
 use App\Validator\BanWord;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

@@ -3,10 +3,10 @@
 namespace App\Controller\Admin;
 
 use App\DTO\CategoryFilterDTO;
-use App\Entity\Category;
-use App\Form\CategoryFilterType;
-use App\Form\CategoryType;
-use App\Repository\CategoryRepository;
+use App\Entity\Recipe\Category;
+use App\Form\Recipe\CategoryFilterType;
+use App\Form\Recipe\CategoryType;
+use App\Repository\Recipe\CategoryRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;

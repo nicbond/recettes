@@ -22,8 +22,8 @@ parameters:
             message: '#Call to an undefined method Faker\\Generator::foodName\(\)#'
             path: src/DataFixtures/RecipeFixtures.php
         -
-            message: '#Property App\\Entity\\Recipe::\$id \(int\|null\) is never assigned int#'
-            path: src/Entity/Recipe.php
+            message: '#Property App\\Entity\\Recipe\\Recipe::\$id \(int\|null\) is never assigned int#'
+            path: src/Entity/Recipe/Recipe.php
         -
             message: '#Trait App\\DataFixtures\\Traits\\FixturesTrait is used zero times and is not analysed\.#'
             path: src/DataFixtures/Traits/FixturesTrait.php

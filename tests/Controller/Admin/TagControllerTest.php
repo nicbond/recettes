@@ -3,7 +3,7 @@
 namespace App\Tests\Controller\Admin;
 
 use App\DataFixtures\Traits\FixturesTrait;
-use App\Entity\Recipe;
+use App\Entity\Recipe\Recipe;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;

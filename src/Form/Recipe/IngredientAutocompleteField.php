@@ -1,22 +1,26 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Recipe;
 
-use App\Entity\Unit;
+use App\Entity\Recipe\Ingredient;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\UX\Autocomplete\Form\AsEntityAutocompleteField;
 use Symfony\UX\Autocomplete\Form\BaseEntityAutocompleteType;
 
 #[AsEntityAutocompleteField]
-class UnitAutocompleteField extends AbstractType
+class IngredientAutocompleteField extends AbstractType
 {
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'class' => Unit::class,
-            'choice_label' => 'label',
-            'placeholder' => 'Choisir une unité de mesure',
+            'class' => Ingredient::class,
+            'choice_label' => 'name',
+            'placeholder' => 'Choisir un ingrédient',
+            'attr' => [
+                'data-controller' => 'ingredient-autocomplete',
+                'data-ingredient-autocomplete-url-value' => '/ingredient/create-ajax',
+            ],
         ]);
     }
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Recipe;
 
-use App\Entity\Category;
-use App\Entity\Recipe;
-use App\Entity\Tag;
+use App\Entity\Recipe\Category;
+use App\Entity\Recipe\Recipe;
+use App\Entity\Recipe\Tag;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

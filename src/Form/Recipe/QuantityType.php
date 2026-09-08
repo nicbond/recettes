@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Recipe;
 
-use App\Entity\Quantity;
+use App\Entity\Recipe\Quantity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;

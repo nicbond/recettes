@@ -3,8 +3,8 @@
 namespace App\Tests\Controller\Admin;
 
 use App\DataFixtures\Traits\FixturesTrait;
-use App\Entity\Recipe;
-use App\Repository\CategoryRepository;
+use App\Entity\Recipe\Recipe;
+use App\Repository\Recipe\CategoryRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;

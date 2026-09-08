@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Recipe;
 
 use App\Repository\Recipe\TagRepository;
 use Doctrine\Common\Collections\ArrayCollection;

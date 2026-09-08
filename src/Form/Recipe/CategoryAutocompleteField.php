@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Recipe;
 
-use App\Entity\Category;
+use App\Entity\Recipe\Category;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\UX\Autocomplete\Form\AsEntityAutocompleteField;

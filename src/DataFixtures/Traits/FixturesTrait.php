@@ -2,9 +2,9 @@
 
 namespace App\DataFixtures\Traits;
 
-use App\Entity\Category;
-use App\Entity\Recipe;
-use App\Entity\Tag;
+use App\Entity\Recipe\Category;
+use App\Entity\Recipe\Recipe;
+use App\Entity\Recipe\Tag;
 use Doctrine\ORM\EntityManagerInterface;
 
 trait FixturesTrait

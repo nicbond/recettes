@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Recipe;
 
-use App\DTO\TagFilterDTO;
+use App\DTO\CategoryFilterDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class TagFilterType extends AbstractType
+class CategoryFilterType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('tags', TagAutocompleteField::class, [
+            ->add('category', CategoryAutocompleteField::class, [
                 'label' => false,
                 'required' => false,
-                'placeholder' => '🔍 Rechercher un ou des tags...',
+                'placeholder' => '🔍 Rechercher une catégorie...',
             ])
         ;
     }
@@ -23,7 +23,7 @@ class TagFilterType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => TagFilterDTO::class,
+            'data_class' => CategoryFilterDTO::class,
             'method' => 'GET',
             'csrf_protection' => false,
         ]);

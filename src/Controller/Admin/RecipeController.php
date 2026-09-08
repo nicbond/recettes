@@ -3,11 +3,11 @@
 namespace App\Controller\Admin;
 
 use App\DTO\RecipeFilterDTO;
-use App\Entity\Recipe;
-use App\Form\RecipeFilterType;
-use App\Form\RecipeThumbnailType;
-use App\Form\RecipeType;
-use App\Repository\RecipeRepository;
+use App\Entity\Recipe\Recipe;
+use App\Form\Recipe\RecipeFilterType;
+use App\Form\Recipe\RecipeThumbnailType;
+use App\Form\Recipe\RecipeType;
+use App\Repository\Recipe\RecipeRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;

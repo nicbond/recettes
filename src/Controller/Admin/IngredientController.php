@@ -2,8 +2,8 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Ingredient;
-use App\Repository\IngredientRepository;
+use App\Entity\Recipe\Ingredient;
+use App\Repository\Recipe\IngredientRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

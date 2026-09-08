@@ -3,9 +3,9 @@
 namespace App\Controller\Admin;
 
 use App\DTO\TagFilterDTO;
-use App\Entity\Tag;
-use App\Form\TagFilterType;
-use App\Form\TagType;
+use App\Entity\Recipe\Tag;
+use App\Form\Recipe\TagFilterType;
+use App\Form\Recipe\TagType;
 use App\Repository\Recipe\TagRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

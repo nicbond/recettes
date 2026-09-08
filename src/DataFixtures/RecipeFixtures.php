@@ -2,12 +2,12 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Category;
-use App\Entity\Ingredient;
-use App\Entity\Quantity;
-use App\Entity\Recipe;
-use App\Entity\Tag;
-use App\Entity\Unit;
+use App\Entity\Recipe\Category;
+use App\Entity\Recipe\Ingredient;
+use App\Entity\Recipe\Quantity;
+use App\Entity\Recipe\Recipe;
+use App\Entity\Recipe\Tag;
+use App\Entity\Recipe\Unit;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
