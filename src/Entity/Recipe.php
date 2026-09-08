@@ -88,6 +88,7 @@ class Recipe
      * in the database without an associated recipe, which would cause data inconsistency
      */
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Quantity::class, cascade: ['persist'], orphanRemoval: true)]
+    #[Assert\Valid]
     private Collection $quantities;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 0])]

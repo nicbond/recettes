@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\QuantityRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: QuantityRepository::class)]
 class Quantity
@@ -14,6 +15,8 @@ class Quantity
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'La quantité est obligatoire.')]
+    #[Assert\Positive(message: 'La quantité doit être supérieure à 0.')]
     private ?float $quantity = null;
 
     #[ORM\ManyToOne(inversedBy: 'quantities')]
@@ -22,10 +25,12 @@ class Quantity
 
     #[ORM\ManyToOne(inversedBy: 'quantities')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank(message: 'L\'ingrédient est obligatoire.')]
     private ?Ingredient $ingredient = null;
 
     #[ORM\ManyToOne(inversedBy: 'quantities')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank(message: 'L\'unité de mesure est obligatoire.')]
     private ?Unit $unit = null;
 
     public function getId(): ?int
