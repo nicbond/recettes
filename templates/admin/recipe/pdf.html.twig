@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Recette : {{ recipe.title }}</title>
+    <style>
+        /* Styles CSS de base compatibles avec Dompdf pour une mise en page propre */
+        body {
+            font-family: sans-serif;
+            color: #333;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        h1 {
+            color: #111;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+        .meta-info {
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .recipe-container {
+            margin-top: 20px;
+        }
+        .thumbnail-container {
+            width: 200px;
+            height: 200px;
+            overflow: hidden;
+            background-color: #6c757d;
+            margin-bottom: 20px;
+        }
+        .thumbnail-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .ingredients-list {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+        .ingredient-item {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>{{ recipe.title }}</h1>
+
+<div class="meta-info">
+    {# Affichage de la durée si elle existe #}
+    {% if recipe.duration is defined and recipe.duration %}
+        <strong>Durée de préparation :</strong> {{ recipe.duration }} min
+    {% endif %}
+</div>
+
+{# Zone de l'image (Aperçu de la recette décodé instantanément via Base64) #}
+<div class="thumbnail-container">
+    {% if imageBase64 is defined and imageBase64 %}
+        <img class="thumbnail-img"
+             src="{{ imageBase64 }}"
+             alt="Aperçu de la recette {{ recipe.title }}">
+    {% else %}
+        <div style="text-align: center; padding-top: 80px; color: #fff;">[Pas d'image]</div>
+    {% endif %}
+</div>
+
+<div class="recipe-container">
+    {# Contenu / Description de la recette #}
+    {% if recipe.content is defined and recipe.content %}
+        <h3>Instructions</h3>
+        <p>{{ recipe.content|nl2br }}</p>
+    {% endif %}
+
+    {# Section Ingrédients et Quantités #}
+    {% if recipe.quantities is defined and recipe.quantities|length > 0 %}
+        <h3>Ingrédients et Quantités</h3>
+        <ul class="ingredients-list">
+            {% for quantity in recipe.quantities %}
+                <li class="ingredient-item">
+                    {% if quantity.ingredient is defined %}{{ quantity.ingredient.name }} : {% endif %}
+                    {{ quantity.quantity }} {% if quantity.unit is defined %}{{ quantity.unit }}{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+
+</body>
+</html>

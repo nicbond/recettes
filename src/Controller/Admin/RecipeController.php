@@ -7,6 +7,7 @@ use App\Entity\Recipe\Recipe;
 use App\Form\Recipe\RecipeFilterType;
 use App\Form\Recipe\RecipeThumbnailType;
 use App\Form\Recipe\RecipeType;
+use App\Message\RecipePDFMessage;
 use App\Repository\Recipe\RecipeRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 
@@ -25,6 +28,7 @@ final class RecipeController extends AbstractController
         private readonly PaginatorInterface $paginator,
         #[Autowire('%number_per_page_recipe%')]
         private readonly int $numberPerPageRecipe,
+        private readonly MessageBusInterface $bus,
     ) {
     }
 
@@ -66,7 +70,7 @@ final class RecipeController extends AbstractController
         ]);
     }
 
-    #[Route('/recettes/{slug}-{id}', name: 'recipe.show', requirements: ['id' => '\d+', 'slug' => '[a-z0-9-]+'])]
+    #[Route('/{slug}-{id}', name: 'show', requirements: ['id' => '\d+', 'slug' => '[a-z0-9-]+'])]
     public function show(string $slug, Recipe $recipe): Response
     {
         $form = $this->createForm(RecipeType::class, $recipe, ['disabled' => true]);
@@ -79,7 +83,7 @@ final class RecipeController extends AbstractController
             ]);
         }
 
-        return $this->render('recipe/edit.html.twig', [
+        return $this->render('admin/recipe/edit.html.twig', [
             'recipe' => $recipe,
             'show' => true,
             'form' => $form,
@@ -110,6 +114,9 @@ final class RecipeController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     #[Route('/{id}', name: 'edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function edit(Recipe $recipe, Request $request): Response
     {
@@ -120,6 +127,13 @@ final class RecipeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->recipeRepository->save($recipe, true);
+            $recipeId = $recipe->getId();
+
+            if (null === $recipeId) {
+                throw new \LogicException('Recipe ID should not be null after persistence.');
+            }
+
+            $this->bus->dispatch(new RecipePDFMessage($recipeId));
             $this->addFlash('success', 'La recette a bien été modifiée');
 
             return $this->redirectToRoute('admin.recipe.index');

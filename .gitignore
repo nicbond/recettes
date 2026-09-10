@@ -90,6 +90,7 @@ phpstan.neon
 
 ###> images ###
 /public/images
+/public/pdfs
 ###< images ###
 
 ###> vincentlanglet/twig-cs-fixer ###
