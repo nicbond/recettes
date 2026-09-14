@@ -1,4 +1,7 @@
 form:
+  password:
+    label: "Mot de passe"
+    confirm: "Confirmer le mot de passe"
   recipe:
     title: "Titre"
     slug: "Slug"

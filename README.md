@@ -15,6 +15,9 @@ This personal project was created to experiment with modern Symfony best practic
 * Email and SMS notifications
 * Responsive administration back-office
 * Business rules enforced at application level (e.g. protected deletions)
+* Async PDF generation via Symfony Messenger
+* Authentication (login, registration) with role-based access control
+
 
 ## Tech Stack
 

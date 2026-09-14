@@ -19,8 +19,10 @@ use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/recettes', name: 'admin.recipe.')]
+#[IsGranted('ROLE_ADMIN')]
 final class RecipeController extends AbstractController
 {
     public function __construct(
@@ -35,7 +37,7 @@ final class RecipeController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(Request $request): Response
     {
-        // $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $filter = new RecipeFilterDTO();
 
         $filterForm = $this->createForm(RecipeFilterType::class, $filter);

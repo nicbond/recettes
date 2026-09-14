@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller\Admin;
 
+use App\DataFixtures\Traits\FixturesTrait;
 use App\Entity\Recipe\Ingredient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -9,6 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class IngredientControllerTest extends WebTestCase
 {
+    use FixturesTrait;
+
     private function createIngredient(EntityManagerInterface $em, string $name): Ingredient
     {
         $ingredient = new Ingredient();
@@ -24,7 +27,7 @@ final class IngredientControllerTest extends WebTestCase
      */
     public function testCreateAjaxWithEmptyNameReturnsBadRequest(): void
     {
-        $client = IngredientControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
 
         $client->request('POST', '/ingredient/create-ajax', [
             'name' => '',
@@ -39,7 +42,7 @@ final class IngredientControllerTest extends WebTestCase
 
     public function testCreateAjaxWithMissingNameReturnsBadRequest(): void
     {
-        $client = static::createClient();
+        $client = $this->createAuthenticatedClient();
 
         $client->request('POST', '/ingredient/create-ajax', []);
 
@@ -51,7 +54,7 @@ final class IngredientControllerTest extends WebTestCase
      */
     public function testCreateAjaxCreatesNewIngredient(): void
     {
-        $client = IngredientControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
 
         $client->request('POST', '/ingredient/create-ajax', [
             'name' => 'Frites '.uniqid(),
@@ -70,7 +73,7 @@ final class IngredientControllerTest extends WebTestCase
      */
     public function testCreateAjaxWithExistingIngredientReturnsExisting(): void
     {
-        $client = IngredientControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
 
@@ -93,7 +96,7 @@ final class IngredientControllerTest extends WebTestCase
      */
     public function testCreateAjaxIsCaseInsensitive(): void
     {
-        $client = IngredientControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
 
@@ -112,7 +115,7 @@ final class IngredientControllerTest extends WebTestCase
 
     public function testCreateAjaxOnlyAcceptsPostMethod(): void
     {
-        $client = IngredientControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
 
         $client->request('GET', '/ingredient/create-ajax');
 

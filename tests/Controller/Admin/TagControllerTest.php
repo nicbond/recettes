@@ -15,7 +15,7 @@ final class TagControllerTest extends WebTestCase
 
     public function testIndex(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/tags/');
 
         self::assertResponseIsSuccessful();
@@ -23,7 +23,7 @@ final class TagControllerTest extends WebTestCase
 
     public function testCreatePageIsSuccessful(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/tags/create');
 
         self::assertResponseIsSuccessful();
@@ -31,7 +31,7 @@ final class TagControllerTest extends WebTestCase
 
     public function testCreateTag(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/tags/create');
 
         $client->submitForm('Créer', [
@@ -46,7 +46,7 @@ final class TagControllerTest extends WebTestCase
 
     public function testCreateTagWithInvalidData(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/tags/create');
 
         $client->submitForm('Créer', [
@@ -58,7 +58,7 @@ final class TagControllerTest extends WebTestCase
 
     public function testEditPageIsSuccessful(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $tag = $this->createTag($em);
@@ -70,7 +70,7 @@ final class TagControllerTest extends WebTestCase
 
     public function testEditTag(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $tag = $this->createTag($em);
@@ -89,7 +89,7 @@ final class TagControllerTest extends WebTestCase
 
     public function testEditTagNotFound(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/tags/99999');
 
         self::assertResponseStatusCodeSame(404);
@@ -100,7 +100,7 @@ final class TagControllerTest extends WebTestCase
      */
     public function testDeleteTag(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
 
@@ -133,7 +133,7 @@ final class TagControllerTest extends WebTestCase
      */
     public function testDeleteTagWithInvalidCsrfToken(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $tag = $this->createTag($em, 'Ne doit pas être supprimé');
@@ -160,7 +160,7 @@ final class TagControllerTest extends WebTestCase
      */
     public function testDeleteTagLinkedToRecipeIsNotDeleted(): void
     {
-        $client = TagControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
 

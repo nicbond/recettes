@@ -38,7 +38,7 @@
 <body>
 
 {# State detection: Full access if NOT on the maintenance page #}
-{% set has_full_access = app.current_route != 'maintenance' %}
+{% set has_full_access = app.request.attributes.get('has_full_access')|default(false) %}
 
 <div class="admin-layout">
 
@@ -47,7 +47,7 @@
     ========================================================== #}
     <aside class="admin-sidebar">
 
-        {% if has_full_access %}
+        {% if has_full_access and is_granted('ROLE_ADMIN') %}
             {# Logo / title - Always visible (authorized IP sees everything; blocked IP sees an empty column with just this title) #}
             <div class="admin-sidebar-header">
                 <a href="{{ path('admin.recipe.index') }}" class="admin-brand">
@@ -59,7 +59,7 @@
 
         {# Navigation - Visible ONLY if the IP is authorized and accessing the site #}
         <nav class="admin-nav">
-            {% if has_full_access %}
+            {% if has_full_access and is_granted('ROLE_ADMIN') %}
                 <div class="admin-nav-section">
                     <span class="admin-nav-section-title">
                         Gestion
@@ -106,13 +106,18 @@
 
         {# Bottom of the sidebar - Visible ONLY if the IP is authorized and accessing the site #}
         <div class="admin-sidebar-footer">
-            {% if has_full_access %}
+            {% if has_full_access and is_granted('ROLE_ADMIN') %}
                 <a href="{{ path('home') }}" class="admin-nav-link">
-                    <i class="fa-solid fa-arrow-left"></i>
+                    <i class="fa-solid fa-house"></i>
                     <span>Retour à l'accueil</span>
+                </a>
+                <a href="{{ path('app_logout') }}" class="admin-nav-link logout-link">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Se déconnecter</span>
                 </a>
             {% endif %}
         </div>
+
     </aside>
 
     {# ==========================================================

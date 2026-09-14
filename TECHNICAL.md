@@ -552,11 +552,114 @@ readonly class MaintenanceListener
 
 ---
 
+## Authentication
+
+The application uses Symfony Security for authentication.
+
+### User hierarchy
+
+The application uses Doctrine single-table inheritance to manage different types of users:
+
+```text
+User (base entity)
+ ├── Admin  → discriminator: admin
+ └── Consumer → discriminator: consumer
+```
+
+The `discriminator` column in the `user` table determines the type of user.
+
+### Roles
+
+- `ROLE_USER` — automatically assigned to every user
+- `ROLE_ADMIN` — assigned to every `Admin` entity through `getRoles()`
+
+### Routes and access control
+
+| Route | Path | Access |
+|-------|------|--------|
+| `app_login` | `/login` | PUBLIC |
+| `app_register` | `/inscription` | PUBLIC |
+| `app_logout` | `/logout` | Authenticated |
+| `home` | `/` | `IS_AUTHENTICATED_FULLY` |
+| Admin routes | `/admin/*` | `ROLE_ADMIN` |
+
+### Security configuration
+
+```yaml
+access_control:
+    - { path: ^/login, roles: PUBLIC_ACCESS }
+    - { path: ^/inscription, roles: PUBLIC_ACCESS }
+    - { path: ^/contact, roles: PUBLIC_ACCESS }
+    - { path: ^/admin, roles: ROLE_ADMIN }
+    - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+```
+
+### Login
+
+The login form uses `form_login` provided by Symfony Security.
+
+After successful authentication, the user is redirected to the `home` route.
+
+CSRF protection is enabled on the login form:
+
+```yaml
+form_login:
+    login_path: app_login
+    check_path: app_login
+    default_target_path: home
+    enable_csrf: true
+```
+
+### Registration
+
+The registration form creates an `Admin` entity directly.
+
+Doctrine automatically sets the `discriminator` column to `admin` when persisting an `Admin` instance.
+
+Password constraints are enforced at form level:
+
+- Minimum 12 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one digit
+- At least one special character (`@$!%*?&^#`)
+
+### Remember me
+
+The remember me feature is enabled with a lifetime of 7 days:
+
+```yaml
+remember_me:
+    secret: '%kernel.secret%'
+    lifetime: 604800
+    path: /
+    always_remember_me: true
+```
+
+### Tests
+
+Tests requiring authentication use the `loginUser()` method provided by Symfony:
+
+```php
+private function createAuthenticatedClient(): KernelBrowser
+{
+    $client = static::createClient();
+    $admin = new Admin();
+    $admin->setEmail('admin@test.com');
+    $admin->setPassword($passwordHasher->hashPassword($admin, 'password'));
+    $em->persist($admin);
+    $em->flush();
+    $client->loginUser($admin);
+
+    return $client;
+}
+```
+
+---
+
 ## Mailpit
 
 Mailpit captures outgoing emails locally without sending them to real recipients.
 
 - SMTP: `localhost:1025`
 - Web interface: http://localhost:8025/
-
-

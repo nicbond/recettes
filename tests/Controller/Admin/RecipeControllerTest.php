@@ -18,7 +18,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testIndex(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/recettes/');
 
         self::assertResponseIsSuccessful();
@@ -26,7 +26,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testCreatePageIsSuccessful(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/recettes/create');
 
         self::assertResponseIsSuccessful();
@@ -34,7 +34,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testCreateRecipe(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
 
         $doctrine = $client->getContainer()->get('doctrine');
         assert($doctrine instanceof ManagerRegistry);
@@ -76,7 +76,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testCreateRecipeWithInvalidData(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/recettes/create');
 
         $client->submitForm('Créer', [
@@ -90,7 +90,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testEditPageIsSuccessful(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em);
@@ -102,7 +102,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testEditRecipe(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em);
@@ -128,7 +128,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testEditRecipeNotFound(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/recettes/99999');
 
         self::assertResponseStatusCodeSame(404);
@@ -136,7 +136,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testEditThumbnailPageNotFound(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/recettes/99999/edit-thumbnail');
 
         self::assertResponseStatusCodeSame(404);
@@ -144,7 +144,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testEditThumbnailWithValidFile(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em);
@@ -182,7 +182,7 @@ final class RecipeControllerTest extends WebTestCase
 
     public function testEditThumbnailWithInvalidFile(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em);
@@ -213,7 +213,7 @@ final class RecipeControllerTest extends WebTestCase
      */
     public function testDeleteRecipe(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em, 'A supprimer');
@@ -262,7 +262,7 @@ final class RecipeControllerTest extends WebTestCase
      */
     public function testDeleteRecipeWithInvalidCsrfToken(): void
     {
-        $client = RecipeControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $recipe = $this->createRecipe($em, 'Ne doit pas être supprimée');

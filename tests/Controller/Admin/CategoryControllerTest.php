@@ -16,7 +16,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testIndex(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/categories/');
 
         self::assertResponseIsSuccessful();
@@ -24,7 +24,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testCreatePageIsSuccessful(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/categories/create');
 
         self::assertResponseIsSuccessful();
@@ -32,7 +32,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testCreateCategory(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/categories/create');
 
         $client->submitForm('Créer', [
@@ -48,7 +48,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testCreateCategoryWithInvalidData(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/categories/create');
 
         $client->submitForm('Créer', [
@@ -61,7 +61,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testEditPageIsSuccessful(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em);
@@ -73,7 +73,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testEditCategory(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em, 'Dessert '.uniqid());
@@ -92,7 +92,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testEditCategoryNotFound(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $client->request('GET', '/admin/categories/99999');
 
         self::assertResponseStatusCodeSame(404);
@@ -100,7 +100,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testDeleteCategory(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
 
@@ -135,7 +135,7 @@ final class CategoryControllerTest extends WebTestCase
 
     public function testDeleteCategoryWithInvalidCsrfToken(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
         $category = $this->createCategory($em, 'Ne doit pas être supprimée');
@@ -158,7 +158,7 @@ final class CategoryControllerTest extends WebTestCase
      */
     public function testDeleteCategoryLinkedToRecipeIsNotDeleted(): void
     {
-        $client = CategoryControllerTest::createClient();
+        $client = $this->createAuthenticatedClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
         assert($em instanceof EntityManagerInterface);
 

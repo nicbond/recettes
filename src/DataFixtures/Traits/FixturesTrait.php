@@ -5,7 +5,10 @@ namespace App\DataFixtures\Traits;
 use App\Entity\Recipe\Category;
 use App\Entity\Recipe\Recipe;
 use App\Entity\Recipe\Tag;
+use App\Entity\User\Admin;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 trait FixturesTrait
 {
@@ -45,5 +48,28 @@ trait FixturesTrait
         $em->flush();
 
         return $tag;
+    }
+
+    private function createAuthenticatedClient(): KernelBrowser
+    {
+        $client = static::createClient();
+        $container = $client->getContainer();
+
+        $em = $container->get(EntityManagerInterface::class);
+        assert($em instanceof EntityManagerInterface);
+
+        /** @var UserPasswordHasherInterface $passwordHasher */
+        $passwordHasher = $container->get('security.user_password_hasher');
+
+        $admin = new Admin();
+        $admin->setEmail('admin@test.com');
+        $admin->setPassword($passwordHasher->hashPassword($admin, '@Password1986'));
+
+        $em->persist($admin);
+        $em->flush();
+
+        $client->loginUser($admin);
+
+        return $client;
     }
 }

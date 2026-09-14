@@ -22,11 +22,15 @@ readonly class MaintenanceListener
             return;
         }
 
+        $request = $event->getRequest();
+        // 1. If maintenance is disabled: full access for everyone.
         if (empty($_ENV['ACTIVE_MAINTENANCE_PAGE'])) {
+            $request->attributes->set('has_full_access', true);
+
             return;
         }
 
-        $request = $event->getRequest();
+        // 2. If we are already on the maintenance page, do nothing to avoid a loop.
         if ('/maintenance' === $request->getPathInfo()) {
             return;
         }
@@ -38,9 +42,15 @@ readonly class MaintenanceListener
             $allowedIp = array_map('trim', explode(',', $_ENV['ALLOWED_IP']));
         }
 
+        // 3. If maintenance is active BUT the IP is authorized: full access.
         if (in_array($clientIp, $allowedIp, true)) {
+            $request->attributes->set('has_full_access', true);
+
             return;
         }
+
+        // 4. If maintenance is active and the IP is unauthorized: no access and redirection.
+        $request->attributes->set('has_full_access', false);
 
         $maintenanceUrl = $this->urlGenerator->generate('maintenance');
         $response = new RedirectResponse($maintenanceUrl, Response::HTTP_FOUND);
