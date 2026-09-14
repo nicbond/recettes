@@ -35,6 +35,7 @@ final class RecipeController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(Request $request): Response
     {
+        // $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $filter = new RecipeFilterDTO();
 
         $filterForm = $this->createForm(RecipeFilterType::class, $filter);
