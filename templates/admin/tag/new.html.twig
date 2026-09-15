@@ -1,8 +1,8 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base.html.twig' %}
 
-{% block title %}Créer un tag{% endblock %}
+{% block admin_title %}Créer un tag{% endblock %}
 
-{% block body %}
+{% block admin_body %}
     <h1>Créer un tag</h1>
     <div class="box-body">
         {{ include('partials/_form.html.twig', {button_label: 'Créer'}) }}

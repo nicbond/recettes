@@ -3,27 +3,56 @@
 {% block title %}Inscription{% endblock %}
 
 {% block body %}
-    <h1>Créer un compte administrateur</h1>
+    <div class="login-page">
+        <div class="login-card">
 
-    {{ form_start(form) }}
-    <div class="mb-3">
-        {{ form_label(form.email) }}
-        {{ form_widget(form.email, {attr: {class: 'form-control'}}) }}
-        {{ form_errors(form.email) }}
+            <div class="login-logo">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+
+            <h1 class="login-card__title">Créer un compte</h1>
+            <p class="login-card__subtitle">Renseignez vos informations pour créer un compte administrateur</p>
+
+            {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+
+            <div class="mb-3">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, {attr: {placeholder: 'admin@exemple.fr'}}) }}
+                <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                    {{ form_errors(form.email) }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.plainPassword.first) }}
+                {{ form_widget(form.plainPassword.first) }}
+                <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                    {{ form_errors(form.plainPassword.first) }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.plainPassword.second) }}
+                {{ form_widget(form.plainPassword.second) }}
+                <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                    {{ form_errors(form.plainPassword.second) }}
+                </div>
+            </div>
+
+            <button class="login-card_btn" type="submit">
+                <i class="fa-solid fa-user-plus me-2"></i> S'inscrire
+            </button>
+
+            {{ form_end(form) }}
+
+            <div class="login-footer">
+                Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a>
+            </div>
+
+            <div class="login-footer">
+                Administration © {{ 'now'|date('Y') }}
+            </div>
+
+        </div>
     </div>
-
-    <div class="mb-3">
-        {{ form_label(form.plainPassword.first) }}
-        {{ form_widget(form.plainPassword.first, {attr: {class: 'form-control'}}) }}
-        {{ form_errors(form.plainPassword.first) }}
-    </div>
-
-    <div class="mb-3">
-        {{ form_label(form.plainPassword.second) }}
-        {{ form_widget(form.plainPassword.second, {attr: {class: 'form-control'}}) }}
-        {{ form_errors(form.plainPassword.second) }}
-    </div>
-
-    <button type="submit" class="btn btn-primary">S'inscrire</button>
-    {{ form_end(form) }}
 {% endblock %}
