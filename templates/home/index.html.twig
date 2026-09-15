@@ -3,6 +3,8 @@
 {% block admin_title %}Accueil{% endblock %}
 
 {% block admin_body %}
-    <h1>Welcome 007</h1>
+    {% if app.user %}
+        <h1>Welcome {{ app.user.email }}</h1>
+    {% endif %}
     <h2>Here we will find a dashboard soon</h2>
 {% endblock %}

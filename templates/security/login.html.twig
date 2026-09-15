@@ -4,10 +4,12 @@
 
 {% block body %}
 
+    <div class="login-page-flash-wrapper text-center">
+        {{ include('partials/flash.html.twig') }}
+    </div>
+
     <div class="login-page">
-
         <div class="login-card">
-
             <div class="login-logo">
                 <i class="fa-solid fa-utensils"></i>
             </div>
@@ -25,7 +27,6 @@
             {% endif %}
 
             <form method="post">
-
                 <div class="mb-3">
                     <label for="username" class="form-label">
                         Adresse email
@@ -48,14 +49,30 @@
                         Mot de passe
                     </label>
 
-                    <input
-                            type="password"
-                            id="password"
-                            name="_password"
-                            class="form-control"
-                            autocomplete="current-password"
-                            required
-                    >
+                    <div data-controller="password-visibility" class="password-field">
+                        <input
+                                type="password"
+                                id="password"
+                                name="_password"
+                                class="form-control"
+                                autocomplete="current-password"
+                                required
+                                data-password-visibility-target="input"
+                        >
+
+                        <button
+                                type="button"
+                                class="password-field__toggle"
+                                data-action="click->password-visibility#toggle"
+                                aria-label="Afficher le mot de passe"
+                                title="Afficher le mot de passe"
+                        >
+                            <i
+                                    class="fa-solid fa-eye"
+                                    data-password-visibility-target="icon"
+                            ></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-check mb-4">
@@ -81,7 +98,6 @@
                     <i class="fa-solid fa-right-to-bracket me-2"></i>
                     Connexion
                 </button>
-
             </form>
 
             <div class="login-footer">
@@ -91,9 +107,6 @@
             <div class="login-footer">
                 Administration © {{ 'now'|date('Y') }}
             </div>
-
         </div>
-
     </div>
-
 {% endblock %}
