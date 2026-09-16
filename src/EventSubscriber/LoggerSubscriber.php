@@ -28,8 +28,8 @@ readonly class LoggerSubscriber implements EventSubscriberInterface
         }
 
         $this->logger->info('Contact request received', [
-            'email' => $event->data->email,
-            'subject' => $event->data->service,
+            'email' => $event->message->getContactDTO()->email,
+            'subject' => $event->message->getContactDTO()->service,
         ]);
     }
 }

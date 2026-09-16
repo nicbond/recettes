@@ -34,19 +34,31 @@ framework:
                     max_retries: 3
                     multiplier: 2
                 failure_transport: async-pdf-failed
+            async-user-account-verify:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    use_notify: true
+                    check_delayed_interval: 60000
+                    queue_name: async-user-account-verify
+                retry_strategy:
+                    max_retries: 3
+                    multiplier: 2
+                failure_transport: async-user-account-verify-failed
 
             async-contact-failed: 'doctrine://default?queue_name=async-contact-failed&auto_setup=0'
             async-pdf-failed: 'doctrine://default?queue_name=async-pdf-failed&auto_setup=0'
+            async-user-account-verify-failed: 'doctrine://default?queue_name=async-user-account-verify-failed&auto_setup=0'
         default_bus: messenger.bus.default
 
         buses:
             messenger.bus.default: []
 
         routing:
-            Symfony\Component\Mailer\Messenger\SendEmailMessage: async-contact
             Symfony\Component\Notifier\Message\ChatMessage: async
             Symfony\Component\Notifier\Message\SmsMessage: async
             'App\Message\RecipePDFMessage': async-pdf
+            'App\Message\ContactMessage': async-contact
+            'App\Message\User\UserVerifyAccountMessage': async-user-account-verify
 
             # Route your messages to the transports
             # 'App\Message\YourMessage': async

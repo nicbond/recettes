@@ -4,6 +4,7 @@ twig:
     globals:
         is_maintenance_active: '%env(bool:ACTIVE_MAINTENANCE_PAGE)%'
         is_allowed_ip: '%env(bool:ALLOWED_IP)%'
+        url_back_path: '%env(string:APP_ENV_BACK)%'
 
 when@test:
     twig:

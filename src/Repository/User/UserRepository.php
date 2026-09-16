@@ -29,7 +29,28 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
 
         $user->setPassword($newHashedPassword);
-        $this->getEntityManager()->persist($user);
+        $this->save($user, true);
+    }
+
+    public function findOneByConfirmationToken(string $token): ?User
+    {
+        return $this->findOneBy([
+            'confirmationToken' => $token,
+            'isVerified' => false,
+        ]);
+    }
+
+    public function save(User $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function flush(): void
+    {
         $this->getEntityManager()->flush();
     }
 }

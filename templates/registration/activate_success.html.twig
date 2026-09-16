@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Compte activé{% endblock %}
+
+{% block body %}
+    <div class="login-page">
+        <div class="login-card text-center">
+
+            <div class="login-logo text-primary mb-4">
+                <i class="fa-solid fa-circle-check fa-3x"></i>
+            </div>
+
+            <h1>Activation réussie !</h1>
+
+            <p class="login-subtitle mt-3">
+                Votre compte administrateur est désormais actif.
+            </p>
+
+            <div class="mt-4 mb-4">
+                <a href="{{ path('app_login') }}" class="login-card_btn text-decoration-none d-block text-center">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i>
+                    Accéder à la page de connexion
+                </a>
+            </div>
+
+            <div class="login-footer">
+                Administration © {{ 'now'|date('Y') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

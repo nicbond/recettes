@@ -8,6 +8,7 @@ parameters:
     number_per_page_category: '%env(int:NUMBER_PER_PAGE_CATEGORY)%'
     number_per_page_tags: '%env(int:NUMBER_PER_PAGE_TAGS)%'
     app.recipe_pdf_path: '%kernel.project_dir%/%env(RECIPE_PDF_PATH)%'
+    app.url_back_path: '%env(string:APP_ENV_BACK)%'
 
 services:
     # default configuration for services in *this* file

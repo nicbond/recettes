@@ -3,19 +3,22 @@
 namespace App\Controller;
 
 use App\DTO\ContactDTO;
-use App\Event\ContactRequestEvent;
 use App\Form\ContactType;
+use App\Message\ContactMessage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class ContactController extends AbstractController
 {
+    /**
+     * @throws ExceptionInterface
+     */
     #[Route('/contact', name: 'contact', methods: ['GET', 'POST'])]
-    public function contact(Request $request, EventDispatcherInterface $dispatcher): Response
+    public function contact(Request $request, MessageBusInterface $bus): Response
     {
         $data = new ContactDTO();
         $form = $this->createForm(ContactType::class, $data, [
@@ -27,14 +30,8 @@ final class ContactController extends AbstractController
             if (null === $data->service) {
                 throw new \LogicException('Service ne peut pas être null après validation');
             }
-
-            $event = new ContactRequestEvent($data);
-            $dispatcher->dispatch($event);
-
-            $this->addFlash(
-                $event->isFailed() ? 'danger' : 'success',
-                $event->isFailed() ? "Impossible d'envoyer votre message" : 'Votre message a bien été envoyé'
-            );
+            $bus->dispatch(new ContactMessage($data));
+            $this->addFlash('success', 'Votre demande a bien été envoyée.');
 
             return $this->redirectToRoute('contact');
         }
