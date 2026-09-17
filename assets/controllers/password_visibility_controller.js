@@ -8,8 +8,8 @@ export default class extends Controller {
 
         this.inputTarget.type = isVisible ? 'text' : 'password';
 
-        this.iconTarget.classList.toggle('fa-eye', !isVisible);
-        this.iconTarget.classList.toggle('fa-eye-slash', isVisible);
+        this.iconTarget.classList.toggle('fa-eye-slash', !isVisible);
+        this.iconTarget.classList.toggle('fa-eye', isVisible);
 
         this.element.querySelector('.password-field__toggle').title =
             isVisible

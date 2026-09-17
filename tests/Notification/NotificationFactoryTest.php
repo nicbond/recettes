@@ -18,9 +18,10 @@ final class NotificationFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
+        // With createStub, we test only the returned type is checked.
         $this->factory = new NotificationFactory(
-            email: $this->createMock(EmailNotification::class),
-            sms: $this->createMock(SmsNotification::class),
+            email: $this->createStub(EmailNotification::class),
+            sms: $this->createStub(SmsNotification::class),
         );
     }
 
