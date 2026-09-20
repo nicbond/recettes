@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Inscription{% endblock %}
+{% block title %}Réinitialiser votre mot de passe{% endblock %}
 
 {% block body %}
     <div class="login-page">
@@ -10,35 +10,22 @@
                 <i class="fa-solid fa-utensils"></i>
             </div>
 
-            <h1 class="login-card__title">Créer un compte</h1>
+            <h1 class="login-card__title">Réinitialiser votre mot de passe</h1>
 
             <p class="login-card__subtitle">
                 Renseignez vos informations pour créer un compte administrateur
             </p>
 
-            {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+            {{ form_start(resetForm, {attr: {novalidate: 'novalidate'}}) }}
 
             <div class="mb-3">
-                {{ form_label(form.email) }}
-                {{ form_widget(form.email, {
-                    attr: {
-                        placeholder: 'admin@exemple.fr',
-                    },
-                }) }}
-
-                <div class="text-danger mt-1" style="font-size: 0.85rem;">
-                    {{ form_errors(form.email) }}
-                </div>
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.plainPassword.first) }}
+                {{ form_label(resetForm.plainPassword.first) }}
 
                 <div
                         data-controller="password-visibility"
                         class="password-field"
                 >
-                    {{ form_widget(form.plainPassword.first, {
+                    {{ form_widget(resetForm.plainPassword.first, {
                         attr: {
                             'data-password-visibility-target': 'input',
                         },
@@ -59,18 +46,18 @@
                 </div>
 
                 <div class="text-danger mt-1" style="font-size: 0.85rem;">
-                    {{ form_errors(form.plainPassword.first) }}
+                    {{ form_errors(resetForm.plainPassword.first) }}
                 </div>
             </div>
 
             <div class="mb-3">
-                {{ form_label(form.plainPassword.second) }}
+                {{ form_label(resetForm.plainPassword.second) }}
 
                 <div
                         data-controller="password-visibility"
                         class="password-field"
                 >
-                    {{ form_widget(form.plainPassword.second, {
+                    {{ form_widget(resetForm.plainPassword.second, {
                         attr: {
                             'data-password-visibility-target': 'input',
                         },
@@ -91,21 +78,16 @@
                 </div>
 
                 <div class="text-danger mt-1" style="font-size: 0.85rem;">
-                    {{ form_errors(form.plainPassword.second) }}
+                    {{ form_errors(resetForm.plainPassword.second) }}
                 </div>
             </div>
 
             <button class="login-card_btn" type="submit">
                 <i class="fa-solid fa-user-plus me-2"></i>
-                S'inscrire
+                Réinitialiser votre mot de passe
             </button>
 
-            {{ form_end(form) }}
-
-            <div class="login-footer">
-                Déjà un compte ?
-                <a href="{{ path('app_login') }}">Se connecter</a>
-            </div>
+            {{ form_end(resetForm) }}
 
             <div class="login-footer">
                 Administration © {{ 'now'|date('Y') }}

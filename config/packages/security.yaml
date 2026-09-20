@@ -45,6 +45,7 @@ security:
         - { path: ^/inscription, roles: PUBLIC_ACCESS }
         - { path: ^/contact, roles: PUBLIC_ACCESS }
         - { path: ^/activate, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 

@@ -44,10 +44,21 @@ framework:
                     max_retries: 3
                     multiplier: 2
                 failure_transport: async-user-account-verify-failed
+            async-user-reset-password:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    use_notify: true
+                    check_delayed_interval: 60000
+                    queue_name: async-user-reset-password
+                retry_strategy:
+                    max_retries: 3
+                    multiplier: 2
+                failure_transport: async-user-reset-password-failed
 
             async-contact-failed: 'doctrine://default?queue_name=async-contact-failed&auto_setup=0'
             async-pdf-failed: 'doctrine://default?queue_name=async-pdf-failed&auto_setup=0'
             async-user-account-verify-failed: 'doctrine://default?queue_name=async-user-account-verify-failed&auto_setup=0'
+            async-user-reset-password-failed: 'doctrine://default?queue_name=async-user-reset-password-failed&auto_setup=0'
         default_bus: messenger.bus.default
 
         buses:
@@ -59,6 +70,7 @@ framework:
             'App\Message\RecipePDFMessage': async-pdf
             'App\Message\ContactMessage': async-contact
             'App\Message\User\UserVerifyAccountMessage': async-user-account-verify
+            'App\Message\User\UserResetPasswordMessage': async-user-reset-password
 
             # Route your messages to the transports
             # 'App\Message\YourMessage': async

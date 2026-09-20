@@ -9,6 +9,7 @@ use App\Repository\User\UserRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 #[AsMessageHandler]
 final readonly class UserVerifyAccountMessageHandler
@@ -16,8 +17,9 @@ final readonly class UserVerifyAccountMessageHandler
     public function __construct(
         private LoggerInterface $logger,
         private UserRepository $userRepository,
-        private EventDispatcherInterface $dispatcher)
-    {
+        private EventDispatcherInterface $dispatcher,
+        private VerifyEmailHelperInterface $verifyEmailHelper,
+    ) {
     }
 
     /**
@@ -34,6 +36,17 @@ final readonly class UserVerifyAccountMessageHandler
         }
 
         $event = new UserVerifyRequestEvent($user);
+        $signatureComponents = $this->verifyEmailHelper->generateSignature(
+            'app_activate_account',
+            (string) $user->getId(),
+            (string) $user->getEmail(),
+            [
+                'id' => $user->getId(),
+                'token' => $message->token,
+            ]
+        );
+
+        $event->setSignatureUrl($signatureComponents->getSignedUrl());
         $this->dispatcher->dispatch($event);
 
         if ($event->isFailed()) {

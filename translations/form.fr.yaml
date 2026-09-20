@@ -2,6 +2,8 @@ form:
   password:
     label: "Mot de passe"
     confirm: "Confirmer le mot de passe"
+    new: "Nouveau mot de passe"
+    invalid_message: "Les champs de mot de passe doivent correspondre."
   recipe:
     title: "Titre"
     slug: "Slug"

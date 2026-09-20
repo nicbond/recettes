@@ -17,7 +17,10 @@ This personal project was created to experiment with modern Symfony best practic
 * Business rules enforced at application level (e.g. protected deletions)
 * Async PDF generation via Symfony Messenger
 * Authentication (login, registration) with role-based access control
-
+* Email verification on registration via signed URL (symfonycasts/verify-email-bundle)
+* Password reset via secure token with expiration (symfonycasts/reset-password-bundle)
+* Asynchronous email delivery via Symfony Messenger (contact, account verification, password reset)
+* Password visibility toggle on all password fields
 
 ## Tech Stack
 
@@ -31,6 +34,8 @@ This personal project was created to experiment with modern Symfony best practic
 * Symfony UX Turbo
 * Bootstrap 5
 * Font Awesome
+* symfonycasts/verify-email-bundle
+* symfonycasts/reset-password-bundle
 * PHPUnit
 * PHPStan
 * PHP-CS-Fixer
@@ -53,6 +58,13 @@ This personal project was created to experiment with modern Symfony best practic
 * `make .env.local`
 * Edit your `.env.local`
 * `make install` or `make reset`
+
+## Environment variables
+
+```dotenv
+# Application URL (used for signed URLs in emails)
+ROUTER_DEFAULT_URI=http://localhost:8088
+```
 
 ## Useful commands
 

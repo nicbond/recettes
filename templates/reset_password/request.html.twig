@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mot de passe oublié{% endblock %}
+
+{% block body %}
+    <div class="login-page">
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+
+            <h1>Mot de passe oublié</h1>
+
+            <p class="login-subtitle mb-4">
+                Saisissez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+            </p>
+
+            {{ form_start(requestForm) }}
+            <div class="mb-4">
+                {{ form_row(requestForm.email, {
+                    label: 'Adresse email',
+                    attr: {
+                        class: 'form-control',
+                        autocomplete: 'email',
+                        autofocus: 'autofocus',
+                    },
+                }) }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 login-submit mb-3">
+                <i class="fa-solid fa-paper-plane me-2"></i>
+                Envoyer le lien
+            </button>
+            {{ form_end(requestForm) }}
+
+            <div class="login-footer mt-3">
+                <a href="{{ path('app_login') }}">
+                    <i class="fa-solid fa-arrow-left me-1"></i>
+                    Retour à la connexion
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

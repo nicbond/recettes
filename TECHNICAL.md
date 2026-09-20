@@ -70,7 +70,7 @@ Domain/Application Event
      │
      ├── MailingSubscriber
      ├── LoggerSubscriber
-     └── SmsSubscriber
+     └── ImageConvertSubscriber
 ```
 
 ---
@@ -579,6 +579,10 @@ The `discriminator` column in the `user` table determines the type of user.
 |-------|------|--------|
 | `app_login` | `/login` | PUBLIC |
 | `app_register` | `/inscription` | PUBLIC |
+| `app_activate_account` | `/activate` | PUBLIC |
+| `app_forgot_password_request` | `/reset-password` | PUBLIC |
+| `app_check_email` | `/reset-password/check-email` | PUBLIC |
+| `app_reset_password` | `/reset-password/reset/{token}` | PUBLIC |
 | `app_logout` | `/logout` | Authenticated |
 | `home` | `/` | `IS_AUTHENTICATED_FULLY` |
 | Admin routes | `/admin/*` | `ROLE_ADMIN` |
@@ -587,9 +591,12 @@ The `discriminator` column in the `user` table determines the type of user.
 
 ```yaml
 access_control:
+    - { path: ^/maintenance, roles: PUBLIC_ACCESS }
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/inscription, roles: PUBLIC_ACCESS }
     - { path: ^/contact, roles: PUBLIC_ACCESS }
+    - { path: ^/activate, roles: PUBLIC_ACCESS }
+    - { path: ^/reset-password, roles: PUBLIC_ACCESS }
     - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 ```
@@ -624,6 +631,8 @@ Password constraints are enforced at form level:
 - At least one digit
 - At least one special character (`@$!%*?&^#`)
 
+After registration, an asynchronous message is dispatched to send a verification email.
+
 ### Remember me
 
 The remember me feature is enabled with a lifetime of 7 days:
@@ -652,6 +661,124 @@ private function createAuthenticatedClient(): KernelBrowser
     $client->loginUser($admin);
 
     return $client;
+}
+```
+
+---
+
+## Email Verification
+
+Account verification is handled by **symfonycasts/verify-email-bundle**.
+
+### How it works
+
+1. After registration, a `UserVerifyAccountMessage` is dispatched asynchronously via Messenger.
+2. The `UserVerifyAccountMessageHandler` generates a signed URL using `VerifyEmailHelperInterface`.
+3. A `UserVerifyRequestEvent` is dispatched and handled by `MailingSubscriber`.
+4. The user receives an email containing the signed URL.
+5. When clicking the link, `VerifyEmailHelperInterface::validateEmailConfirmationFromRequest()` validates the cryptographic signature.
+6. If valid, the user is marked as verified (`isVerified = true`) and the confirmation token is cleared.
+
+### Configuration
+
+```yaml
+# config/packages/verify_email.yaml
+symfonycasts_verify_email:
+    lifetime: 86400 # 24 hours
+```
+
+The signed URL is generated without exposing the token in the email template:
+
+```php
+$signatureComponents = $this->verifyEmailHelper->generateSignature(
+    'app_activate_account',
+    (string) $user->getId(),
+    (string) $user->getEmail(),
+    ['id' => $user->getId(), 'token' => $message->token]
+);
+```
+
+---
+
+## Password Reset
+
+Password reset is handled by **symfonycasts/reset-password-bundle**.
+
+### How it works
+
+1. The user submits their email on `/reset-password`.
+2. If the user exists, a `UserResetPasswordMessage` is dispatched asynchronously via Messenger.
+3. The `UserResetPasswordMessageHandler` generates a reset token using `ResetPasswordHelperInterface`.
+4. A `UserResetPasswordRequestEvent` is dispatched and handled by `MailingSubscriber`.
+5. The user receives an email with a secure reset link valid for **30 minutes**.
+6. The token is stored in the session (not in the URL) for security (anti-leak).
+7. After successful password change, the token is invalidated immediately.
+
+### Configuration
+
+```yaml
+# config/packages/reset_password.yaml
+symfonycasts_reset_password:
+    request_password_repository: App\Repository\ResetPasswordRequestRepository
+    lifetime: 1800  # 30 minutes
+    throttle_limit: 3
+```
+
+### Security note
+
+The controller never reveals whether an email exists in the database. In all cases the user is redirected to `/reset-password/check-email`.
+
+---
+
+## Asynchronous Messaging
+
+The application uses Symfony Messenger for asynchronous operations.
+
+### Transports
+
+| Transport | Queue | Purpose |
+|-----------|-------|---------|
+| `async` | default | Generic async messages |
+| `async-contact` | async-contact | Contact form emails |
+| `async-pdf` | async-pdf | Recipe PDF generation |
+| `async-user-account-verify` | async-user-account-verify | Account verification emails |
+| `async-user-reset-password` | async-user-reset-password | Password reset emails |
+
+Each transport has a dedicated failure transport (e.g. `async-contact-failed`) using Doctrine.
+
+### Message flow
+
+```text
+Controller
+     ↓
+Message dispatched (e.g. UserVerifyAccountMessage)
+     ↓
+MessageHandler (async)
+     ↓
+Event dispatched (e.g. UserVerifyRequestEvent)
+     ↓
+MailingSubscriber → sends email
+```
+
+### Failure handling
+
+If a subscriber marks an event as failed (`$event->setFailed(true)`), the handler throws an exception. Messenger retries the message up to 3 times before moving it to the failure transport.
+
+```php
+if ($event->isFailed()) {
+    throw new \Exception('Failed to send email');
+}
+```
+
+The `FailableTrait` is shared across all events:
+
+```php
+trait FailableTrait
+{
+    private bool $failed = false;
+
+    public function setFailed(bool $failed): void { ... }
+    public function isFailed(): bool { ... }
 }
 ```
 

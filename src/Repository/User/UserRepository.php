@@ -4,6 +4,7 @@ namespace App\Repository\User;
 
 use App\Entity\User\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -38,6 +39,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             'confirmationToken' => $token,
             'isVerified' => false,
         ]);
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findOneByIdAndConfirmationTokenNotNull(int $userId): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.id = :id')
+            ->andWhere('u.confirmationToken IS NOT NULL')
+            ->setParameter('id', $userId)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     public function save(User $entity, bool $flush = false): void
