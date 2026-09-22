@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Event;
 
-use App\Event\Traits\FailableTrait;
 use App\Message\ContactMessage;
 
-class ContactRequestEvent
+readonly class ContactRequestEvent
 {
-    use FailableTrait;
-
-    public function __construct(public readonly ContactMessage $message)
+    public function __construct(public ContactMessage $message)
     {
     }
 }

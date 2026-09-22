@@ -35,6 +35,7 @@ class ResetPasswordController extends AbstractController
      * Display & process form to request a password reset.
      *
      * @throws ExceptionInterface
+     * @throws ResetPasswordExceptionInterface
      */
     #[Route('', name: 'app_forgot_password_request')]
     public function request(Request $request): Response
@@ -59,7 +60,8 @@ class ResetPasswordController extends AbstractController
                     throw new \LogicException('User ID must not be null.');
                 }
 
-                $this->bus->dispatch(new UserResetPasswordMessage($userId));
+                $resetToken = $this->resetPasswordHelper->generateResetToken($user);
+                $this->bus->dispatch(new UserResetPasswordMessage($userId, $resetToken));
             }
 
             return $this->redirectToRoute('app_check_email');
@@ -110,7 +112,7 @@ class ResetPasswordController extends AbstractController
             return $this->redirectToRoute('app_forgot_password_request');
         }
 
-        // The token is valid; we allow the actual password change
+        // The token is valid: we allow the actual password change
         $form = $this->createForm(ChangePasswordFormType::class);
         $form->handleRequest($request);
 

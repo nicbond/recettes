@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\MessageHandler\User;
 
 use App\Entity\User\User;
@@ -9,8 +11,6 @@ use App\Repository\User\UserRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
-use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
 #[AsMessageHandler]
 final readonly class UserResetPasswordMessageHandler
@@ -19,13 +19,9 @@ final readonly class UserResetPasswordMessageHandler
         private LoggerInterface $logger,
         private UserRepository $userRepository,
         private EventDispatcherInterface $dispatcher,
-        private ResetPasswordHelperInterface $resetPasswordHelper)
-    {
+    ) {
     }
 
-    /**
-     * @throws \Exception
-     */
     public function __invoke(UserResetPasswordMessage $message): void
     {
         $user = $this->userRepository->find($message->userId);
@@ -34,36 +30,22 @@ final readonly class UserResetPasswordMessageHandler
             $this->logger->error(
                 'UserResetPasswordMessage : Unable to find user',
                 [
-                    'user' => $message->userId,
+                    'userId' => $message->userId,
                 ]
             );
 
-            throw new \Exception(sprintf('Unable to reset password user %s', $message->userId));
+            throw new \RuntimeException(sprintf('Unable to reset password user %s', $message->userId));
         }
 
-        try {
-            $resetToken = $this->resetPasswordHelper->generateResetToken($user);
-        } catch (ResetPasswordExceptionInterface $e) {
-            $this->logger->error(
-                'Error generateResetToken : Unable to generate reset token',
-                [
-                    'reason' => $e->getReason(),
-                    'message' => $e->getMessage(),
-                    'userId' => $user->getId(),
-                ]
-            );
-
-            return;
-        }
-
-        $event = new UserResetPasswordRequestEvent($user, $resetToken);
+        $event = new UserResetPasswordRequestEvent($user, $message->resetToken);
         $this->dispatcher->dispatch($event);
 
-        if ($event->isFailed()) {
-            $this->logger->error('UserResetPasswordMessage : Failed to send UserResetPassword email');
-            throw new \Exception('Failed to send contact message');
-        }
-
-        $this->logger->info('UserResetPasswordMessage : UserResetPassword email sent successfully');
+        $this->logger->info(
+            'UserResetPasswordMessage : UserResetPassword email sent successfully',
+            [
+                'userId' => $message->userId,
+                'email' => $user->getEmail(),
+            ]
+        );
     }
 }

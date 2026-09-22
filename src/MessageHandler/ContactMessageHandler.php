@@ -24,11 +24,10 @@ final readonly class ContactMessageHandler
     {
         $event = new ContactRequestEvent($message);
         $this->dispatcher->dispatch($event);
-        if ($event->isFailed()) {
-            $this->logger->error('ContactMessage : Failed to send contact message');
-            throw new \Exception('Failed to send contact message');
-        }
 
-        $this->logger->info('ContactMessage : Contact message sent successfully');
+        $this->logger->info('Contact request received', [
+            'email' => $message->getContactDTO()->email,
+            'subject' => $message->getContactDTO()->service,
+        ]);
     }
 }

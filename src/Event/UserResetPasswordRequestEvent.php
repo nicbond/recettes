@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace App\Event;
 
 use App\Entity\User\User;
-use App\Event\Traits\FailableTrait;
-use App\Notification\FailableEventInterface;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordToken;
 
-class UserResetPasswordRequestEvent implements FailableEventInterface
+readonly class UserResetPasswordRequestEvent
 {
-    use FailableTrait;
-
-    public function __construct(private readonly User $user, private readonly ResetPasswordToken $resetToken)
+    public function __construct(private User $user, private ResetPasswordToken $resetToken)
     {
     }
 

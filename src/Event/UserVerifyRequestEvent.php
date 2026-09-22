@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace App\Event;
 
 use App\Entity\User\User;
-use App\Event\Traits\FailableTrait;
-use App\Notification\FailableEventInterface;
 
-final class UserVerifyRequestEvent implements FailableEventInterface
+final class UserVerifyRequestEvent
 {
-    use FailableTrait;
-
     private ?string $signatureUrl = null;
 
     public function __construct(

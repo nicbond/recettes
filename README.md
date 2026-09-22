@@ -63,7 +63,7 @@ This personal project was created to experiment with modern Symfony best practic
 
 ```dotenv
 # Application URL (used for signed URLs in emails)
-ROUTER_DEFAULT_URI=http://localhost:8088
+DEFAULT_URI=http://localhost:8088
 ```
 
 ## Useful commands

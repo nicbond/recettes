@@ -49,11 +49,11 @@ final readonly class UserVerifyAccountMessageHandler
         $event->setSignatureUrl($signatureComponents->getSignedUrl());
         $this->dispatcher->dispatch($event);
 
-        if ($event->isFailed()) {
-            $this->logger->error('UserVerifyAccountMessage : Failed to send UserVerifyAccount email');
-            throw new \Exception('Failed to send contact message');
-        }
-
-        $this->logger->info('UserVerifyAccountMessage : UserVerifyAccount email sent successfully');
+        $this->logger->info(
+            'UserVerifyAccountMessage : UserVerifyAccount email sent successfully',
+            [
+                'email' => $user->getEmail(),
+            ]
+        );
     }
 }
