@@ -1,0 +1,8 @@
+scheb_two_factor:
+    google:
+        enabled: false
+        server_name: Recipes
+        issuer: Recipes
+        digits: 6
+        leeway: 0
+        template: security/2fa_form.html.twig

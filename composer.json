@@ -17,6 +17,8 @@
         "knplabs/knp-paginator-bundle": "^6.10",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^2.3",
+        "scheb/2fa-bundle": "^8.6",
+        "scheb/2fa-google-authenticator": "^8.6",
         "stof/doctrine-extensions-bundle": "^1.14",
         "symfony/asset": "^7.1",
         "symfony/asset-mapper": "^7.1",
