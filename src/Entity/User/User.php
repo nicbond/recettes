@@ -217,10 +217,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return $this->googleAuthenticatorSecret;
     }
 
-    public function setGoogleAuthenticatorSecret(?string $googleAuthenticatorSecret): static
+    public function setGoogleAuthenticatorSecret(?string $secret): void
     {
-        $this->googleAuthenticatorSecret = $googleAuthenticatorSecret;
-
-        return $this;
+        $this->googleAuthenticatorSecret = $secret;
     }
 }

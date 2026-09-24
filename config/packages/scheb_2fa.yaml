@@ -1,6 +1,6 @@
 scheb_two_factor:
     google:
-        enabled: false
+        enabled: true
         server_name: Recipes
         issuer: Recipes
         digits: 6
