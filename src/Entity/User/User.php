@@ -130,14 +130,49 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
+     * Sérialisation explicite pour la session de sécurité Symfony.
+     *
+     * @return array{
+     *     id: int|null,
+     *     email: string|null,
+     *     roles: list<string>,
+     *     password: string|null,
+     *     isVerified: bool,
+     *     googleAuthenticatorSecret: string|null
+     * }
      */
     public function __serialize(): array
     {
-        $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password ?? '');
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'roles' => $this->roles,
+            'password' => $this->password,
+            'isVerified' => $this->isVerified,
+            'googleAuthenticatorSecret' => $this->googleAuthenticatorSecret,
+        ];
+    }
 
-        return $data;
+    /**
+     * Désérialisation explicite lors de la lecture de la session.
+     *
+     * @param array{
+     *     id?: int|null,
+     *     email?: string|null,
+     *     roles?: list<string>,
+     *     password?: string|null,
+     *     isVerified?: bool,
+     *     googleAuthenticatorSecret?: string|null
+     * } $data
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->id = $data['id'] ?? null;
+        $this->email = $data['email'] ?? null;
+        $this->roles = $data['roles'] ?? [];
+        $this->password = $data['password'] ?? null;
+        $this->isVerified = $data['isVerified'] ?? false;
+        $this->googleAuthenticatorSecret = $data['googleAuthenticatorSecret'] ?? null;
     }
 
     #[\Deprecated]
