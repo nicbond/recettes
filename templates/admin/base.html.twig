@@ -84,6 +84,12 @@
 
                 {% if has_full_access and is_granted('ROLE_ADMIN') %}
 
+                    <a href="{{ path('admin_security_2fa') }}"
+                       class="admin-nav-link {{ app.current_route == 'admin_security_2fa' ? 'active' : '' }}">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Double authentification</span>
+                    </a>
+
                     <a href="{{ path('home') }}" class="admin-nav-link">
                         <i class="fa-solid fa-house"></i>
                         <span>Retour à l'accueil</span>
