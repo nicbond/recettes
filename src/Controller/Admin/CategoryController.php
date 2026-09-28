@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\DTO\CategoryFilterDTO;
 use App\Entity\Recipe\Category;
+use App\Enum\Permission;
 use App\Form\Recipe\CategoryFilterType;
 use App\Form\Recipe\CategoryType;
 use App\Repository\Recipe\CategoryRepository;
@@ -61,8 +62,9 @@ final class CategoryController extends AbstractController
         ]);
     }
 
+    #[IsGranted(Permission::CATEGORY_CREATE->value)]
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
-    public function new(Request $request): RedirectResponse|Response
+    public function create(Request $request): RedirectResponse|Response
     {
         $category = new Category();
         $form = $this->createForm(CategoryType::class, $category, [
@@ -85,6 +87,7 @@ final class CategoryController extends AbstractController
         ]);
     }
 
+    #[IsGranted(Permission::CATEGORY_EDIT->value)]
     #[Route('/{id}', name: 'edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function edit(Category $category, Request $request): Response
     {
@@ -105,6 +108,7 @@ final class CategoryController extends AbstractController
         ]);
     }
 
+    #[IsGranted(Permission::CATEGORY_DELETE->value)]
     #[Route('/{id}', name: 'delete', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
     public function delete(Request $request, Category $category): RedirectResponse
     {

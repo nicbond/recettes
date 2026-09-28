@@ -62,8 +62,9 @@ trait FixturesTrait
         $passwordHasher = $container->get('security.user_password_hasher');
 
         $admin = new Admin();
-        $admin->setEmail('admin@test.com');
-        $admin->setPassword($passwordHasher->hashPassword($admin, '@Password1986'));
+        $admin->setEmail('admin@test.com')
+               ->setPassword($passwordHasher->hashPassword($admin, '@Password1986'))
+               ->setRoles(['ROLE_SUPER_ADMIN']);
 
         $em->persist($admin);
         $em->flush();

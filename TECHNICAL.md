@@ -800,3 +800,145 @@ Mailpit captures outgoing emails locally without sending them to real recipients
 
 - SMTP: `localhost:1025`
 - Web interface: http://localhost:8025/
+
+## Two-Factor Authentication (2FA)
+
+Two-factor authentication is implemented using **scheb/2fa-bundle** with Google Authenticator (TOTP).
+
+### Packages
+
+```bash
+composer require scheb/2fa-bundle scheb/2fa-google-authenticator
+```
+
+### How it works
+
+1. The admin logs in with email and password.
+2. If Google Authenticator is enabled on the account, the bundle intercepts the authentication and redirects to `/2fa`.
+3. The user enters the 6-digit TOTP code from their authenticator app.
+4. If the code is valid, the user is fully authenticated.
+
+### Setup flow
+
+The setup is handled by `TwoFactorController`:
+
+1. A secret is generated via `GoogleAuthenticatorInterface::generateSecret()` and stored temporarily in the session.
+2. The secret is temporarily set on the user entity to generate the QR code provisioning URI.
+3. The secret is immediately cleared from the entity — it is **not** persisted yet.
+4. A QR code is generated using **endroid/qr-code** and displayed to the user.
+5. The user scans the QR code and enters the 6-digit code.
+6. The code is verified using **spomky-labs/otphp** (`TOTP::verify()`).
+7. If valid, the secret is persisted on the user entity and the session key is removed.
+
+A 5-second leeway is applied during enrollment to tolerate clock drift at TOTP window boundaries.
+
+### Configuration
+
+```yaml
+# config/packages/scheb_2fa.yaml
+scheb_two_factor:
+    security_tokens:
+        - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken
+        - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken
+    google:
+        enabled: true
+        server_name: Recipes
+        issuer: Recipes
+        digits: 6
+        leeway: 5
+        template: security/2fa_form.html.twig
+```
+
+### Firewall configuration
+
+```yaml
+main:
+    two_factor:
+        auth_form_path: 2fa_login
+        check_path: 2fa_login_check
+```
+
+### Access control
+
+The 2FA form route must be declared first in `access_control`:
+
+```yaml
+access_control:
+    - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
+    # ... other rules
+```
+
+### User entity
+
+The `User` entity implements `TwoFactorInterface`:
+
+```php
+use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
+
+class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
+{
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleAuthenticatorSecret = null;
+
+    public function isGoogleAuthenticatorEnabled(): bool
+    {
+        return null !== $this->googleAuthenticatorSecret;
+    }
+
+    public function getGoogleAuthenticatorUsername(): ?string
+    {
+        return $this->email;
+    }
+
+    public function getGoogleAuthenticatorSecret(): ?string
+    {
+        return $this->googleAuthenticatorSecret;
+    }
+}
+```
+
+The `__serialize()` and `__unserialize()` methods explicitly include `googleAuthenticatorSecret` to ensure proper session handling.
+
+### UserChecker
+
+A custom `UserChecker` verifies that the account is activated before authentication:
+
+```php
+public function checkPreAuth(UserInterface $user): void
+{
+    if (!$user instanceof User) {
+        return;
+    }
+
+    if (!$user->isVerified()) {
+        throw new CustomUserMessageAccountStatusException(
+            "Votre compte n'est pas encore activé."
+        );
+    }
+}
+```
+
+### Login success listener
+
+A `LoginSuccessEventListener` updates `lastLoginAt` after each successful authentication:
+
+```php
+#[AsEventListener(event: LoginSuccessEvent::class)]
+class LoginSuccessEventListener
+{
+    public function __invoke(LoginSuccessEvent $event): void
+    {
+        $user = $event->getUser();
+        if (!$user instanceof User) {
+            return;
+        }
+        $user->setLastLoginAt(new \DateTime());
+        $this->userRepository->save($user, true);
+    }
+}
+```
+
+### Templates
+
+- `security/2fa_setup.html.twig` — QR code display and first code validation
+- `security/2fa_form.html.twig` — 6-digit code entry on each login

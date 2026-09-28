@@ -1,0 +1,49 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}Gestion des permissions{% endblock %}
+
+{% block admin_body %}
+    <h1>Gestion des permissions</h1>
+
+    <div class="border-top border-primary border-3 pt-3">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Permissions</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for admin in admins %}
+                <tr>
+                    <td>{{ admin.email }}</td>
+                    <td>
+                        {% if admin.isSuperAdmin() %}
+                            <span class="badge bg-danger">Super Admin</span>
+                        {% else %}
+                            <span class="badge bg-primary">Admin</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if admin.isSuperAdmin() %}
+                            <span class="text-muted">Toutes les permissions</span>
+                        {% else %}
+                            {{ admin.permissions|length }} permission(s)
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not admin.isSuperAdmin() %}
+                            <a href="{{ path('admin.permissions.edit', {id: admin.id}) }}"
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit"></i> Gérer
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

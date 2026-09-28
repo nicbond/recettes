@@ -1,0 +1,59 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}Permissions de {{ admin.email }}{% endblock %}
+
+{% block admin_body %}
+    <h1 class="permission-title">
+        <i class="fa-solid fa-user-shield me-2"></i>Permissions de <span class="email-highlight">{{ admin.email }}</span>
+    </h1>
+
+    {{ form_start(form) }}
+    <div class="row">
+        {% for group, choices in form.permissions.vars.choices %}
+            <div class="col-md-4 mb-4">
+                <div class="card permission-grid-card" data-controller="permission-group">
+                    <div class="card-header permission-card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">{{ group }}</span>
+
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input style-master-checkbox"
+                                   type="checkbox"
+                                   role="switch"
+                                   data-action="change->permission-group#toggleAll"
+                                   title="Tout cocher / décocher">
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        {% for key, choice in choices %}
+                            <div class="form-check permission-form-check">
+                                {{ form_widget(form.permissions[key], {
+                                    attr: {
+                                        class: 'form-check-input',
+                                        'data-permission-group-target': 'checkbox',
+                                        'data-action': 'change->permission-group#checkMaster',
+                                    },
+                                }) }}
+                                {{ form_label(form.permissions[key], null, {
+                                    label_attr: {class: 'form-check-label'},
+                                }) }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="permission-actions-group">
+        <button type="submit" class="btn btn-primary permission-btn-submit">
+            <i class="fas fa-save me-2"></i>Enregistrer les permissions
+        </button>
+
+        <a href="{{ path('admin.permissions.index') }}" class="btn btn-outline-secondary permission-btn-cancel">
+            Annuler
+        </a>
+    </div>
+
+    {{ form_end(form) }}
+{% endblock %}

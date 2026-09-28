@@ -43,9 +43,11 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ path('admin.recipe.create') }}" class="btn btn-primary">Ajouter une nouvelle recette</a>
-    </div>
+    {% if app.user.isSuperAdmin() or is_granted('recipe.create') %}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ path('admin.recipe.create') }}" class="btn btn-primary">Ajouter une nouvelle recette</a>
+        </div>
+    {% endif %}
 
     <div class="border-top border-primary border-3 pt-3">
         <div class="d-flex justify-content-start gap-3 mb-3">
@@ -66,29 +68,39 @@
                     <div class="card h-100 shadow-sm">
 
                         {# Image + overlay + tags #}
+                        {% set canEditRecipe = is_granted('recipe.edit') %}
                         <div class="recipe-card-image-wrapper">
+                            {% if canEditRecipe %}
                             <a href="{{ path('admin.recipe.edit_thumbnail', {id: recipe.id}) }}"
                                data-turbo-frame="modal"
                                class="d-block">
+                            {% endif %}
 
                                 {% if recipe.thumbnail.name %}
                                     <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}"
                                          class="card-img-top recipe-card-img"
                                          alt="{{ recipe.title }}">
 
-                                    <span class="recipe-image-hover-overlay">
-                                        <i class="fas fa-edit me-1"></i> Modifier l'image
-                                    </span>
+                                    {% if canEditRecipe %}
+                                        <span class="recipe-image-hover-overlay">
+                                            <i class="fas fa-edit me-1"></i> Modifier l'image
+                                        </span>
+                                    {% endif %}
                                 {% else %}
                                     <div class="card-img-top recipe-card-placeholder bg-secondary d-flex align-items-center justify-content-center">
                                         <i class="fas fa-utensils fa-3x text-white"></i>
                                     </div>
 
-                                    <span class="recipe-image-hover-overlay">
-                                        <i class="fas fa-plus me-1"></i> Ajouter une image
-                                    </span>
+                                    {% if canEditRecipe %}
+                                        <span class="recipe-image-hover-overlay">
+                                            <i class="fas fa-plus me-1"></i> Ajouter une image
+                                        </span>
+                                    {% endif %}
                                 {% endif %}
+
+                        {% if canEditRecipe %}
                             </a>
+                        {% endif %}
 
                             {% if recipe.tags|length > 0 %}
                                 <div class="position-absolute bottom-0 start-0 p-2 d-flex flex-wrap gap-1">
@@ -129,18 +141,22 @@
 
                         {# Actions #}
                         <div class="card-footer d-flex gap-2">
-                            <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}"
-                               class="btn btn-primary btn-sm"
-                               data-turbo-frame="modal">
-                                <i class="fas fa-edit"></i>
-                            </a>
+                            {% if app.user.isSuperAdmin() or is_granted('recipe.edit') %}
+                                <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}"
+                                   class="btn btn-primary btn-sm"
+                                   data-turbo-frame="modal">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            {% endif %}
 
-                            {{ include('components/modal/_delete_from_index_form.html.twig', {
-                                icon: true,
-                                id: recipe.id,
-                                route: 'admin.recipe.delete',
-                                message: 'Cette recette sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
-                            }) }}
+                            {% if app.user.isSuperAdmin() or is_granted('recipe.delete') %}
+                                {{ include('components/modal/_delete_from_index_form.html.twig', {
+                                    icon: true,
+                                    id: recipe.id,
+                                    route: 'admin.recipe.delete',
+                                    message: 'Cette recette sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
+                                }) }}
+                            {% endif %}
                         </div>
 
                     </div>

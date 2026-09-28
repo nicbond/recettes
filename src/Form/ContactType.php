@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\DTO\ContactDTO;
-use App\Enum\ServiceEnum;
+use App\Enum\Service;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -41,9 +41,9 @@ class ContactType extends AbstractType
                 'required' => true,
                 'empty_data' => '',
                 'choices' => [
-                    'form.contact.technical.service' => ServiceEnum::TECHNIQUE->value,
-                    'form.contact.comptability.service' => ServiceEnum::COMPTABLE->value,
-                    'form.contact.rh.service' => ServiceEnum::RH->value,
+                    'form.contact.technical.service' => Service::TECHNIQUE->value,
+                    'form.contact.comptability.service' => Service::COMPTABLE->value,
+                    'form.contact.rh.service' => Service::RH->value,
                 ],
                 'placeholder' => 'form.contact.service.placeholder',
             ])

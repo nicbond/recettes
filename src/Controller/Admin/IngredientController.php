@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Recipe\Ingredient;
+use App\Enum\Permission;
 use App\Repository\Recipe\IngredientRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,7 @@ class IngredientController extends AbstractController
     /**
      * @throws NonUniqueResultException
      */
+    #[IsGranted(Permission::INGREDIENT_CREATE->value)]
     #[Route('/ingredient/create-ajax', name: 'ingredient_create_ajax', methods: ['POST'])]
     public function createAjax(
         Request $request,

@@ -543,3 +543,67 @@ body {
     position: relative;
     padding-top: 60px !important;
 }
+
+/* ==========================================================================
+   Permissions Management Page
+   ========================================================================== */
+
+.permission-title {
+    text-align: center;
+    color: var(--bs-primary);
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--bs-border-color-translucent);
+}
+
+.permission-title .email-highlight {
+    color: var(--bs-dark);
+}
+
+.permission-grid-card {
+    height: 100%;
+    box-shadow: var(--bs-box-shadow-sm);
+    border-color: var(--bs-border-color-translucent);
+}
+
+.permission-card-header {
+    font-weight: 700;
+    text-align: center;
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.permission-form-check {
+    margin-bottom: 0.5rem;
+}
+
+.permission-actions-group {
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+}
+
+.permission-btn-submit {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.permission-btn-cancel {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    margin-left: 0.5rem;
+}
+
+.permission-card-header .style-master-checkbox {
+    cursor: pointer;
+    border-color: var(--bs-primary-border-subtle);
+}
+
+.permission-card-header .style-master-checkbox:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}

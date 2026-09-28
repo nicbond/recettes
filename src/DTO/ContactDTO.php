@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-use App\Enum\ServiceEnum;
+use App\Enum\Service;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class ContactDTO
@@ -41,7 +41,7 @@ class ContactDTO
     public string $phone = '';
 
     #[Assert\NotBlank(message: 'Veuillez sélectionner un service.')]
-    #[Assert\Choice(callback: [ServiceEnum::class, 'values'])]
+    #[Assert\Choice(callback: [Service::class, 'values'])]
     public ?string $service = null;
 
     #[Assert\NotBlank(

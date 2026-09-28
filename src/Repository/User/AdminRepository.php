@@ -15,4 +15,18 @@ class AdminRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Admin::class);
     }
+
+    public function save(Admin $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
+    }
 }

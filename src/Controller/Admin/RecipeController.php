@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\DTO\RecipeFilterDTO;
 use App\Entity\Recipe\Recipe;
+use App\Enum\Permission;
 use App\Form\Recipe\RecipeFilterType;
 use App\Form\Recipe\RecipeThumbnailType;
 use App\Form\Recipe\RecipeType;
@@ -93,8 +94,9 @@ final class RecipeController extends AbstractController
         ]);
     }
 
+    #[IsGranted(Permission::RECIPE_CREATE->value)]
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
-    public function new(Request $request): RedirectResponse|Response
+    public function create(Request $request): RedirectResponse|Response
     {
         $recipe = new Recipe();
         $form = $this->createForm(RecipeType::class, $recipe, [
@@ -120,6 +122,7 @@ final class RecipeController extends AbstractController
     /**
      * @throws ExceptionInterface
      */
+    #[IsGranted(Permission::RECIPE_EDIT->value)]
     #[Route('/{id}', name: 'edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function edit(Recipe $recipe, Request $request): Response
     {
@@ -151,6 +154,7 @@ final class RecipeController extends AbstractController
         ], new Response(status: $status));
     }
 
+    #[IsGranted(Permission::RECIPE_DELETE->value)]
     #[Route('/{id}', name: 'delete', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
     public function delete(Request $request, Recipe $recipe): RedirectResponse
     {
@@ -162,6 +166,7 @@ final class RecipeController extends AbstractController
         return $this->redirectToRoute('admin.recipe.index');
     }
 
+    #[IsGranted(Permission::RECIPE_EDIT->value)]
     #[Route('/{id}/edit-thumbnail', name: 'edit_thumbnail', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function editThumbnail(Recipe $recipe, Request $request): Response
     {

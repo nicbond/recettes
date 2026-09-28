@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\DTO\TagFilterDTO;
 use App\Entity\Recipe\Tag;
+use App\Enum\Permission;
 use App\Form\Recipe\TagFilterType;
 use App\Form\Recipe\TagType;
 use App\Repository\Recipe\TagRepository;
@@ -60,8 +61,9 @@ final class TagController extends AbstractController
         ]);
     }
 
+    #[IsGranted(Permission::TAG_CREATE->value)]
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
-    public function new(Request $request): RedirectResponse|Response
+    public function create(Request $request): RedirectResponse|Response
     {
         $tag = new Tag();
         $form = $this->createForm(TagType::class, $tag, [
@@ -84,6 +86,7 @@ final class TagController extends AbstractController
         ]);
     }
 
+    #[IsGranted(Permission::TAG_EDIT->value)]
     #[Route('/{id}', name: 'edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function edit(Tag $tag, Request $request): Response
     {
@@ -104,6 +107,7 @@ final class TagController extends AbstractController
         ]);
     }
 
+    #[IsGranted(Permission::TAG_DELETE->value)]
     #[Route('/{id}', name: 'delete', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
     public function delete(Request $request, Tag $tag): RedirectResponse
     {

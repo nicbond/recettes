@@ -14,7 +14,7 @@
         ========================================================== #}
         <aside class="admin-sidebar">
 
-            {% if has_full_access and is_granted('ROLE_ADMIN') %}
+            {% if has_full_access and (is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN')) %}
                 <div class="admin-sidebar-header">
                     <a href="{{ path('admin.recipe.index') }}" class="admin-brand">
                         <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -25,7 +25,7 @@
 
             {# Navigation - Visible ONLY if the IP is authorized and accessing the site #}
             <nav class="admin-nav">
-                {% if has_full_access and is_granted('ROLE_ADMIN') %}
+                {% if has_full_access and (is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN')) %}
 
                     <div class="admin-nav-section">
                         <span class="admin-nav-section-title">
@@ -39,41 +39,69 @@
                         </a>
 
                         {# Dropdown Recipes #}
-                        <div class="admin-nav-dropdown {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'open' : '' }}">
+                        {% set canAccessRecipesMenu = is_granted('recipe.menu') %}
+                        {% if canAccessRecipesMenu %}
+                            <div class="admin-nav-dropdown {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'open' : '' }}">
 
-                            <button
-                                    class="admin-nav-link admin-nav-dropdown-toggle {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'active' : '' }}"
+                                <button
+                                        class="admin-nav-link admin-nav-dropdown-toggle {{ app.current_route starts with 'admin.recipe.' or app.current_route starts with 'admin.category.' ? 'active' : '' }}"
+                                        type="button"
+                                        onclick="this.closest('.admin-nav-dropdown').classList.toggle('open')"
+                                >
+                                    <i class="fa-solid fa-book-open"></i>
+                                    <span>Recettes</span>
+                                    <i class="fa-solid fa-chevron-down admin-nav-chevron"></i>
+                                </button>
+
+                                <div class="admin-nav-dropdown-menu">
+
+                                    <a href="{{ path('admin.recipe.index') }}"
+                                       class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.recipe.' ? 'active' : '' }}">
+                                        <i class="fa-solid fa-utensils"></i>
+                                        <span>Liste des recettes</span>
+                                    </a>
+
+                                    <a href="{{ path('admin.category.index') }}"
+                                       class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.category.' ? 'active' : '' }}">
+                                        <i class="fa-solid fa-layer-group"></i>
+                                        <span>Liste des catégories</span>
+                                    </a>
+
+                                    <a href="{{ path('admin.tag.index') }}"
+                                       class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.tag.' ? 'active' : '' }}">
+                                        <i class="fa-solid fa-hashtag"></i>
+                                        <span>Liste des tags</span>
+                                    </a>
+
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {# Dropdown Permissions #}
+                        {% if app.user.isSuperAdmin() %}
+                            <div class="admin-nav-dropdown {{ app.current_route starts with 'admin.permissions.' or app.current_route starts with 'admin.category.' ? 'open' : '' }}">
+
+                                <button
+                                    class="admin-nav-link admin-nav-dropdown-toggle {{ app.current_route starts with 'admin.permissions' or app.current_route starts with 'admin.category.' ? 'active' : '' }}"
                                     type="button"
                                     onclick="this.closest('.admin-nav-dropdown').classList.toggle('open')"
-                            >
-                                <i class="fa-solid fa-book-open"></i>
-                                <span>Recettes</span>
-                                <i class="fa-solid fa-chevron-down admin-nav-chevron"></i>
-                            </button>
+                                >
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <span>Permissions</span>
+                                    <i class="fa-solid fa-chevron-down admin-nav-chevron"></i>
+                                </button>
 
-                            <div class="admin-nav-dropdown-menu">
+                                <div class="admin-nav-dropdown-menu">
 
-                                <a href="{{ path('admin.recipe.index') }}"
-                                   class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.recipe.' ? 'active' : '' }}">
-                                    <i class="fa-solid fa-utensils"></i>
-                                    <span>Liste des recettes</span>
-                                </a>
+                                    <a href="{{ path('admin.permissions.index') }}"
+                                       class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.permissions.' ? 'active' : '' }}">
+                                        <i class="fa-solid fa-users-gear"></i>
+                                        <span>Liste des rôles</span>
+                                    </a>
 
-                                <a href="{{ path('admin.category.index') }}"
-                                   class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.category.' ? 'active' : '' }}">
-                                    <i class="fa-solid fa-layer-group"></i>
-                                    <span>Liste des catégories</span>
-                                </a>
-
-                                <a href="{{ path('admin.tag.index') }}"
-                                   class="admin-nav-link admin-nav-sublink {{ app.current_route starts with 'admin.tag.' ? 'active' : '' }}">
-                                    <i class="fa-solid fa-hashtag"></i>
-                                    <span>Liste des tags</span>
-                                </a>
-
+                                </div>
                             </div>
-                        </div>
-
+                        {% endif %}
                     </div>
 
                 {% endif %}
@@ -82,7 +110,7 @@
             {# Bottom of the sidebar #}
             <div class="admin-sidebar-footer">
 
-                {% if has_full_access and is_granted('ROLE_ADMIN') %}
+                {% if has_full_access and (is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN')) %}
 
                     <a href="{{ path('admin_security_2fa') }}"
                        class="admin-nav-link {{ app.current_route == 'admin_security_2fa' ? 'active' : '' }}">

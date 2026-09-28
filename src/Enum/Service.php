@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Enum;
 
-enum ServiceEnum: string
+enum Service: string
 {
     case TECHNIQUE = 'service-technique@test.fr';
+
     case COMPTABLE = 'service-comptabilite@test.fr';
+
     case RH = 'ressources-humaines@test.fr';
 
     /**
