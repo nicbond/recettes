@@ -4,6 +4,7 @@ namespace App\Repository\User;
 
 use App\Entity\User\Admin;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -28,5 +29,22 @@ class AdminRepository extends ServiceEntityRepository
     public function flush(): void
     {
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param array{
+     *     email?: string,
+     * } $data
+     */
+    public function findAllAdmins(array $data = []): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('admin');
+
+        if (isset($data['email']) && '' !== trim((string) $data['email'])) {
+            $qb->andWhere('admin.email LIKE :email')
+                ->setParameter('email', '%'.$data['email'].'%');
+        }
+
+        return $qb;
     }
 }
