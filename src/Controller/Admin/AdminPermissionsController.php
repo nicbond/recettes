@@ -63,7 +63,7 @@ final class AdminPermissionsController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit')]
-    public function edit(Admin $admin, Request $request, AdminRepository $adminRepository): Response
+    public function edit(Admin $admin, Request $request): Response
     {
         if ($admin->isSuperAdmin()) {
             $this->addFlash('danger', 'Impossible de modifier les permissions d\'un Super Admin.');
@@ -75,7 +75,7 @@ final class AdminPermissionsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $adminRepository->save($admin, true);
+            $this->adminRepository->save($admin, true);
             $this->addFlash('success', 'Permissions mises à jour avec succès.');
 
             return $this->redirectToRoute('admin.permissions.index');
@@ -85,5 +85,16 @@ final class AdminPermissionsController extends AbstractController
             'admin' => $admin,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/{id}/toggle-status', name: 'toggle_status', methods: ['POST', 'GET'])]
+    public function toggleStatus(Admin $admin): Response
+    {
+        $admin->setIsActive(!$admin->isActive());
+        $this->adminRepository->flush();
+
+        $this->addFlash('success', 'Le statut de l\'administrateur a bien été mis à jour.');
+
+        return $this->redirectToRoute('admin.permissions.index');
     }
 }

@@ -607,3 +607,28 @@ body {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary);
 }
+
+.badge.bg-primary,
+.badge.bg-danger {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.badge.bg-primary:hover,
+.badge.bg-danger:hover {
+    opacity: 0.85;
+}
+
+.badge-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.badge-toggle:hover {
+    opacity: 0.85;
+}
+
