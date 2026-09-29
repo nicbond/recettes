@@ -54,6 +54,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isVerified = false;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $isActive = true;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $confirmationToken = null;
 
@@ -255,5 +258,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     public function setGoogleAuthenticatorSecret(?string $secret): void
     {
         $this->googleAuthenticatorSecret = $secret;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
     }
 }
