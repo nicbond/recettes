@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User\Admin;
 use App\Form\User\RegistrationFormType;
-use App\Message\User\UserVerifyAccountMessage;
+use App\Manager\AdminManager;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Random\RandomException;
@@ -12,8 +12,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
@@ -25,36 +23,18 @@ class RegistrationController extends AbstractController
      * @throws ExceptionInterface
      */
     #[Route('/inscription', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher,
-        UserRepository $userRepository, MessageBusInterface $bus): Response
+    public function register(Request $request, AdminManager $adminManager): Response
     {
-        $user = new Admin();
-        $form = $this->createForm(RegistrationFormType::class, $user, [
+        $admin = new Admin();
+        $form = $this->createForm(RegistrationFormType::class, $admin, [
             'attr' => ['novalidate' => 'novalidate'],
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('plainPassword')->getData();
-            assert(is_string($plainPassword));
-
-            $token = bin2hex(random_bytes(32));
-            $user
-                ->setConfirmationToken($token)
-                ->setIsVerified(false)
-                ->setPassword($userPasswordHasher->hashPassword($user, $plainPassword)
-                );
-
-            $email = $user->getEmail();
-            $token = $user->getConfirmationToken();
-
-            if (null === $email || null === $token) {
-                throw new \LogicException('User email and confirmation token must not be null.');
-            }
-
-            $bus->dispatch(new UserVerifyAccountMessage($email, $token));
-            $userRepository->save($user, true);
+            $adminManager->createNewAdmin($admin, $form);
             $this->addFlash('success', 'Votre compte a bien été créé. Un e-mail d\'activation vous a été envoyé.');
+            $this->addFlash('warning', 'Veuillez par la suite contacter votre administrateur pour vous donner les accès voulus.');
 
             return $this->redirectToRoute('app_login');
         }

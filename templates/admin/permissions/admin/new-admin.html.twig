@@ -1,0 +1,12 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}Créer un nouvel administrateur{% endblock %}
+
+{% block admin_body %}
+    <h1>Créer un nouvel administrateur</h1>
+    <div class="example-wrapper">
+        <div class="box-body">
+            {{ include('partials/_form.html.twig', {button_label: 'Créer', form: form}) }}
+        </div>
+    </div>
+{% endblock %}

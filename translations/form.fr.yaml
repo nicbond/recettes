@@ -40,3 +40,11 @@ form:
       service: "Service Comptabilité"
     rh:
       service: "Service RH"
+  admin:
+    help: "Dans le cas contraire, laissez vide."
+    role: "Rôles"
+    super_admin: "ROLE_SUPER_ADMIN"
+    admin: "ROLE_ADMIN"
+    user: "ROLE_USER"
+    placeholder: "Si vous souhaitez donner tous les droits, veuillez sélectionner le rôle ROLE_SUPER_ADMIN"
+

@@ -22,7 +22,7 @@ This personal project was created to experiment with modern Symfony best practic
 * Asynchronous email delivery via Symfony Messenger (contact, account verification, password reset)
 * Password visibility toggle on all password fields
 * Google Authenticator two-factor authentication (2FA) via scheb/2fa-bundle
-* Role-Based Access Control via a custom PHP Enum, custom Symfony Voters, and a dedicated admin interface to manage permission grids per administrator
+* Granular role-based access control with custom PHP permissions, Symfony Security Voters, and a dedicated interface for managing administrator permissions
 
 
 ## Tech Stack

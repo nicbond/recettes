@@ -37,9 +37,11 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ path('admin.category.create') }}" class="btn btn-primary">Ajouter une nouvelle catégorie</a>
-    </div>
+    {% if app.user.isSuperAdmin() or is_granted('category.create') %}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ path('admin.category.create') }}" class="btn btn-primary">Ajouter une nouvelle catégorie</a>
+        </div>
+    {% endif %}
 
     <div class="border-top border-primary border-3">
         <div class="box-body">
@@ -59,27 +61,31 @@
                         <th scope="row">{{ category.name }}</th>
                         <th>
                             <div class="d-flex gap-2">
-                                <a class="btn btn-primary btn-sm" href="{{ path('admin.category.edit', {id: category.id}) }}">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                {% if app.user.isSuperAdmin() or is_granted('category.edit') %}
+                                    <a class="btn btn-primary btn-sm" href="{{ path('admin.category.edit', {id: category.id}) }}">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
 
-                                {% if category.recipes|length > 0 %}
-                                    {{ include('components/modal/category/_cannot_delete_form.html.twig', {
-                                        icon: true,
-                                        id: category.id,
-                                        name: category.name,
-                                        recipes: category.recipes,
-                                        warning: 'Désolé, vous ne pouvez pas supprimer cette catégorie',
-                                        reason: 'car celle-ci est liée aux recettes suivantes :',
-                                        message: 'Veuillez d\'abord modifier ou supprimer ces recettes avant de supprimer ctte catégorie.',
-                                    }) }}
-                                {% else %}
-                                    {{ include('components/modal/_delete_from_index_form.html.twig', {
-                                        icon: true,
-                                        id: category.id,
-                                        route: 'admin.category.delete',
-                                        message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
-                                    }) }}
+                                {% if app.user.isSuperAdmin() or is_granted('category.delete') %}
+                                    {% if category.recipes|length > 0 %}
+                                        {{ include('components/modal/category/_cannot_delete_form.html.twig', {
+                                            icon: true,
+                                            id: category.id,
+                                            name: category.name,
+                                            recipes: category.recipes,
+                                            warning: 'Désolé, vous ne pouvez pas supprimer cette catégorie',
+                                            reason: 'car celle-ci est liée aux recettes suivantes :',
+                                            message: 'Veuillez d\'abord modifier ou supprimer ces recettes avant de supprimer ctte catégorie.',
+                                        }) }}
+                                    {% else %}
+                                        {{ include('components/modal/_delete_from_index_form.html.twig', {
+                                            icon: true,
+                                            id: category.id,
+                                            route: 'admin.category.delete',
+                                            message: 'Cette catégorie sera définitivement supprimée et ne sera plus affichée.<br><br>Êtes-vous certain de vouloir procéder à la suppression ?',
+                                        }) }}
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </th>
