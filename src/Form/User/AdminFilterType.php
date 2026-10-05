@@ -14,8 +14,9 @@ class AdminFilterType extends AbstractType
             ->add('email', AdminAutocompleteField::class, [
                 'label' => false,
                 'required' => false,
+                'translation_domain' => 'form',
                 'attr' => [
-                    'placeholder' => '🔍 Rechercher par email',
+                    'placeholder' => 'form.admin.search',
                     'class' => 'form-control',
                 ],
             ])

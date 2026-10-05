@@ -100,10 +100,30 @@
                     </td>
                     <td>
                         {% if not admin.isSuperAdmin() %}
-                            <a href="{{ path('admin.permissions.edit', {id: admin.id}) }}"
-                                class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit"></i> Gérer
-                            </a>
+                            <div class="admin-actions-group">
+
+                                <a href="{{ path('admin.permissions.edit', {id: admin.id}) }}"
+                                   class="btn-admin-action btn-admin-manage"
+                                   title="Gérer les permissions"
+                                   aria-label="Gérer les permissions">
+                                    <i class="fas fa-edit"></i>
+                                    <span class="btn-admin-text">Gérer</span>
+                                </a>
+
+                                {% if not admin.isVerified() %}
+                                    <button type="button"
+                                            class="btn-admin-action btn-admin-remind"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmRemindModal{{ admin.id }}"
+                                            title="Renvoyer le mail de vérification">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span class="btn-admin-text">Relancer</span>
+                                    </button>
+
+                                    {{ include('components/modal/admin/_confirm_account_verified_reminder.html.twig', {admin: admin}) }}
+                                {% endif %}
+
+                            </div>
                         {% endif %}
                     </td>
                 </tr>

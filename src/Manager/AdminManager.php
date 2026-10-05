@@ -29,18 +29,37 @@ readonly class AdminManager
         $plainPassword = $form->get('plainPassword')->getData();
         assert(is_string($plainPassword));
 
-        $token = bin2hex(random_bytes(32));
         $admin
-            ->setConfirmationToken($token)
+            ->setConfirmationToken($this->generateSecureToken())
             ->setIsVerified(false)
-            ->setPassword($this->userPasswordHasher->hashPassword($admin, $plainPassword)
-            );
+            ->setPassword($this->userPasswordHasher->hashPassword($admin, $plainPassword));
 
         if ($form->has('roles') && null !== $form->get('roles')->getData()) {
             /** @var string[] $roles */
             $roles = $form->get('roles')->getData();
             $admin->setRoles(array_values($roles));
         }
+
+        $this->saveAndDispatchVerification($admin);
+    }
+
+    /**
+     * @throws RandomException
+     * @throws ExceptionInterface
+     */
+    public function resendVerifiedAccountEmail(Admin $admin): void
+    {
+        $admin->setConfirmationToken($this->generateSecureToken());
+        $this->saveAndDispatchVerification($admin);
+    }
+
+    /**
+     * The administrator persists and distributes the asynchronous verification message.
+     *
+     * @throws ExceptionInterface
+     */
+    private function saveAndDispatchVerification(Admin $admin): void
+    {
         $email = $admin->getEmail();
         $token = $admin->getConfirmationToken();
 
@@ -50,5 +69,15 @@ readonly class AdminManager
 
         $this->adminRepository->save($admin, true);
         $this->bus->dispatch(new UserVerifyAccountMessage($email, $token));
+    }
+
+    /**
+     * Generates a secure cryptographic token.
+     *
+     * @throws RandomException
+     */
+    private function generateSecureToken(): string
+    {
+        return bin2hex(random_bytes(32));
     }
 }

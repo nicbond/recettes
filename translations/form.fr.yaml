@@ -47,4 +47,5 @@ form:
     admin: "ROLE_ADMIN"
     user: "ROLE_USER"
     placeholder: "Si vous souhaitez donner tous les droits, veuillez sélectionner le rôle ROLE_SUPER_ADMIN"
+    search: "🔍 Rechercher par email"
 

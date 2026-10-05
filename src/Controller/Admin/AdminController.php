@@ -50,4 +50,30 @@ final class AdminController extends AbstractController
             'show' => false,
         ]);
     }
+
+    /**
+     * @throws RandomException
+     * @throws ExceptionInterface
+     */
+    #[Route('/{id}/verified-account', name: 'verified-account', methods: ['POST'])]
+    public function verifiedAccount(Request $request, Admin $admin): RedirectResponse|Response
+    {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('resend-activation-'.$admin->getId(), $token)) {
+            $this->addFlash('danger', 'Jeton de sécurité invalide. Action annulée.');
+
+            return $this->redirectToRoute('admin.permissions.index');
+        }
+
+        if ($admin->isVerified()) {
+            $this->addFlash('warning', 'Ce compte administrateur est déjà vérifié.');
+
+            return $this->redirectToRoute('admin.permissions.index');
+        }
+
+        $this->adminManager->resendVerifiedAccountEmail($admin);
+        $this->addFlash('success', 'L\'e-mail de vérification du compte a été renvoyé.');
+
+        return $this->redirectToRoute('admin.permissions.index');
+    }
 }
