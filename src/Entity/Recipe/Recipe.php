@@ -100,6 +100,12 @@ class Recipe
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'recipes')]
     private Collection $tags;
 
+    #[ORM\Column]
+    private bool $promoted = false;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $position = null;
+
     public function __construct()
     {
         $this->thumbnail = new EmbeddedFile();
@@ -268,6 +274,30 @@ class Recipe
     public function removeTag(Tag $tag): static
     {
         $this->tags->removeElement($tag);
+
+        return $this;
+    }
+
+    public function isPromoted(): bool
+    {
+        return $this->promoted;
+    }
+
+    public function setPromoted(bool $promoted): self
+    {
+        $this->promoted = $promoted;
+
+        return $this;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(?int $position): self
+    {
+        $this->position = $position;
 
         return $this;
     }

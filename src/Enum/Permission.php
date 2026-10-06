@@ -15,6 +15,8 @@ enum Permission: string
 
     case RECIPE_DELETE = 'recipe.delete';
 
+    case RECIPE_PROMOTE = 'recipe.promote';
+
     // Categories
     case CATEGORY_CREATE = 'category.create';
 
@@ -54,6 +56,7 @@ enum Permission: string
             self::RECIPE_CREATE => 'Créer une recette',
             self::RECIPE_EDIT => 'Modifier une recette',
             self::RECIPE_DELETE => 'Supprimer une recette',
+            self::RECIPE_PROMOTE => 'Mise en avant des recettes',
             self::CATEGORY_CREATE => 'Créer une catégorie',
             self::CATEGORY_EDIT => 'Modifier une catégorie',
             self::CATEGORY_DELETE => 'Supprimer une catégorie',
@@ -70,7 +73,7 @@ enum Permission: string
     public function group(): string
     {
         return match ($this) {
-            self::RECIPE_MENU,self::RECIPE_CREATE, self::RECIPE_EDIT, self::RECIPE_DELETE => 'Recettes',
+            self::RECIPE_MENU,self::RECIPE_CREATE, self::RECIPE_EDIT, self::RECIPE_PROMOTE, self::RECIPE_DELETE => 'Recettes',
             self::CATEGORY_CREATE, self::CATEGORY_EDIT, self::CATEGORY_DELETE => 'Catégories',
             self::TAG_CREATE, self::TAG_EDIT, self::TAG_DELETE => 'Tags',
             self::INGREDIENT_CREATE => 'Ingrédients',

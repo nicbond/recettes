@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository\Recipe;
 
 use App\Entity\Recipe\Category;
@@ -65,8 +67,82 @@ class RecipeRepository extends ServiceEntityRepository
         return (int) $this->createQueryBuilder('r')
             ->select('SUM(r.duration) as total')
             ->getQuery()
-            ->getSingleScalarResult()
-        ;
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Returns all recipes required for managing
+     * featured recipes.
+     *
+     * Promoted recipes are placed first,
+     * then sorted by position and finally by title.
+     *
+     * @return list<Recipe>
+     */
+    public function findAllForPromotion(): array
+    {
+        return $this->createQueryBuilder('recipe')
+            ->orderBy('recipe.promoted', 'DESC')
+            ->addOrderBy('recipe.position', 'ASC')
+            ->addOrderBy('recipe.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param list<int> $ids
+     *
+     * @return list<Recipe>
+     */
+    public function findByIds(array $ids): array
+    {
+        if ([] === $ids) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('recipe')
+            ->andWhere('recipe.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Remove promotion from every recipe.
+     */
+    public function removePromotionFromAll(): void
+    {
+        $this->createQueryBuilder('recipe')
+            ->update()
+            ->set('recipe.promoted', ':promoted')
+            ->set('recipe.position', ':position')
+            ->setParameter('promoted', false)
+            ->setParameter('position', null)
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * @param list<int> $ids
+     */
+    public function removePromotionFromOtherRecipes(array $ids): void
+    {
+        if ([] === $ids) {
+            $this->removePromotionFromAll();
+
+            return;
+        }
+
+        $this->createQueryBuilder('recipe')
+            ->update()
+            ->set('recipe.promoted', ':promoted')
+            ->set('recipe.position', ':position')
+            ->where('recipe.id NOT IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->setParameter('promoted', false)
+            ->setParameter('position', null)
+            ->getQuery()
+            ->execute();
     }
 
     public function save(Recipe $entity, bool $flush = false): void

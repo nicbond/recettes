@@ -69,4 +69,7 @@ return [
     '@symfony/ux-autocomplete' => [
         'version' => '2.36.2',
     ],
+    'sortablejs' => [
+        'version' => '1.15.7',
+    ],
 ];

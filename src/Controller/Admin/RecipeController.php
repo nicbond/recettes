@@ -8,11 +8,13 @@ use App\Enum\Permission;
 use App\Form\Recipe\RecipeFilterType;
 use App\Form\Recipe\RecipeThumbnailType;
 use App\Form\Recipe\RecipeType;
+use App\Manager\RecipeManager;
 use App\Message\RecipePDFMessage;
 use App\Repository\Recipe\RecipeRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,6 +34,7 @@ final class RecipeController extends AbstractController
         #[Autowire('%number_per_page_recipe%')]
         private readonly int $numberPerPageRecipe,
         private readonly MessageBusInterface $bus,
+        private readonly RecipeManager $recipeManager,
     ) {
     }
 
@@ -188,5 +191,46 @@ final class RecipeController extends AbstractController
             'recipe' => $recipe,
             'form' => $form,
         ], new Response(status: $status));
+    }
+
+    #[IsGranted(Permission::RECIPE_PROMOTE->value)]
+    #[Route('/promoted/load', name: 'promoted_load', methods: ['GET'])]
+    public function promotedLoad(): JsonResponse
+    {
+        $recipes = $this->recipeRepository->findAllForPromotion();
+
+        return $this->json(
+            array_map(
+                static function (Recipe $recipe): array {
+                    return [
+                        'id' => $recipe->getId(),
+                        'title' => $recipe->getTitle(),
+                        'promoted' => $recipe->isPromoted(),
+                        'position' => $recipe->getPosition(),
+                    ];
+                },
+                $recipes
+            )
+        );
+    }
+
+    #[IsGranted(Permission::RECIPE_PROMOTE->value)]
+    #[Route('/promoted', name: 'promoted_save', methods: ['PATCH'])]
+    public function promotedSave(Request $request): JsonResponse
+    {
+        if (!$this->isCsrfTokenValid('promoted_recipes', $request->headers->get('X-CSRF-TOKEN'))) {
+            return $this->json(['message' => 'Token CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        /** @var array{recipes?: list<string>} $data */
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        try {
+            $this->recipeManager->updatePromotedRecipes($data['recipes'] ?? []);
+        } catch (\DomainException $exception) {
+            return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+        return $this->json(['success' => true]);
     }
 }

@@ -85,6 +85,8 @@ Event dispatched
           sends email
 ```
 
+---
+
 ## Administration Back-Office
 
 The project includes a dedicated administration back-office with:
@@ -140,6 +142,8 @@ User
 
 The discriminator column in the `user` table determines the concrete user type.
 
+---
+
 ## Roles
 
 The application uses the following roles:
@@ -165,6 +169,8 @@ public function isSuperAdmin(): bool
     return in_array('ROLE_SUPER_ADMIN', $this->getRoles(), true);
 }
 ```
+
+---
 
 ## Routes and Access Control
 
@@ -248,63 +254,37 @@ Current permissions are organized into the following groups.
 
 ### Recipes
 
-```text
-recipe.menu
-recipe.create
-recipe.edit
-recipe.delete
-```
-
-These permissions respectively control:
-
-* access to the Recipes administration menu;
-* recipe creation;
-* recipe edition;
-* recipe deletion.
-
-Recipe thumbnail editing is currently protected by the same `recipe.edit` permission.
+* `recipe.menu`
+* `recipe.create`
+* `recipe.edit`
+* `recipe.delete`
+* `recipe.promote`
 
 ### Categories
 
-```text
-category.create
-category.edit
-category.delete
-```
+* `category.create`
+* `category.edit`
+* `category.delete`
 
 ### Tags
 
-```text
-tag.create
-tag.edit
-tag.delete
-```
+* `tag.create`
+* `tag.edit`
+* `tag.delete`
 
 ### Ingredients
 
-```text
-ingredient.create
-```
-
-There is currently no dedicated Ingredient administration menu.
-
-Ingredients are created dynamically from the recipe form through the Tom Select / AJAX workflow.
-
-Consequently, only ingredient creation currently exists as a dedicated permission.
-
-There are no `ingredient.edit` or `ingredient.delete` permissions because the application does not currently expose dedicated ingredient management screens or routes.
+* `ingredient.create`
+* `ingredient.edit`
+* `ingredient.delete`
 
 ### Users
 
-```text
-user.create
-user.edit
-user.delete
-```
+* `user.create`
+* `user.edit`
+* `user.delete`
 
-These permissions are already defined by the permission model for future user-management functionality.
-
-The dedicated administrator permission-management interface itself remains protected by `ROLE_SUPER_ADMIN`.
+Grouping permissions in the enum makes the administration interface easier to maintain and allows the permission-management form to be generated dynamically.
 
 ---
 
@@ -317,33 +297,7 @@ Permissions are stored directly on the `Admin` entity as a JSON array:
 private array $permissions = [];
 ```
 
-The entity exposes:
-
-```php
-/**
- * @return list<string>
- */
-public function getPermissions(): array
-{
-    return $this->permissions;
-}
-```
-
-Permissions can be assigned through:
-
-```php
-/**
- * @param list<string> $permissions
- */
-public function setPermissions(array $permissions): static
-{
-    $this->permissions = $permissions;
-
-    return $this;
-}
-```
-
-The permission check is centralized in:
+The entity exposes a dedicated permission check:
 
 ```php
 public function hasPermission(Permission $permission): bool
@@ -352,31 +306,13 @@ public function hasPermission(Permission $permission): bool
 }
 ```
 
-This keeps the entity API strongly typed around the `Permission` enum instead of exposing permission checks as arbitrary string comparisons throughout the application.
+The permission list contains the technical values defined by the `Permission` enum.
+
+Super Admins bypass the individual permission list and are automatically authorized for every permission.
 
 ---
 
-## Super Admin Behavior
-
-Super Admins do not need to have individual permissions stored in their `permissions` JSON field.
-
-The `AdminVoter` automatically grants every permission to a Super Admin.
-
-```text
-Admin
- │
- ├── ROLE_SUPER_ADMIN
- │       └── all permissions granted
- │
- └── regular Admin
-         └── only assigned permissions granted
-```
-
-This prevents the Super Admin account from depending on a potentially incomplete permission list.
-
----
-
-## AdminVoter
+## Symfony Voter
 
 Fine-grained authorization is handled by:
 
@@ -384,19 +320,9 @@ Fine-grained authorization is handled by:
 src/Security/Voter/AdminVoter.php
 ```
 
-The voter extends Symfony's:
+The voter supports the permissions declared by the `Permission` enum.
 
-```php
-Voter
-```
-
-and supports every permission declared by:
-
-```php
-Permission::values()
-```
-
-The authorization flow is:
+Its authorization flow is:
 
 ```text
 Symfony Security
@@ -404,67 +330,25 @@ Symfony Security
        ▼
    AdminVoter
        │
-       ├── User is not an Admin
-       │        └── DENY
+       ├── Not an Admin → DENY
        │
-       ├── Admin is Super Admin
-       │        └── GRANT
+       ├── Super Admin → GRANT
        │
        └── Regular Admin
-                │
-                ▼
-          hasPermission()
-                │
-          ┌─────┴─────┐
-          ▼           ▼
-        GRANT        DENY
+              │
+              ▼
+        hasPermission()
+              │
+          GRANT / DENY
 ```
 
-The implementation is intentionally small:
+The voter first ensures that the authenticated user is an `Admin`.
 
-```php
-protected function voteOnAttribute(
-    string $attribute,
-    mixed $subject,
-    TokenInterface $token
-): bool {
-    $user = $token->getUser();
+A Super Admin is automatically granted access.
 
-    if (!$user instanceof Admin) {
-        return false;
-    }
+For a regular administrator, the voter checks whether the requested permission exists in the administrator's permission list.
 
-    if ($user->isSuperAdmin()) {
-        return true;
-    }
-
-    return $user->hasPermission(Permission::from($attribute));
-}
-```
-
-The voter therefore remains responsible only for authorization decisions.
-
-Business logic stays inside the corresponding controllers, repositories and services.
-
----
-
-## Controller-Level Authorization
-
-Administrative controllers are protected at two levels.
-
-### Global administration access
-
-Controllers are protected with:
-
-```php
-#[IsGranted('ROLE_ADMIN')]
-```
-
-This ensures that only administrators can access the administration area.
-
-### Individual permissions
-
-Specific operations are protected with the corresponding permission:
+Controllers therefore use Symfony's `#[IsGranted]` attribute with the permission value instead of implementing authorization logic themselves:
 
 ```php
 #[IsGranted(Permission::RECIPE_EDIT->value)]
@@ -474,395 +358,114 @@ public function edit(Recipe $recipe, Request $request): Response
 }
 ```
 
-This means that having `ROLE_ADMIN` alone does not automatically grant access to every administrative action.
+This keeps authorization centralized and prevents permission checks from being duplicated across controllers.
 
 ---
 
-## Recipe Permissions
+## Controller-Level Protection
 
-The `RecipeController` uses separate permissions for its operations:
+Administrative controllers are protected at two levels:
 
-```php
-#[IsGranted(Permission::RECIPE_CREATE->value)]
-```
+1. `#[IsGranted('ROLE_ADMIN')]` protects the administration area at a broad level.
+2. `#[IsGranted(Permission::...->value)]` protects individual operations such as create, edit and delete.
 
-for recipe creation,
+For example, recipe management uses separate permissions for creation, edition, deletion and promotion.
 
-```php
-#[IsGranted(Permission::RECIPE_EDIT->value)]
-```
+Category and tag controllers follow the same pattern.
 
-for recipe editing,
-
-```php
-#[IsGranted(Permission::RECIPE_DELETE->value)]
-```
-
-for recipe deletion.
-
-Recipe thumbnail editing also uses:
-
-```php
-#[IsGranted(Permission::RECIPE_EDIT->value)]
-```
-
-This keeps image editing consistent with the rest of the recipe editing functionality.
-
-The recipe listing itself remains protected by the broader:
-
-```php
-#[IsGranted('ROLE_ADMIN')]
-```
-
-requirement.
-
-The dedicated `recipe.menu` permission is used by the administration navigation to determine whether the Recipes menu should be displayed.
+The ingredient controller currently exposes the AJAX creation endpoint because ingredients do not have a dedicated administration menu. Ingredient creation is therefore protected by `ingredient.create`.
 
 ---
 
-## Category Permissions
+## Object-Level Authorization
 
-`CategoryController` protects individual actions with:
-
-```php
-Permission::CATEGORY_CREATE
-Permission::CATEGORY_EDIT
-Permission::CATEGORY_DELETE
-```
-
-For example:
+For operations where authorization depends on a specific entity, the controller can pass the entity to the voter:
 
 ```php
-#[IsGranted(Permission::CATEGORY_CREATE->value)]
-#[Route('/create', name: 'create', methods: ['GET', 'POST'])]
-public function create(Request $request): RedirectResponse|Response
-{
-    // ...
-}
+$this->denyAccessUnlessGranted(
+    Permission::RECIPE_EDIT->value,
+    $recipe
+);
 ```
 
-This separates category listing access from category modification rights.
+This allows the voter to evolve later if authorization rules become dependent on the specific resource.
 
 ---
 
-## Tag Permissions
+## Administration Interface
 
-`TagController` follows the same pattern:
+The Super Admin has access to a dedicated permission-management interface.
 
-```php
-Permission::TAG_CREATE
-Permission::TAG_EDIT
-Permission::TAG_DELETE
-```
+The interface:
 
-The controller therefore does not contain manual checks such as:
+* lists administrators;
+* allows filtering by email;
+* prevents modification of Super Admin permissions;
+* allows regular administrators to be assigned permissions;
+* groups permissions by functional area;
+* provides controls to select or deselect all permissions in a group;
+* allows the administrator status to be managed from the listing.
 
-```php
-if ($user->hasPermission(...)) {
-    // ...
-}
-```
+The permission form is built dynamically from `Permission::cases()`.
 
-Authorization is delegated to Symfony Security and the voter.
+Adding a new permission enum case therefore makes the permission available to the administration interface without duplicating the permission definition inside the form.
 
 ---
 
-## Ingredient Permissions
+## Twig Visibility
 
-Ingredients are currently handled differently because there is no dedicated administration menu.
-
-The recipe form uses Tom Select to create an ingredient dynamically.
-
-The endpoint:
-
-```text
-POST /ingredient/create-ajax
-```
-
-is protected with:
-
-```php
-#[IsGranted(Permission::INGREDIENT_CREATE->value)]
-```
-
-The current flow is:
-
-```text
-Recipe form
-    │
-    ▼
-Tom Select
-    │
-    ├── Existing ingredient → select it
-    │
-    └── New ingredient
-            │
-            ▼
-      POST /ingredient/create-ajax
-            │
-            ▼
-      IngredientController
-            │
-            ▼
-      ingredient.create
-            │
-            ▼
-      IngredientRepository
-```
-
-No ingredient edition or deletion permission currently exists because there is no corresponding administration functionality.
-
----
-
-## Permission Management Interface
-
-Permission assignment is available only to Super Admins.
-
-The interface is handled by:
-
-```text
-src/Controller/Admin/AdminPermissionsController.php
-```
-
-and is protected by:
-
-```php
-#[IsGranted('ROLE_SUPER_ADMIN')]
-```
-
-The controller provides:
-
-* administrator listing;
-* filtering by email;
-* permission editing;
-* administrator activation/deactivation.
-
----
-
-## Super Admin Protection
-
-A Super Admin cannot modify another Super Admin's permissions.
-
-The controller explicitly prevents this:
-
-```php
-if ($admin->isSuperAdmin()) {
-    $this->addFlash(
-        'danger',
-        'Impossible de modifier les permissions d\'un Super Admin.'
-    );
-
-    return $this->redirectToRoute(
-        'admin.permissions.index'
-    );
-}
-```
-
-This avoids creating an inconsistent state where a Super Admin would appear to have a limited permission set even though Super Admin status grants full access.
-
----
-
-## AdminPermissionsType
-
-The permission form is implemented by:
-
-```text
-src/Form/User/AdminPermissionsType.php
-```
-
-The form is generated dynamically from:
-
-```php
-Permission::cases()
-```
-
-Permissions are grouped using the enum's `group()` method:
-
-```php
-$choices[$permission->group()]
-    [$permission->label()] = $permission->value;
-```
-
-This produces a structure similar to:
-
-```text
-Recettes
- ├── Menu Recettes
- ├── Créer une recette
- ├── Modifier une recette
- └── Supprimer une recette
-
-Catégories
- ├── Créer une catégorie
- ├── Modifier une catégorie
- └── Supprimer une catégorie
-
-Tags
- ├── Créer un tag
- ├── Modifier un tag
- └── Supprimer un tag
-
-Ingrédients
- └── Créer un ingrédient
-
-Utilisateurs
- ├── Créer un utilisateur
- ├── Modifier un utilisateur
- └── Supprimer un utilisateur
-```
-
-The form uses:
-
-```php
-'expanded' => true,
-'multiple' => true,
-```
-
-which allows the permissions to be displayed as individual checkboxes.
-
-This design means that adding a new permission to the enum automatically makes it available in the administration interface without having to manually update the form type.
-
----
-
-## Permission Grid and Stimulus
-
-The permission grid uses a dedicated Stimulus controller:
-
-```text
-assets/controllers/permission_group_controller.js
-```
-
-Each permission group is represented by a card containing:
-
-* the group name;
-* a master checkbox;
-* the individual permission checkboxes.
-
-The master checkbox allows all permissions in a group to be selected or deselected at once.
-
-The controller also synchronizes the master checkbox when individual permissions are changed.
-
-```text
-Permission group
-       │
-       ├── Master checkbox
-       │       │
-       │       └── toggleAll()
-       │
-       └── Individual checkboxes
-               │
-               └── checkMaster()
-                       │
-                       ▼
-                updateMasterState()
-```
-
-This behavior is purely client-side and does not participate in authorization.
-
-The server remains authoritative.
-
----
-
-## Twig Permission Visibility
-
-The administration templates can hide actions that the current administrator is not allowed to perform.
+The templates also hide actions that the current administrator cannot perform.
 
 For example:
 
 ```twig
-{% if is_granted('recipe.edit') %}
+{% if app.user.isSuperAdmin() or is_granted('recipe.edit') %}
     <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}">
         Modifier
     </a>
 {% endif %}
 ```
 
-For Super Admins, `is_granted()` automatically returns `true` because the voter grants all permissions.
+These checks are only a **user-interface convenience**.
 
-Twig visibility checks are only a **user-interface convenience**.
+They do not replace server-side authorization.
 
-They must never be considered a security boundary.
+The controller remains protected by `#[IsGranted]` and the voter.
 
-The corresponding controller action remains protected by:
-
-```php
-#[IsGranted(Permission::RECIPE_EDIT->value)]
-```
-
-Therefore, manually calling a protected URL cannot bypass the permission system.
+This distinction ensures that manually calling a protected URL or endpoint cannot bypass the permission system.
 
 ---
 
 ## Permission Architecture
 
-The complete permission flow is:
-
-```text
-                    Permission enum
-                          │
-              ┌───────────┼───────────┐
-              │           │           │
-            value       label       group
-              │           │           │
-              └───────────┴───────────┘
-                          │
-                          ▼
-                AdminPermissionsType
-                          │
-                          ▼
-                 Admin.permissions
-                      (JSON)
-                          │
-                          ▼
-                    AdminVoter
-                          │
-                 ┌────────┴────────┐
-                 │                 │
-          Super Admin          Regular Admin
-                 │                 │
-               GRANT          hasPermission()
-                                   │
-                              GRANT / DENY
-                                   │
-                                   ▼
-                         #[IsGranted(...)]
-                                   │
-                                   ▼
-                         Controller action
-```
-
-The system is therefore centralized around three main components:
+The overall flow is:
 
 ```text
 Permission enum
-      +
-Admin entity
-      +
+      │
+      ├── value / label / group
+      │
+      ▼
+AdminPermissionsType
+      │
+      ▼
+Admin.permissions (JSON)
+      │
+      ▼
 AdminVoter
+      │
+      ├── ROLE_SUPER_ADMIN → GRANT
+      │
+      └── hasPermission() → GRANT / DENY
+      │
+      ▼
+#[IsGranted(...)] on controllers
+      │
+      ▼
+Protected administration action
 ```
 
-Controllers only declare which permission is required.
-
-
-### 1. Protect the corresponding controller action
-
-```php
-#[IsGranted(Permission::RECIPE_CREATE->value)]
-```
-
-### 2. Add UI visibility if necessary
-
-```twig
-{% if is_granted('recipe.create') %}
-    ...
-{% endif %}
-```
-
-No modification is required in `AdminPermissionsType` because it automatically reads `Permission::cases()`.
-
-No modification is required in `AdminVoter` because it automatically supports `Permission::values()`.
-
-This keeps the system extensible while maintaining a single source of truth.
+The permission system is therefore centralized around the `Permission` enum and `AdminVoter`, while controllers remain responsible only for declaring which permission is required.
 
 ---
 
@@ -872,23 +475,27 @@ This keeps the system extensible while maintaining a single source of truth.
 
 [Hotwire Turbo](https://turbo.hotwired.dev/) is integrated via `symfony/ux-turbo`.
 
-Used features include:
+The application uses the following Turbo features:
 
 * **Turbo Drive** — page navigation without full page reloads
-* **Turbo Frames** — partial page updates, notably edit modals
+* **Turbo Frames** — partial page updates, notably for edit modals
 * **Turbo Streams** — dynamic DOM updates
 
 ### Stimulus
 
-[Stimulus](https://stimulus.hotwired.dev/) is used for lightweight frontend interactions.
+[Stimulus](https://stimulus.hotwired.dev/) is integrated into the application.
 
-Controllers include:
+It is a lightweight JavaScript framework based on controllers attached to HTML elements using `data-controller`.
 
-* sidebar dropdown behavior;
-* image preview before upload;
-* dynamic form collections for ingredients and quantities;
-* password visibility toggle;
-* permission group checkbox management.
+Stimulus is used for:
+
+* Sidebar dropdown open/close behavior
+* Image preview before upload (`thumbnail_preview_controller`)
+* Dynamic form collections for ingredients and quantities (`form-collection_controller`)
+* Password visibility toggle (`password-visibility_controller`)
+* AJAX interactions
+* Dynamic Bootstrap modal interactions
+* Drag & drop interfaces
 
 ---
 
@@ -898,9 +505,12 @@ The project uses **Symfony AssetMapper** instead of a traditional JavaScript bun
 
 No Node.js or Webpack build is required.
 
-Dependencies are declared in `importmap.php`:
+Dependencies are declared in `importmap.php` and can be loaded from CDN providers such as jsDelivr.
+
+Example:
 
 ```php
+// importmap.php
 'bootstrap' => ['version' => '5.3.8'],
 '@hotwired/turbo' => ['version' => '7.3.0'],
 '@hotwired/stimulus' => ['version' => '3.2.2'],
@@ -910,19 +520,21 @@ Dependencies are declared in `importmap.php`:
 
 ## Turbo Frame Modal
 
-The application uses Bootstrap modals combined with Turbo Frames to edit entities without a full page reload.
+The application uses Bootstrap modals combined with Turbo Frames to edit entities without requiring a full page reload.
 
-Clicking an **Edit** button or a recipe image opens the corresponding form inside a Bootstrap modal.
+For example, clicking the **Edit** button or the recipe image opens the corresponding form inside a Bootstrap modal.
 
 ### How it works
 
-1. The link contains `data-turbo-frame="modal"`.
-2. Turbo intercepts the navigation.
-3. Symfony receives the `Turbo-Frame: modal` header.
-4. Symfony returns the corresponding `<turbo-frame id="modal">`.
-5. JavaScript displays the Bootstrap modal.
+1. The link contains the `data-turbo-frame="modal"` attribute.
+2. Turbo intercepts the navigation and sends a request with the `Turbo-Frame: modal` header.
+3. Symfony detects the Turbo Frame request and returns the modal content inside a `<turbo-frame id="modal">`.
+4. The JavaScript modal integration detects the frame load.
+5. The Bootstrap modal is displayed.
 
-### Modal container
+### Index page
+
+The index page contains an empty Bootstrap modal waiting to be populated by Turbo:
 
 ```twig
 <div class="modal fade" id="turbo-modal" tabindex="-1">
@@ -934,297 +546,947 @@ Clicking an **Edit** button or a recipe image opens the corresponding form insid
 </div>
 ```
 
-Invalid form submissions return HTTP `422` so Turbo keeps the modal open and displays validation errors.
+### Edit template
 
----
-
-## Tom Select
-
-Tom Select enhances select fields with:
-
-* real-time search;
-* multi-selection;
-* custom placeholders;
-* on-the-fly entity creation.
-
-### Ingredient creation
-
-When the entered ingredient does not exist, Tom Select allows the user to create it without leaving the recipe form.
-
-The application sends:
-
-```text
-POST /ingredient/create-ajax
-```
-
-The endpoint is protected by:
-
-```php
-#[IsGranted(Permission::INGREDIENT_CREATE->value)]
-```
-
----
-
-## Symfony UX Autocomplete
-
-Custom autocomplete fields are implemented using:
-
-```text
-AsEntityAutocompleteField
-BaseEntityAutocompleteType
-```
-
-Autocomplete is used for:
-
-* categories;
-* tags;
-* ingredients.
-
-Example:
-
-```php
-#[AsEntityAutocompleteField]
-class TagAutocompleteField extends AbstractType
-{
-    public function configureOptions(
-        OptionsResolver $resolver
-    ): void {
-        $resolver->setDefaults([
-            'class' => Tag::class,
-            'choice_label' => 'name',
-            'multiple' => true,
-            'tom_select_options' => [
-                'placeholder' => 'Choisir un ou des tags',
-            ],
-        ]);
-    }
-
-    public function getParent(): string
-    {
-        return BaseEntityAutocompleteType::class;
-    }
-}
-```
-
----
-
-## Pagination
-
-Pagination is handled by **KnpPaginatorBundle**:
-
-```php
-$pagination = $this->paginator->paginate(
-    $query,
-    $request->query->getInt('page', 1),
-    $this->numberPerPageRecipe
-);
-```
-
-Sortable columns are rendered with:
+The template can return a Turbo Frame when the request originates from the modal:
 
 ```twig
-{{ knp_pagination_sortable(pagination, 'Titre', 'recipe.title') }}
+{% if app.request.headers.get('turbo-frame') == 'modal' %}
+    <turbo-frame id="modal">
+        {# Modal content #}
+    </turbo-frame>
+{% else %}
+    {# Full page content #}
+{% endif %}
 ```
 
----
+This allows the same route to support both:
 
-## Recipe Filtering
+* Direct browser navigation
+* Turbo Frame modal navigation
 
-The recipe listing supports filtering by:
+### Controller
 
-* title;
-* category;
-* tags.
-
-Filtering uses a dedicated DTO and the `GET` method.
+The form action is explicitly configured to avoid URL context issues when the form is submitted from a Turbo Frame:
 
 ```php
-$resolver->setDefaults([
-    'method' => 'GET',
-    'csrf_protection' => false,
+$form = $this->createForm(RecipeType::class, $recipe, [
+    'action' => $this->generateUrl('admin.recipe.edit', [
+        'id' => $recipe->getId(),
+    ]),
 ]);
 ```
 
-Example DTO:
+Invalid form submissions return HTTP `422 Unprocessable Entity` so Turbo keeps the modal open and displays the validation errors:
 
 ```php
-final class RecipeFilterDTO
-{
-    public ?string $title = null;
-    public ?Category $category = null;
+$status = $form->isSubmitted() && !$form->isValid() ? 422 : 200;
 
-    /** @var list<Tag> */
-    public array $tags = [];
+return $this->render(
+    'admin/recipe/edit.html.twig',
+    [...],
+    new Response(status: $status)
+);
+```
+
+---
+
+## AJAX Bootstrap Modal with Stimulus
+
+The application also uses Bootstrap modals combined with Stimulus and AJAX for interactions that do not require Turbo Frames.
+
+A concrete example is the **management of promoted recipes**.
+
+The feature allows administrators to:
+
+* Load recipes dynamically when the modal opens
+* Search available recipes
+* Drag recipes between two lists
+* Reorder promoted recipes
+* Limit the number of promoted recipes
+* Reset the current selection
+* Save the selected order through AJAX
+* Warn the user when closing the modal with unsaved changes
+
+The recipe lists are intentionally **not rendered in the index page**.
+
+Only the modal structure is rendered initially. The recipe data is loaded from Symfony through an AJAX request when the modal is opened.
+
+### Responsibilities
+
+The architecture deliberately separates the responsibilities of each layer:
+
+```text
+Bootstrap
+    │
+    └── Modal lifecycle
+         ├── Open
+         ├── Close
+         ├── Backdrop
+         └── Body state
+
+Stimulus
+    │
+    └── Client-side interaction
+         ├── AJAX loading
+         ├── Rendering
+         ├── Search
+         ├── Drag & drop
+         ├── Reordering
+         └── Unsaved changes detection
+
+Symfony Controller
+    │
+    └── HTTP/API layer
+         ├── Authorization
+         ├── CSRF validation
+         ├── JSON parsing
+         └── JSON response
+
+RecipeManager
+    │
+    └── Business rules
+         ├── Maximum number of promoted recipes
+         ├── Validation of recipe IDs
+         ├── Promoted state
+         └── Position management
+
+RecipeRepository
+    │
+    └── Persistence queries
+
+Doctrine ORM
+    │
+    ▼
+MySQL
+```
+
+This separation is important because Bootstrap should remain responsible for the modal lifecycle, while Stimulus manages the interactive client-side behavior and Symfony remains authoritative for business rules.
+
+### Modal Structure
+
+The promoted recipes modal is attached to a dedicated Stimulus controller:
+
+```twig
+<div
+    class="modal fade"
+    id="modalPromotedRecipes"
+    tabindex="-1"
+    aria-labelledby="modalPromotedRecipesLabel"
+    aria-hidden="true"
+    data-controller="promoted-recipes"
+    data-promoted-recipes-save-url-value="{{ path('admin.recipe.promoted_save') }}"
+    data-promoted-recipes-load-url-value="{{ path('admin.recipe.promoted_load') }}"
+    data-promoted-recipes-csrf-token-value="{{ csrf_token('promoted_recipes') }}"
+    data-promoted-recipes-max-value="10"
+    data-action="shown.bs.modal->promoted-recipes#open hide.bs.modal->promoted-recipes#beforeClose"
+>
+    ...
+</div>
+```
+
+The modal uses Bootstrap's native events:
+
+* `shown.bs.modal` — triggered once the modal is fully visible
+* `hide.bs.modal` — triggered when Bootstrap is about to close the modal
+
+Stimulus listens to these events to perform the required application logic.
+
+### Loading Data Only When the Modal Opens
+
+The index page does not render the recipe lists.
+
+The containers initially remain empty:
+
+```twig
+<div
+    class="recipe-list border rounded p-2"
+    data-promoted-recipes-target="available"
+></div>
+
+<div
+    class="recipe-list border rounded p-2"
+    data-promoted-recipes-target="chosen"
+></div>
+```
+
+When the modal is opened, Bootstrap emits `shown.bs.modal`.
+
+Stimulus then calls the loading method:
+
+```js
+async open() {
+    if (this.isLoading) {
+        return;
+    }
+
+    this.hasChanges = false;
+    this.isSaved = false;
+    this.searchTarget.value = '';
+
+    await this.loadRecipes();
 }
 ```
 
----
+The recipes are retrieved through an AJAX request:
 
-## Image Upload
-
-Images are managed using **VichUploaderBundle**.
-
-Constraints:
-
-* Maximum file size: `7000k`
-* Accepted formats: `image/jpeg`, `image/png`, `image/webp`
-* Maximum dimensions: `1080x1080`
-
-Uploaded images are automatically converted to WebP by `ImageConvertSubscriber`.
-
-### Image forms
-
-* `RecipeType` — complete recipe form including image upload
-* `RecipeThumbnailType` — dedicated image-only form
-
-`RecipeThumbnailType` is embedded in `RecipeType` using `inherit_data: true`.
-
-### Image preview
-
-A Stimulus controller provides a client-side preview using the browser `FileReader` API.
-
----
-
-## Forms
-
-### RecipeType
-
-Main recipe form containing:
-
-* title;
-* slug;
-* category;
-* content;
-* duration;
-* online status;
-* thumbnail;
-* tags;
-* ingredients;
-* quantities.
-
-### RecipeThumbnailType
-
-Dedicated image-only form used by the Turbo modal when clicking the recipe image.
-
----
-
-## Doctrine Relationships
-
-```text
-Recipe
- ├── Category
- ├── Tag[]
- └── Quantity[]
-       ├── Ingredient
-       └── Unit
+```js
+const response = await fetch(this.loadUrlValue, {
+    method: 'GET',
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+    },
+    credentials: 'same-origin',
+});
 ```
 
-Required relationships are non-nullable:
+This approach ensures that each opening of the modal retrieves the current database state.
+
+The modal therefore does not rely on potentially outdated data that was rendered when the page was initially loaded.
+
+### JSON Response
+
+The Symfony controller returns the recipes required by the interface:
 
 ```php
-#[ORM\JoinColumn(nullable: false)]
+return $this->json(
+    array_map(
+        static fn (Recipe $recipe): array => [
+            'id' => $recipe->getId(),
+            'title' => $recipe->getTitle(),
+            'promoted' => $recipe->isPromoted(),
+            'position' => $recipe->getPosition(),
+        ],
+        $recipes
+    )
+);
 ```
 
-The `Quantity` collection uses `orphanRemoval: true`:
+The frontend receives objects rather than only recipe IDs because it needs the recipe title and current promotion state to render both lists.
 
-```php
-#[ORM\OneToMany(
-    mappedBy: 'recipe',
-    targetEntity: Quantity::class,
-    cascade: ['persist'],
-    orphanRemoval: true
-)]
-```
+### JSON Response Validation
 
-This ensures that quantities removed from a recipe are also removed from the database.
+AJAX responses should not blindly assume that `response.json()` will succeed.
 
----
+For example, Symfony can return an HTML response in case of:
 
-## Doctrine Query Optimization
+* Authentication redirection
+* Authorization failure
+* Internal server error
+* Incorrect route
+* Unexpected framework error
 
-Repository queries use fetch joins to avoid N+1 problems.
+The Stimulus controller therefore checks the response content type before decoding it:
 
-Example:
+```js
+const contentType = response.headers.get('content-type') ?? '';
 
-```php
-$qb = $this->createQueryBuilder('recipe')
-    ->select('recipe', 'category', 'tag')
-    ->leftJoin('recipe.category', 'category')
-    ->leftJoin('recipe.tags', 'tag');
-```
+if (!response.ok) {
+    const body = contentType.includes('application/json')
+        ? await response.json().catch(() => null)
+        : await response.text().catch(() => '');
 
-Persistence logic remains inside repositories rather than controllers.
+    throw new Error(
+        body?.message ?? `Erreur HTTP ${response.status}.`
+    );
+}
 
----
-
-## Event-Driven Architecture
-
-### Contact form
-
-The contact form uses a synchronous event-driven approach because the result must be returned to the user immediately.
-
-### Async user notifications
-
-Account verification and password reset use Messenger.
-
-Exceptions are allowed to propagate so Messenger can handle:
-
-* retries;
-* failure transports;
-* dead-letter handling.
-
-Example:
-
-```php
-public function onUserVerifyRequestEvent(
-    UserVerifyRequestEvent $event
-): void {
-    $this->sendUserEmail(
-        $event->user,
-        'Confirmation de votre compte',
-        'emails/user/user_account_confirmation.html.twig',
-        ['signedUrl' => $event->getSignatureUrl()]
+if (!contentType.includes('application/json')) {
+    throw new Error(
+        'Le serveur n’a pas retourné du JSON. Vérifiez les droits et la route de chargement.'
     );
 }
 ```
 
----
-
-## Notification Architecture
-
-Notifications use a factory-based architecture:
+This avoids hiding the actual server-side problem behind a generic JavaScript error such as:
 
 ```text
-NotificationFactory
-     ├── createForContact() → ContactNotificationInterface
-     └── createForUser()    → UserNotificationInterface
+Unexpected token '<'
 ```
 
-Interfaces are used instead of coupling the factory to concrete implementations.
+### Rendering the Two Lists
 
----
+The received recipes are separated into two collections:
 
-## Asynchronous Messaging
+```text
+Recipes
+   │
+   ├── promoted = true
+   │       └── Promoted recipes
+   │
+   └── promoted = false
+           └── Available recipes
+```
 
-### Transports
+Promoted recipes are ordered using their persisted `position`.
 
-| Transport                   | Queue                     | Purpose                |
-| --------------------------- | ------------------------- | ---------------------- |
-| `async`                     | default                   | Generic async messages |
-| `async-contact`             | async-contact             | Contact form emails    |
-| `async-pdf`                 | async-pdf                 | Recipe PDF generation  |
-| `async-user-account-verify` | async-user-account-verify | Account verification   |
-| `async-user-reset-password` | async-user-reset-password | Password reset emails  |
+Available recipes are sorted alphabetically by title.
 
-Each transport has a dedicated failure transport using Doctrine.
+The DOM is then rebuilt from the JSON response.
 
-The global `failed` transport catches messages that do not belong to a dedicated failure transport.
+The server remains the source of truth for the persisted state.
 
-### Retry strategy
+### SortableJS
 
-Each transport retries up to three times with exponential backoff.
+Drag & drop is implemented with **SortableJS**.
 
-After the retry limit is reached, the message is moved to the corresponding failure transport.
+Two sortable lists are created:
+
+```text
+Recettes disponibles
+        ⇅
+Recettes mises en avant
+```
+
+Both lists belong to the same SortableJS group:
+
+```js
+group: {
+    name: 'promoted-recipes',
+    pull: true,
+    put: true,
+},
+```
+
+This allows recipes to be moved between the two lists and reordered within the promoted list.
+
+The drag handle is explicitly defined:
+
+```js
+handle: '.drag-handle',
+```
+
+This avoids making the entire recipe row draggable and leaves other interactions available on the row.
+
+### SortableJS Lifecycle
+
+SortableJS instances are created **after the recipe lists have been rendered**.
+
+They are not initialized against empty containers during Stimulus `connect()`.
+
+The controller keeps explicit references:
+
+```js
+this.availableSortable = null;
+this.chosenSortable = null;
+```
+
+Before rebuilding the lists, existing instances are destroyed:
+
+```js
+destroySortable() {
+    this.availableSortable?.destroy();
+    this.chosenSortable?.destroy();
+
+    this.availableSortable = null;
+    this.chosenSortable = null;
+}
+```
+
+This prevents multiple SortableJS instances from being attached to the same DOM elements after repeated modal openings.
+
+### Maximum of 10 Promoted Recipes
+
+The application limits the number of promoted recipes to **10**.
+
+The limit is enforced on the client side to provide immediate feedback.
+
+SortableJS can prevent an invalid drop before it happens:
+
+```js
+onMove: (event) => {
+    if (event.to !== this.chosenTarget) {
+        return true;
+    }
+
+    if (event.from === this.chosenTarget) {
+        return true;
+    }
+
+    return this.chosenTarget.querySelectorAll('.recipe-item').length
+        < this.maxValue;
+},
+```
+
+This provides a better user experience than accepting an invalid drop and moving the element back afterward.
+
+However, this client-side validation is **not considered a security or business rule**.
+
+The backend independently enforces the maximum of 10 recipes.
+
+This is important because client-side JavaScript can always be bypassed by sending a direct HTTP request.
+
+### Reordering
+
+Whenever the promoted list changes, the displayed positions are recalculated:
+
+```js
+updatePositions() {
+    this.chosenTarget
+        .querySelectorAll('.recipe-item')
+        .forEach((recipe, index) => {
+            const position =
+                recipe.querySelector('.recipe-position');
+
+            if (position) {
+                position.textContent = index + 1;
+            }
+        });
+}
+```
+
+The browser position is therefore always:
+
+```text
+1
+2
+3
+...
+10
+```
+
+The actual persisted positions are sent to the backend indirectly through the ordered recipe ID list.
+
+For example:
+
+```json
+{
+    "recipes": [
+        "12",
+        "7",
+        "25",
+        "4"
+    ]
+}
+```
+
+The backend interprets the array order as the desired promotion order.
+
+### Save Button
+
+The save button uses Bootstrap's native modal dismissal mechanism:
+
+```twig
+<button
+    type="button"
+    class="btn btn-primary"
+    data-bs-dismiss="modal"
+    data-promoted-recipes-target="saveButton"
+    data-action="click->promoted-recipes#save"
+>
+    <i class="fas fa-save me-1"></i>
+    Enregistrer
+</button>
+```
+
+The important point is the presence of:
+
+```text
+data-bs-dismiss="modal"
+```
+
+The Stimulus controller performs the AJAX save, but it does **not** manually close the Bootstrap modal.
+
+After a successful save:
+
+```js
+this.hasChanges = false;
+this.isSaved = true;
+```
+
+The Bootstrap button then closes the modal itself.
+
+This provides a clean separation:
+
+```text
+Stimulus
+    │
+    └── Save data
+
+Bootstrap
+    │
+    └── Close modal
+```
+
+### Why the Modal Must Not Be Closed Manually
+
+The Stimulus controller must not manually call:
+
+```js
+modal.hide();
+```
+
+after a successful save.
+
+Bootstrap already manages:
+
+* Modal visibility
+* Backdrop creation
+* Backdrop removal
+* `modal-open` on `<body>`
+* Body overflow
+* Body padding compensation
+* Modal transition lifecycle
+* `shown.bs.modal`
+* `hide.bs.modal`
+* `hidden.bs.modal`
+
+Manually reproducing this logic creates a risk of conflicting with Bootstrap's own lifecycle.
+
+The controller must therefore not manually remove:
+
+```text
+.modal-backdrop
+```
+
+or:
+
+```text
+body.modal-open
+```
+
+and must not manually modify:
+
+```text
+body.style.overflow
+body.style.paddingRight
+```
+
+Bootstrap owns these responsibilities.
+
+### Unsaved Changes
+
+The controller tracks whether the current modal contains unsaved changes:
+
+```js
+this.hasChanges = false;
+this.isSaved = false;
+```
+
+Moving, reordering or resetting recipes changes the state:
+
+```js
+this.hasChanges = true;
+this.isSaved = false;
+```
+
+Before the modal closes, Stimulus listens to:
+
+```text
+hide.bs.modal
+```
+
+and asks for confirmation if necessary:
+
+```js
+beforeClose(event) {
+    if (!this.hasChanges || this.isSaved || this.isSaving) {
+        return;
+    }
+
+    const confirmed = confirm(
+        'Attention : les modifications effectuées ne vont pas être enregistrées.\n\nÊtes-vous sûr de vouloir quitter ?'
+    );
+
+    if (!confirmed) {
+        event.preventDefault();
+    }
+}
+```
+
+The important rule is that `beforeClose()` does **not** perform an asynchronous reload.
+
+It only decides whether Bootstrap is allowed to close the modal.
+
+This avoids a race condition between the modal lifecycle and an asynchronous request.
+
+The current database state is simply reloaded the next time the modal is opened.
+
+### Reset
+
+The reset action moves every currently promoted recipe back to the available list:
+
+```js
+reset() {
+    if (!confirm(
+        'Êtes-vous sûr de vouloir réinitialiser les recettes mises en avant ?'
+    )) {
+        return;
+    }
+
+    const recipes = [
+        ...this.chosenTarget.querySelectorAll('.recipe-item'),
+    ];
+
+    recipes.forEach((recipe) => {
+        this.availableTarget.appendChild(recipe);
+    });
+
+    this.hasChanges = true;
+    this.isSaved = false;
+
+    this.updatePositions();
+}
+```
+
+The reset only modifies the client-side state.
+
+The database is not modified until the user clicks **Enregistrer**.
+
+### Search
+
+The available recipe list can be filtered client-side.
+
+The search is performed against the recipe title already loaded in the modal:
+
+```js
+filter() {
+    const value =
+        this.searchTarget.value.trim().toLowerCase();
+
+    this.availableTarget
+        .querySelectorAll('.recipe-item')
+        .forEach((recipe) => {
+            const name =
+                recipe.dataset.name.toLowerCase();
+
+            recipe.classList.toggle(
+                'd-none',
+                value !== '' && !name.includes(value)
+            );
+        });
+}
+```
+
+No additional HTTP request is required for each search operation.
+
+This keeps the interaction responsive while avoiding unnecessary server requests.
+
+### Symfony Authorization
+
+The AJAX endpoints are protected by the same permission system as the rest of the administration.
+
+The controller uses:
+
+```php
+#[IsGranted(Permission::RECIPE_PROMOTE->value)]
+```
+
+This is applied to both:
+
+* Loading promoted recipes
+* Saving promoted recipes
+
+The frontend therefore does not determine whether the user is authorized.
+
+The permission is enforced server-side.
+
+### Load Endpoint
+
+The load endpoint is a `GET` request:
+
+```php
+#[IsGranted(Permission::RECIPE_PROMOTE->value)]
+#[Route('/promoted/load', name: 'promoted_load', methods: ['GET'])]
+public function promotedLoad(): JsonResponse
+{
+    $recipes = $this->recipeRepository->findAllForPromotion();
+
+    return $this->json(
+        array_map(
+            static fn (Recipe $recipe): array => [
+                'id' => $recipe->getId(),
+                'title' => $recipe->getTitle(),
+                'promoted' => $recipe->isPromoted(),
+                'position' => $recipe->getPosition(),
+            ],
+            $recipes
+        )
+    );
+}
+```
+
+The endpoint only exposes the information required by the promotion interface.
+
+It does not expose the complete recipe entity.
+
+### Save Endpoint
+
+The save endpoint uses `PATCH` because the operation modifies the current promoted state:
+
+```php
+#[IsGranted(Permission::RECIPE_PROMOTE->value)]
+#[Route('/promoted', name: 'promoted_save', methods: ['PATCH'])]
+public function promotedSave(Request $request): JsonResponse
+{
+    ...
+}
+```
+
+The request body contains the ordered recipe IDs:
+
+```json
+{
+    "recipes": [
+        "12",
+        "7",
+        "25"
+    ]
+}
+```
+
+The controller is responsible for:
+
+* CSRF validation
+* JSON parsing
+* Basic request structure validation
+* Calling the manager
+* Returning the appropriate HTTP status
+
+It does not contain the promotion business rules.
+
+### CSRF Protection
+
+The promotion operation uses a dedicated CSRF token:
+
+```twig
+data-promoted-recipes-csrf-token-value="{{ csrf_token('promoted_recipes') }}"
+```
+
+The token is sent through the request header:
+
+```js
+'X-CSRF-TOKEN': this.csrfTokenValue,
+```
+
+The controller validates it:
+
+```php
+if (!$this->isCsrfTokenValid(
+    'promoted_recipes',
+    $request->headers->get('X-CSRF-TOKEN')
+)) {
+    return $this->json(
+        ['message' => 'Token CSRF invalide.'],
+        Response::HTTP_FORBIDDEN
+    );
+}
+```
+
+This protects the state-changing AJAX operation against CSRF attacks.
+
+### RecipeManager
+
+The promotion business rules are handled by `RecipeManager`.
+
+The controller should remain thin and delegate the operation:
+
+```php
+$this->recipeManager->updatePromotedRecipes($recipeIds);
+```
+
+The manager is responsible for:
+
+* Validating recipe IDs
+* Removing duplicates
+* Enforcing the maximum of 10 recipes
+* Ensuring all requested recipes exist
+* Resetting previous promoted recipes
+* Assigning the new promoted state
+* Assigning positions
+* Flushing the changes
+
+Example:
+
+```php
+final readonly class RecipeManager
+{
+    private const int MAX_PROMOTED_RECIPES = 10;
+
+    public function __construct(
+        private RecipeRepository $recipeRepository,
+    ) {
+    }
+
+    /**
+     * @param list<string> $recipeIds
+     */
+    public function updatePromotedRecipes(array $recipeIds): void
+    {
+        $ids = [];
+
+        foreach ($recipeIds as $recipeId) {
+            if (!ctype_digit($recipeId) || (int) $recipeId <= 0) {
+                throw new \DomainException(
+                    'Une ou plusieurs recettes sélectionnées sont invalides.'
+                );
+            }
+
+            $ids[] = (int) $recipeId;
+        }
+
+        $ids = array_values(array_unique($ids));
+
+        if (count($ids) > self::MAX_PROMOTED_RECIPES) {
+            throw new \DomainException(
+                sprintf(
+                    'Impossible de mettre plus de %d recettes en avant.',
+                    self::MAX_PROMOTED_RECIPES
+                )
+            );
+        }
+
+        $recipes = $this->recipeRepository->findByIds($ids);
+
+        if (count($recipes) !== count($ids)) {
+            throw new \DomainException(
+                'Une ou plusieurs recettes sélectionnées sont introuvables.'
+            );
+        }
+
+        $recipesById = [];
+
+        foreach ($recipes as $recipe) {
+            $recipesById[$recipe->getId()] = $recipe;
+        }
+
+        foreach ($this->recipeRepository->findPromotedRecipes() as $recipe) {
+            $recipe->setPromoted(false);
+            $recipe->setPosition(null);
+        }
+
+        foreach ($ids as $position => $id) {
+            $recipe = $recipesById[$id];
+
+            $recipe->setPromoted(true);
+            $recipe->setPosition($position + 1);
+        }
+
+        $this->recipeRepository->flush();
+    }
+}
+```
+
+The manager therefore remains independent from the HTTP layer.
+
+The same business operation could later be called from another interface without duplicating the rules.
+
+### Repository
+
+Persistence-specific queries remain inside `RecipeRepository`.
+
+For example, promoted recipes can be retrieved with:
+
+```php
+/**
+ * @return list<Recipe>
+ */
+public function findPromotedRecipes(): array
+{
+    return $this->createQueryBuilder('recipe')
+        ->andWhere('recipe.promoted = :promoted')
+        ->setParameter('promoted', true)
+        ->orderBy('recipe.position', 'ASC')
+        ->getQuery()
+        ->getResult();
+}
+```
+
+This allows the manager to work with actual Doctrine entities.
+
+The manager then changes the entities through their domain methods:
+
+```php
+$recipe->setPromoted(false);
+$recipe->setPosition(null);
+```
+
+and:
+
+```php
+$recipe->setPromoted(true);
+$recipe->setPosition($position + 1);
+```
+
+This approach avoids performing bulk DQL updates that could bypass Doctrine's UnitOfWork and leave already-managed entities out of sync.
+
+### Promotion Persistence Model
+
+The recipe entity already contains:
+
+```text
+promoted
+position
+```
+
+The values have the following meaning:
+
+```text
+promoted = false
+position = null
+```
+
+means that the recipe is not promoted.
+
+```text
+promoted = true
+position = 1..10
+```
+
+means that the recipe is promoted at the corresponding position.
+
+The `Recipe` entity does not need to be modified specifically for the AJAX promotion interface.
+
+The existing domain methods remain the single entry point for modifying these properties:
+
+```php
+$recipe->isPromoted();
+$recipe->setPromoted(...);
+
+$recipe->getPosition();
+$recipe->setPosition(...);
+```
+
+### Important Modal Contract
+
+The promoted recipes modal follows this rule:
+
+```text
+Bootstrap
+    owns the modal lifecycle
+
+Stimulus
+    owns the client-side interaction
+
+Symfony Controller
+    owns HTTP validation and authorization
+
+RecipeManager
+    owns business rules
+
+RecipeRepository
+    owns persistence queries
+
+Doctrine
+    owns entity persistence
+```
+
+This separation should be preserved when modifying the feature.
+
+In particular:
+
+* Do not manually manipulate Bootstrap's backdrop.
+* Do not manually add or remove `modal-open`.
+* Do not manually modify body overflow or padding.
+* Do not call `modal.hide()` from the Stimulus save method.
+* Do not perform asynchronous reloads during `hide.bs.modal`.
+* Do not move business rules into the JavaScript controller.
+* Do not trust the client-side maximum of 10 as the only validation.
+* Do not put repository queries inside the controller.
+* Do not return the complete `Recipe` entity when a smaller JSON representation is sufficient.
+
+The Bootstrap modal lifecycle should remain controlled by Bootstrap itself.
 
 ---
 
@@ -1232,17 +1494,33 @@ After the retry limit is reached, the message is moved to the corresponding fail
 
 Account verification is handled by **symfonycasts/verify-email-bundle**.
 
-### Flow
+### How it works
 
-1. A `UserVerifyAccountMessage` is dispatched asynchronously.
-2. The handler generates a signed URL.
-3. A `UserVerifyRequestEvent` is dispatched.
-4. `MailingSubscriber` sends the email.
-5. The user follows the signed URL.
-6. The signature is validated.
-7. The account is marked as verified.
+1. After registration, a `UserVerifyAccountMessage` is dispatched asynchronously.
+2. The `UserVerifyAccountMessageHandler` generates a signed URL using `VerifyEmailHelperInterface`.
+3. A `UserVerifyRequestEvent` is dispatched and handled by `MailingSubscriber`.
+4. The user receives an email with the signed URL.
+5. Clicking the link triggers `VerifyEmailHelperInterface::validateEmailConfirmationFromRequest()`.
+6. If valid, the user is marked as verified (`isVerified = true`) and the confirmation token is cleared.
 
-The verification URL has a limited lifetime.
+### Configuration
+
+```yaml
+# config/packages/verify_email.yaml
+symfonycasts_verify_email:
+    lifetime: 86400 # 24 hours
+```
+
+The signed URL is generated without exposing the token directly in the email template:
+
+```php
+$signatureComponents = $this->verifyEmailHelper->generateSignature(
+    'app_activate_account',
+    (string) $user->getId(),
+    (string) $user->getEmail(),
+    ['id' => $user->getId(), 'token' => $message->token]
+);
+```
 
 ---
 
@@ -1250,18 +1528,31 @@ The verification URL has a limited lifetime.
 
 Password reset is handled by **symfonycasts/reset-password-bundle**.
 
-### Flow
+### How it works
 
-1. The user submits their email.
-2. A reset message is dispatched asynchronously.
-3. The handler generates a secure reset token.
-4. The reset email is sent.
-5. The user follows the reset link.
-6. The token is validated.
-7. The password is changed.
-8. The token is invalidated.
+1. The user submits their email on `/reset-password`.
+2. If the user exists, a `UserResetPasswordMessage` is dispatched asynchronously.
+3. The `UserResetPasswordMessageHandler` generates a reset token using `ResetPasswordHelperInterface`.
+4. A `UserResetPasswordRequestEvent` is dispatched and handled by `MailingSubscriber`.
+5. The user receives an email with a secure reset link valid for **30 minutes**.
+6. The token is stored in the session (not in the URL) for security (anti-leak pattern).
+7. After a successful password change, the token is invalidated immediately.
 
-The controller does not reveal whether an email address exists in the database.
+### Configuration
+
+```yaml
+# config/packages/reset_password.yaml
+symfonycasts_reset_password:
+    request_password_repository: App\Repository\ResetPasswordRequestRepository
+    lifetime: 1800 # 30 minutes
+    throttle_limit: 3
+```
+
+### Security Note
+
+The controller never reveals whether an email exists in the database.
+
+In all cases the user is redirected to `/reset-password/check-email`.
 
 ---
 
@@ -1276,21 +1567,31 @@ ACTIVE_MAINTENANCE_PAGE=1
 ALLOWED_IP=57.128.19.245,192.168.1.10
 ```
 
-### Flow
+### How it works
 
-`MaintenanceListener` listens to `kernel.request`.
+The `MaintenanceListener` listens to `kernel.request`:
 
 1. Only the main HTTP request is processed.
-2. `/maintenance` is always allowed.
+2. Requests to `/maintenance` are always allowed.
 3. The client IP is compared against `ALLOWED_IP`.
 4. Allowed IPs bypass maintenance mode.
-5. Other requests receive an HTTP `302` redirect to `/maintenance`.
+5. All other requests receive an HTTP `302` redirect to `/maintenance`.
+
+```php
+if (!$event->isMainRequest()) {
+    return;
+}
+
+if ('/maintenance' === $request->getPathInfo()) {
+    return;
+}
+```
 
 ---
 
 ## Validation
 
-Validation is primarily applied through Symfony Validator constraints.
+Validation is applied at entity level using Symfony Validator constraints.
 
 Example:
 
@@ -1304,7 +1605,7 @@ Example:
 private string $title;
 ```
 
-Validation groups allow constraints to be activated only in specific contexts.
+Validation groups allow certain constraints to be applied only in specific contexts (e.g. form creation vs API).
 
 ---
 
@@ -1312,9 +1613,7 @@ Validation groups allow constraints to be activated only in specific contexts.
 
 Tests are written with **PHPUnit**.
 
-### Shared fixtures
-
-The project provides reusable helpers through `FixturesTrait`:
+### Shared Fixtures
 
 ```php
 trait FixturesTrait
@@ -1328,57 +1627,31 @@ trait FixturesTrait
 
     private function createRecipe(
         EntityManagerInterface $em,
-        string $title = 'Recette',
-        ?Category $category = null
+        string $title = 'Recette'
     ): Recipe {
         // ...
     }
 }
 ```
 
-Authenticated functional tests create an `Admin` and authenticate it through Symfony's `loginUser()`.
+### CSRF in Tests
 
-The shared test setup uses a Super Admin when a test requires unrestricted administration access.
+CSRF is kept enabled in tests because:
 
-```php
-$admin = new Admin();
+* Tests reflect real-world production conditions.
+* CSRF token handling is verified.
+* Retrieving the token from HTML mirrors actual user behavior.
 
-$admin
-    ->setEmail('admin@test.com')
-    ->setPassword(
-        $passwordHasher->hashPassword(
-            $admin,
-            '@Password1986'
-        )
-    )
-    ->setRoles(['ROLE_SUPER_ADMIN']);
-
-$em->persist($admin);
-$em->flush();
-
-$client->loginUser($admin);
-```
-
-This allows functional tests to exercise protected administration routes without reproducing the complete login workflow.
-
-### CSRF in tests
-
-CSRF remains enabled in tests because:
-
-* tests reflect production conditions;
-* CSRF token handling is verified;
-* retrieving the token from HTML mirrors actual user behavior.
-
-### Test isolation
+### Test Isolation
 
 The project uses `dama/doctrine-test-bundle` to wrap each test in a transaction that is automatically rolled back.
 
-### JSON responses
-
-JSON responses are decoded using:
+### JSON Responses
 
 ```php
-/** @return array<string, mixed> */
+/**
+ * @return array<string, mixed>
+ */
 private function decodeResponse(KernelBrowser $client): array
 {
     $content = $client->getResponse()->getContent();
@@ -1425,9 +1698,7 @@ private function decodeResponse(KernelBrowser $client): array
 
 ## Dependency Injection
 
-Services receive their dependencies through constructor injection.
-
-Example:
+Services receive their dependencies through constructor injection:
 
 ```php
 readonly class MaintenanceListener
@@ -1439,8 +1710,6 @@ readonly class MaintenanceListener
 }
 ```
 
-This keeps dependencies explicit and makes services easier to test.
-
 ---
 
 ## Mailpit
@@ -1448,62 +1717,59 @@ This keeps dependencies explicit and makes services easier to test.
 Mailpit captures outgoing emails locally without sending them to real recipients.
 
 * SMTP: `localhost:1025`
-* Web interface: `http://localhost:8025/`
+* Web interface: http://localhost:8025/
 
 ---
 
-# Two-Factor Authentication (2FA)
+## Two-Factor Authentication (2FA)
 
 Two-factor authentication is implemented using **scheb/2fa-bundle** with Google Authenticator (TOTP).
 
-## Packages
+### Packages
 
 ```bash
 composer require scheb/2fa-bundle scheb/2fa-google-authenticator
 ```
 
-## Authentication Flow
+### How it works
 
-1. The administrator logs in with email and password.
-2. If Google Authenticator is enabled, Symfony Security starts the 2FA process.
-3. The user is redirected to `/2fa`.
-4. The user enters the six-digit TOTP code.
-5. The code is verified.
-6. The user becomes fully authenticated.
+1. The admin logs in with email and password.
+2. If Google Authenticator is enabled on the account, the bundle intercepts the authentication and redirects to `/2fa`.
+3. The user enters the 6-digit TOTP code from their authenticator app.
+4. If the code is valid, the user is fully authenticated.
 
-## Setup Flow
+### Setup flow
 
-The setup is handled by `TwoFactorController`.
+The setup is handled by `TwoFactorController`:
 
-1. A secret is generated through `GoogleAuthenticatorInterface::generateSecret()`.
-2. The secret is stored temporarily in the session.
-3. The secret is temporarily assigned to the user to generate the provisioning URI.
-4. A QR code is generated using `endroid/qr-code`.
-5. The user scans the QR code.
-6. The user enters the generated six-digit code.
-7. The code is verified using `spomky-labs/otphp`.
-8. If valid, the secret is persisted.
-9. The temporary session value is removed.
+1. A secret is generated via `GoogleAuthenticatorInterface::generateSecret()` and stored temporarily in the session.
+2. The secret is temporarily set on the user entity to generate the QR code provisioning URI.
+3. The secret is immediately cleared from the entity — it is **not** persisted yet.
+4. A QR code is generated using **endroid/qr-code** and displayed to the user.
+5. The user scans the QR code and enters the 6-digit code.
+6. The code is verified using **spomky-labs/otphp** (`TOTP::verify()`).
+7. If valid, the secret is persisted on the user entity and the session key is removed.
 
-A five-second leeway is applied during enrollment to tolerate small clock differences at TOTP window boundaries.
+A 5-second leeway is applied during enrollment to tolerate clock drift at TOTP window boundaries.
 
-## Configuration
+### Configuration
 
 ```yaml
+# config/packages/scheb_2fa.yaml
 scheb_two_factor:
     security_tokens:
         - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken
         - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken
-
     google:
         enabled: true
         server_name: Recipes
+        issuer: Recipes
         digits: 6
         leeway: 5
         template: security/2fa_form.html.twig
 ```
 
-## Firewall Configuration
+### Firewall configuration
 
 ```yaml
 main:
@@ -1512,52 +1778,48 @@ main:
         check_path: 2fa_login_check
 ```
 
-## Access Control
+### Access control
 
-The 2FA form route must be available while authentication is in progress:
+The 2FA form route must be declared first in `access_control`:
 
 ```yaml
 access_control:
     - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
+    # ... other rules
 ```
 
-## User Entity
+### User entity
 
-The `User` entity implements:
-
-```php
-Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface
-```
-
-The secret is stored in an optional database column:
+The `User` entity implements `TwoFactorInterface`:
 
 ```php
-#[ORM\Column(length: 255, nullable: true)]
-private ?string $googleAuthenticatorSecret = null;
-```
+use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
 
-The entity exposes:
-
-```php
-public function isGoogleAuthenticatorEnabled(): bool
+class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
-    return null !== $this->googleAuthenticatorSecret;
-}
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleAuthenticatorSecret = null;
 
-public function getGoogleAuthenticatorUsername(): ?string
-{
-    return $this->email;
-}
+    public function isGoogleAuthenticatorEnabled(): bool
+    {
+        return null !== $this->googleAuthenticatorSecret;
+    }
 
-public function getGoogleAuthenticatorSecret(): ?string
-{
-    return $this->googleAuthenticatorSecret;
+    public function getGoogleAuthenticatorUsername(): ?string
+    {
+        return $this->email;
+    }
+
+    public function getGoogleAuthenticatorSecret(): ?string
+    {
+        return $this->googleAuthenticatorSecret;
+    }
 }
 ```
 
-The serialization methods explicitly include the authenticator secret so the authentication state remains compatible with Symfony sessions.
+The `__serialize()` and `__unserialize()` methods explicitly include `googleAuthenticatorSecret` to ensure proper session handling.
 
-## UserChecker
+### UserChecker
 
 A custom `UserChecker` verifies that the account is activated before authentication:
 
@@ -1576,9 +1838,9 @@ public function checkPreAuth(UserInterface $user): void
 }
 ```
 
-## Login Success Listener
+### Login success listener
 
-A `LoginSuccessEventListener` updates `lastLoginAt` after a successful authentication:
+A `LoginSuccessEventListener` updates `lastLoginAt` after each successful authentication:
 
 ```php
 #[AsEventListener(event: LoginSuccessEvent::class)]
@@ -1593,21 +1855,12 @@ class LoginSuccessEventListener
         }
 
         $user->setLastLoginAt(new \DateTime());
-
         $this->userRepository->save($user, true);
     }
 }
 ```
 
-## Templates
+### Templates
 
-The 2FA workflow uses:
-
-```text
-security/2fa_setup.html.twig
-security/2fa_form.html.twig
-```
-
-The first template is responsible for authenticator enrollment and QR code display.
-
-The second template is used when a six-digit TOTP code is required during authentication.
+* `security/2fa_setup.html.twig` — QR code display and first code validation
+* `security/2fa_form.html.twig` — 6-digit code entry on each login

@@ -682,4 +682,40 @@ body {
     }
 }
 
+/* ==========================================================================
+   MISE EN AVANT DES RECETTES
+   ========================================================================== */
 
+.recipe-list {
+    min-height: 250px;
+    max-height: 450px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+.recipe-item {
+    cursor: grab;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.recipe-item:hover {
+    background-color: #f8f9fa;
+}
+
+.recipe-item:active {
+    cursor: grabbing;
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.sortable-chosen {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
