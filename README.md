@@ -22,7 +22,7 @@ This personal project was created to experiment with modern Symfony best practic
 * Asynchronous email delivery via Symfony Messenger (contact, account verification, password reset)
 * Password visibility toggle on all password fields
 * Google Authenticator two-factor authentication (2FA) via scheb/2fa-bundle
-* Granular role-based access control with custom PHP permissions, Symfony Security Voters, and a dedicated interface for managing administrator permissions
+* Granular permissions with PHP enums, Symfony Security Voters, and administrator permission management
 
 
 ## Tech Stack
@@ -34,7 +34,8 @@ This personal project was created to experiment with modern Symfony best practic
 * Docker / Docker Compose
 * Twig
 * Symfony UX Autocomplete
-* Symfony UX Turbo  & Stimulus
+* Symfony UX Turbo & Stimulus
+* SortableJS
 * Bootstrap 5
 * Font Awesome
 * symfonycasts/verify-email-bundle
