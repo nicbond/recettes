@@ -14,6 +14,11 @@ security:
         dev:
             pattern: ^/(_profiler|_wdt|css|images|js|assets|build)/
             security: false
+        api_public:
+            pattern: ^/api/public
+            stateless: true
+            custom_authenticator:
+                - App\Security\Api\ApiKeyAuthenticator
         main:
             lazy: true
             provider: app_admin_provider
@@ -45,10 +50,13 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # 1. Allow access to the 2FA form when two-factor authentication is in progress
+        # 1. Allow API access with API key
+        - { path: ^/api/public, roles: ROLE_API }
+
+        # 2. Allow access to the 2FA form when two-factor authentication is in progress
         - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
 
-        # 2. Access to public pages
+        # 3. Access to public pages
         - { path: ^/maintenance, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/inscription, roles: PUBLIC_ACCESS }
@@ -56,7 +64,7 @@ security:
         - { path: ^/activate, roles: PUBLIC_ACCESS }
         - { path: ^/reset-password, roles: PUBLIC_ACCESS }
 
-        # 3. Access to secure pages
+        # 4. Access to secure pages
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
