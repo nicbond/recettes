@@ -79,7 +79,7 @@ final class RecipeManagerTest extends TestCase
         $this->recipeRepository
             ->expects(self::once())
             ->method('findByIds')
-            ->willReturn([$recipe1, $recipe2, $recipe3]);
+            ->willReturn([$recipe3, $recipe1, $recipe2]);
 
         $this->recipeRepository
             ->expects(self::once())
@@ -182,9 +182,8 @@ final class RecipeManagerTest extends TestCase
     public function testUpdatePromotedRecipesRejectsZeroId(): void
     {
         $this->recipeRepository
-            ->expects(self::once())
-            ->method('findByIds')
-            ->willReturn([]);
+            ->expects(self::never())
+            ->method('findByIds');
 
         $this->expectException(\DomainException::class);
 
@@ -243,7 +242,6 @@ final class RecipeManagerTest extends TestCase
         $promoted = false;
         $position = null;
 
-        // Remplacement par createStub pour être en conformité avec PHPUnit 12
         $recipe = $this->createStub(Recipe::class);
 
         $recipe
@@ -282,6 +280,14 @@ final class RecipeManagerTest extends TestCase
                 static function (?int $value) use (&$position, $recipe): Recipe {
                     $position = $value;
 
+                    return $recipe;
+                },
+            );
+
+        $recipe
+            ->method('setOnline')
+            ->willReturnCallback(
+                static function (bool $value) use ($recipe): Recipe {
                     return $recipe;
                 },
             );

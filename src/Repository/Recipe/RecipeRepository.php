@@ -115,8 +115,10 @@ class RecipeRepository extends ServiceEntityRepository
         $this->createQueryBuilder('recipe')
             ->update()
             ->set('recipe.promoted', ':promoted')
+            ->set('recipe.online', ':online')
             ->set('recipe.position', ':position')
             ->setParameter('promoted', false)
+            ->setParameter('online', false)
             ->setParameter('position', null)
             ->getQuery()
             ->execute();
@@ -143,6 +145,37 @@ class RecipeRepository extends ServiceEntityRepository
             ->setParameter('position', null)
             ->getQuery()
             ->execute();
+    }
+
+    /**
+     * @return list<Recipe>
+     */
+    public function findOnlineForPublicApi(): array
+    {
+        return $this->createQueryBuilder('recipe')
+            ->andWhere('recipe.promoted = :promoted')
+            ->andWhere('recipe.online = :online')
+            ->setParameter('online', true)
+            ->setParameter('promoted', true)
+            ->orderBy('recipe.position', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findOneOnlineForPublicApi(int $id): ?Recipe
+    {
+        return $this->createQueryBuilder('recipe')
+            ->andWhere('recipe.id = :id')
+            ->andWhere('recipe.online = :online')
+            ->andWhere('recipe.promoted = :promoted')
+            ->setParameter('id', $id)
+            ->setParameter('online', true)
+            ->setParameter('promoted', true)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     public function save(Recipe $entity, bool $flush = false): void

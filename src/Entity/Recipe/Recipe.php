@@ -2,7 +2,12 @@
 
 namespace App\Entity\Recipe;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\Recipe\RecipeRepository;
+use App\State\Recipe\RecipePublicCollectionProvider;
+use App\State\Recipe\RecipePublicItemProvider;
 use App\Validator\BanWord;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,10 +17,27 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Entity\File as EmbeddedFile;
 use Vich\UploaderBundle\Mapping\Attribute as Vich;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            uriTemplate: '/public/recipes',
+            normalizationContext: ['groups' => ['recipe:public:read']],
+            security: "is_granted('ROLE_API')",
+            provider: RecipePublicCollectionProvider::class,
+        ),
+        new Get(
+            uriTemplate: '/public/recipes/{id}',
+            normalizationContext: ['groups' => ['recipe:public:read']],
+            security: "is_granted('ROLE_API')",
+            provider: RecipePublicItemProvider::class,
+        ),
+    ],
+)]
 #[Vich\Uploadable]
 #[ORM\Entity(repositoryClass: RecipeRepository::class)]
 #[UniqueEntity(
@@ -36,6 +58,7 @@ class Recipe
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['recipe:public:read'])]
     #[Assert\NotBlank(
         message: 'Le titre de la recette est obligatoire.',
     )]
@@ -54,6 +77,7 @@ class Recipe
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['recipe:public:read'])]
     #[Assert\NotBlank(message: 'Le descriptif de la recette est obligatoire.')]
     #[Assert\Length(
         min: 5,
@@ -64,6 +88,7 @@ class Recipe
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Groups(['recipe:public:read'])]
     #[Assert\NotBlank(message: 'La durée est obligatoire.')]
     #[Assert\Positive(message: 'La durée doit être supérieure à 0.')]
     #[Assert\LessThan(value: 1440, message: 'La durée doit être inférieure à 1440 minutes.')]
@@ -104,6 +129,7 @@ class Recipe
     private bool $promoted = false;
 
     #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    #[Groups(['recipe:public:read'])]
     private ?int $position = null;
 
     public function __construct()

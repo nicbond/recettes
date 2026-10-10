@@ -12,7 +12,6 @@ parameters:
     number_per_page_tags: '%env(int:NUMBER_PER_PAGE_TAGS)%'
     number_per_page_admin: '%env(int:NUMBER_PER_PAGE_ADMIN)%'
     app.recipe_pdf_path: '%kernel.project_dir%/%env(RECIPE_PDF_PATH)%'
-    app.public_api_key: '%env(PUBLIC_API_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -31,7 +30,3 @@ services:
     App\EventListener\Restrictions\MaintenanceListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 100 }
-
-    App\Security\Api\ApiKeyAuthenticator:
-        arguments:
-            $apiKey: '%env(PUBLIC_API_KEY)%'

@@ -10,9 +10,8 @@ final readonly class RecipeManager
 {
     private const int MAX_PROMOTED_RECIPES = 10;
 
-    public function __construct(
-        private RecipeRepository $recipeRepository,
-    ) {
+    public function __construct(private RecipeRepository $recipeRepository)
+    {
     }
 
     /**
@@ -27,7 +26,7 @@ final readonly class RecipeManager
         }
 
         foreach ($recipeIds as $recipeId) {
-            if (!ctype_digit($recipeId)) {
+            if (!ctype_digit($recipeId) || (int) $recipeId <= 0) {
                 throw new \DomainException('Un identifiant de recette est invalide.');
             }
         }
@@ -57,28 +56,29 @@ final readonly class RecipeManager
         }
 
         /*
-         * All selected recipes are first
-         * reset.
+         * All selected recipes are first reset.
          */
         foreach ($recipesById as $recipe) {
-            $recipe->setPromoted(false);
-            $recipe->setPosition(null);
+            $recipe
+                ->setPromoted(false)
+                ->setPosition(null)
+                ->setOnline(false);
         }
 
         /*
-         * The order sent from the front end becomes
-         * the business position.
+         * The order sent from the front end becomes the business position.
          */
         foreach ($ids as $position => $id) {
             $recipe = $recipesById[$id];
 
-            $recipe->setPromoted(true);
-            $recipe->setPosition($position + 1);
+            $recipe
+                ->setPromoted(true)
+                ->setOnline(true)
+                ->setPosition($position + 1);
         }
 
         /*
-         * All other recipes must lose
-         * their "featured" status.
+         * All other recipes must lose their "featured" status.
          */
         $this->recipeRepository->removePromotionFromOtherRecipes($ids);
 
