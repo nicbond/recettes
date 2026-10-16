@@ -79,6 +79,19 @@ mysql: ## Reset the database and load fixtures
 	$(MAKE) fixture
 	$(MAKE) mysql-test
 
+jwt: ## Install JWT Token public key ( no token generation, access token only )
+jwt:
+	cp config/jwt/CI/*.pem config/jwt/
+
+jwt-override: ## Install JWT Token private en public keys. For token generation
+jwt-override:
+	rm -rf config/jwt*.pem
+	mkdir -p config/jwt
+	@echo '\033[1;93mDo not forget to report pass phrase in .env file > JWT_PASSPHRASE\033[0m';
+	openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
+	openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
+	@echo '\033[1;32mKeys created\033[0m';	
+
 fixture: ## Reload fixtures
 fixture:
 	$(SYMFONY) doctrine:fixtures:load --no-interaction

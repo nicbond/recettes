@@ -58,3 +58,6 @@ services:
 
 networks:
   backend:
+    name: ${PROJECT_NAME}_network
+    driver: bridge
+

@@ -10,15 +10,47 @@ security:
             entity:
                 class: App\Entity\User\Admin
                 property: email
+
+        app_consumer_provider:
+            entity:
+                class: App\Entity\User\Consumer
+                property: email
+
+        api_client_provider:
+            memory:
+                users:
+                    api-client:
+                        roles: ['ROLE_API']
+
     firewalls:
         dev:
             pattern: ^/(_profiler|_wdt|css|images|js|assets|build)/
             security: false
+
         api_public:
             pattern: ^/api/public
             stateless: true
-            custom_authenticator:
+            provider: api_client_provider
+            custom_authenticators:
                 - App\Security\Api\ApiKeyAuthenticator
+
+        api_login:
+            pattern: ^/api/login_check$
+            stateless: true
+            provider: app_consumer_provider
+            json_login:
+                check_path: /api/login_check
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api_jwt:
+            pattern: ^/api/private
+            stateless: true
+            provider: app_consumer_provider
+            jwt: ~
+
         main:
             lazy: true
             provider: app_admin_provider
@@ -53,10 +85,16 @@ security:
         # 1. Allow API access with API key
         - { path: ^/api/public, roles: ROLE_API }
 
-        # 2. Allow access to the 2FA form when two-factor authentication is in progress
+        # 2. Endpoint JWT
+        - { path: ^/api/login_check$, roles: PUBLIC_ACCESS }
+
+        # 3. Privates routes from front
+        - { path: ^/api/private, roles: ROLE_CONSUMER }
+
+        # 4. Allow access to the 2FA form when two-factor authentication is in progress
         - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
 
-        # 3. Access to public pages
+        # 5. Access to public pages
         - { path: ^/maintenance, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/inscription, roles: PUBLIC_ACCESS }
@@ -64,7 +102,7 @@ security:
         - { path: ^/activate, roles: PUBLIC_ACCESS }
         - { path: ^/reset-password, roles: PUBLIC_ACCESS }
 
-        # 4. Access to secure pages
+        # 6. Access to secure pages
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
