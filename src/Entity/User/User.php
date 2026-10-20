@@ -8,6 +8,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -24,9 +25,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['consumer:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['consumer:read', 'consumer:write'])]
     #[Assert\NotBlank(message: "L'adresse email est obligatoire.")]
     #[Assert\Email(message: "L'adresse email '{{ value }}' n'est pas valide.")]
     private ?string $email = null;
@@ -41,9 +44,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['consumer:password:write'])]
+    #[Assert\NotBlank(message: 'Le mot de passe est obligatoire et ne peut pas être vide.', groups: ['consumer:password:write'])]
     private ?string $password = null;
 
     #[Gedmo\Timestampable(on: 'create')]
+    #[Groups(['consumer:read'])]
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     protected ?\DateTime $createdAt = null;
 

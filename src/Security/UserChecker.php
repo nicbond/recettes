@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Entity\User\Admin;
 use App\Entity\User\User;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
@@ -20,6 +21,12 @@ readonly class UserChecker implements UserCheckerInterface
         }
 
         if (!$user->isVerified()) {
+            if ($user instanceof Admin) {
+                // Message adapted for the Back-Office
+                throw new CustomUserMessageAccountStatusException("Votre compte administrateur n'est pas encore activé. Veuillez contacter un super-administrateur ou vérifier vos accès.");
+            }
+
+            // Message adapted for the front-end / client API
             throw new CustomUserMessageAccountStatusException("Votre compte n'est pas encore activé.\nVeuillez cliquer sur le lien envoyé par e-mail.");
         }
 

@@ -15,16 +15,22 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 final class ApiKeyAuthenticator extends AbstractAuthenticator
 {
-    public function __construct(
-        #[Autowire('%env(string:PUBLIC_API_KEY)%')] private readonly string $apiKey)
+    public function __construct(#[Autowire('%env(string:PUBLIC_API_KEY)%')] private readonly string $apiKey)
     {
     }
 
+    /**
+     * We force the authenticator to be enabled for ALL requests
+     * entering the api_public firewall.
+     */
     public function supports(Request $request): bool
     {
-        return $request->headers->has('X-AUTH-API-KEY');
+        return true;
     }
 
+    /**
+     * This is where the presence and validity of the key are verified.
+     */
     public function authenticate(Request $request): SelfValidatingPassport
     {
         $providedApiKey = $request->headers->get('X-AUTH-API-KEY');
