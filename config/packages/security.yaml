@@ -85,6 +85,7 @@ security:
         # ====================================================================
         # 2. RESTRICTED API ACCESS
         # ====================================================================
+        - { path: ^/api/me$, roles: ROLE_CONSUMER }
         - { path: ^/api/consumers, roles: ROLE_CONSUMER }
         - { path: ^/api/private, roles: ROLE_CONSUMER }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
