@@ -1864,3 +1864,66 @@ class LoginSuccessEventListener
 
 * `security/2fa_setup.html.twig` — QR code display and first code validation
 * `security/2fa_form.html.twig` — 6-digit code entry on each login
+
+
+## 🔍 Database Debugging: Searching Users by UUID in phpMyAdmin & Worker Context
+
+### The Context
+In this project, we use Symfony's native UUID component (`Symfony\Component\Uid\Uuid`). For performance and index optimization, Doctrine stores these UUIDs in the MySQL database as a **16-byte binary string** (`BINARY(16)`).
+
+When browsing the database via **phpMyAdmin**, you will see the IDs displayed as lowercase hexadecimal values prefixed with `0x` (e.g., `0x01a19cb6dd2479f3abe3de5dafd6eecf`).
+
+---
+
+### ⚙️ How Symfony & Workers Handle UUIDs Internally
+
+When an asynchronous background task (like a Messenger Worker) processes a message containing an UUID, Doctrine acts as an automatic translator between the binary storage and PHP objects.
+
+#### 1. Serialization & Transmission
+When dispatching a message (e.g., `UserResetPasswordMessage`), Symfony's Messenger serializes the object. The `Symfony\Component\Uid\UuidV7` object contains built-in representations such as **Base58** (`1Cgg9vcjyYzEBQTy4AS596`) or **Base32** (`01M6GX2DPRFDYANY4R4HD02W5X`). 
+The worker receives this standard string/object representation inside the background queue.
+
+#### 2. The Doctrine Mapping Translation
+When the worker calls a repository method like `$userRepository->find($userId)`, Doctrine leverages the `#[ORM\Column(type: UuidType::NAME)]` attribute declaration:
+1. **Input Detection:** It intercepts the `UuidV7` object provided in PHP.
+2. **Binary Conversion:** It strips the standard dashes (`-`) and converts the text identifier into its pure binary equivalent.
+3. **Automated Querying:** Doctrine automatically wraps the search using native hex-decoding under the hood:
+   ```sql
+   SELECT * FROM `user` WHERE `id` = x'01a19cb6dd2479f3abe3de5dafd6eecf';
+   ```
+This matching pattern explains why the worker finds records flawlessly while human developers encounter pitfalls during manual raw SQL lookups.
+
+---
+
+### ❌ The Manual Query Problem
+If you try to run a raw SQL query inside phpMyAdmin using a naive comparison like `WHERE id = '01a19cb6dd2479f3...'`, **it will return 0 results**. 
+
+This failure occurs because:
+1. MySQL's `HEX()` function always generates **uppercase** strings natively.
+2. Depending on the database collation (e.g., `utf8mb4_bin` or `binary`), MySQL strictly enforces case sensitivity during binary-to-text evaluations in the SQL editor.
+3. Your raw input text is lowercase, but the underlying stored data evaluated by MySQL expects uppercase matches.
+
+---
+
+###  The Solution (How to Query in phpMyAdmin)
+
+To look up a user manually in phpMyAdmin using their hexadecimal ID without manually rewriting it in uppercase, you must use the `HEX()` function combined with `UPPER()`. 
+
+Go to the **SQL** tab in phpMyAdmin and run the following query:
+
+```sql
+SELECT * FROM `user` 
+WHERE HEX(`id`) = UPPER('01a19cb6dd2479f3abe3de5dafd6eecf');
+```
+
+> **Note:** Remember to **remove the `0x` prefix** from your string when pasting it inside the `UPPER('...')` function.
+
+### Example for Table Joins
+If you need to perform manual debugging or write raw SQL joins on binary UUID columns, apply the exact same logic to your filters:
+
+```sql
+SELECT u.email, o.amount 
+FROM `user` u
+INNER JOIN `orders` o ON u.`id` = o.`user_id`
+WHERE HEX(u.`id`) = UPPER('01a19cb6dd2479f3abe3de5dafd6eecf');
+```

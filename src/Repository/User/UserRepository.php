@@ -6,9 +6,11 @@ use App\Entity\User\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -44,12 +46,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     /**
      * @throws NonUniqueResultException
      */
-    public function findOneByIdAndConfirmationTokenNotNull(int $userId): ?User
+    public function findOneByIdAndConfirmationTokenNotNull(Uuid $userId): ?User
     {
         return $this->createQueryBuilder('u')
             ->where('u.id = :id')
             ->andWhere('u.confirmationToken IS NOT NULL')
-            ->setParameter('id', $userId)
+            ->setParameter('id', $userId, UuidType::NAME)
             ->getQuery()
             ->getOneOrNullResult();
     }

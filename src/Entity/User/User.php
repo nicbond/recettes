@@ -6,9 +6,13 @@ use App\Repository\User\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -23,10 +27,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     #[Groups(['consumer:read'])]
-    private ?int $id = null;
+    #[SerializedName('id')]
+    private ?Uuid $id = null;
 
     #[ORM\Column(length: 180)]
     #[Groups(['consumer:read', 'consumer:write'])]
@@ -72,7 +78,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $googleAuthenticatorSecret = null;
 
-    public function getId(): ?int
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
@@ -142,7 +148,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      * Sérialisation explicite pour la session de sécurité Symfony.
      *
      * @return array{
-     *     id: int|null,
+     *     id: Uuid|null,
      *     email: string|null,
      *     roles: list<string>,
      *     password: string|null,
@@ -166,7 +172,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      * Désérialisation explicite lors de la lecture de la session.
      *
      * @param array{
-     *     id?: int|null,
+     *     id?: Uuid|null,
      *     email?: string|null,
      *     roles?: list<string>,
      *     password?: string|null,

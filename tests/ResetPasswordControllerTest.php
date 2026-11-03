@@ -71,7 +71,7 @@ class ResetPasswordControllerTest extends WebTestCase
         $message = $envelope->getMessage();
 
         self::assertInstanceOf(UserResetPasswordMessage::class, $message);
-        self::assertSame($userId, $message->userId);
+        self::assertEquals($userId, $message->userId);
 
         self::assertResponseRedirects('/reset-password/check-email');
     }
