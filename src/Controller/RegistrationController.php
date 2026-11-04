@@ -11,8 +11,10 @@ use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
@@ -52,9 +54,12 @@ class RegistrationController extends AbstractController
         UserRepository $userRepository,
         Request $request,
         VerifyEmailHelperInterface $verifyEmailHelper,
+        // #[MapQueryParameter] is used here to intercept, validate, and convert the ID from the URL into a Uuid object,
+        // even before the controller code executes. No need to do this anymore: $request->query->get('id')
+        #[MapQueryParameter] Uuid $id,
     ): Response {
         // We don't need anymore the token in the url with verify-email-bundle
-        $user = $userRepository->findOneByIdAndConfirmationTokenNotNull((int) $request->query->get('id'));
+        $user = $userRepository->findOneByIdAndConfirmationTokenNotNull($id);
 
         if (!$user) {
             $this->addFlash('danger', 'Compte introuvable ou déjà activé.');

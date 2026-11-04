@@ -5,8 +5,10 @@ namespace App\State\User;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\User\Consumer;
+use App\Message\User\UserVerifyAccountMessage;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
@@ -19,6 +21,7 @@ final readonly class ConsumerRegistrationProcessor implements ProcessorInterface
      */
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher,
+        private MessageBusInterface $messageBus,
         #[Autowire(service: 'api_platform.doctrine.orm.state.persist_processor')]
         private ProcessorInterface $persistProcessor,
     ) {
@@ -27,16 +30,7 @@ final readonly class ConsumerRegistrationProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Consumer
     {
         if (!$data instanceof Consumer) {
-            $result = $this->persistProcessor->process(
-                $data,
-                $operation,
-                $uriVariables,
-                $context,
-            );
-
-            assert($result instanceof Consumer);
-
-            return $result;
+            throw new \LogicException(sprintf('Expected %s, got %s.', Consumer::class, get_debug_type($data)));
         }
 
         $password = $data->getPassword();
@@ -47,14 +41,17 @@ final readonly class ConsumerRegistrationProcessor implements ProcessorInterface
 
         $data->setPassword($this->passwordHasher->hashPassword($data, $password));
 
-        $result = $this->persistProcessor->process(
-            $data,
-            $operation,
-            $uriVariables,
-            $context,
-        );
+        $confirmationToken = bin2hex(random_bytes(32));
+        $data->setConfirmationToken($confirmationToken);
+
+        $result = $this->persistProcessor->process($data, $operation, $uriVariables, $context);
 
         assert($result instanceof Consumer);
+
+        $this->messageBus->dispatch(new UserVerifyAccountMessage(
+            (string) $result->getEmail(),
+            $confirmationToken
+        ));
 
         return $result;
     }

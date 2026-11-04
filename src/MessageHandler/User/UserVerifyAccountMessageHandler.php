@@ -2,11 +2,13 @@
 
 namespace App\MessageHandler\User;
 
+use App\Entity\User\Consumer;
 use App\Entity\User\User;
 use App\Event\UserVerifyRequestEvent;
 use App\Message\User\UserVerifyAccountMessage;
 use App\Repository\User\UserRepository;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
@@ -19,6 +21,8 @@ final readonly class UserVerifyAccountMessageHandler
         private UserRepository $userRepository,
         private EventDispatcherInterface $dispatcher,
         private VerifyEmailHelperInterface $verifyEmailHelper,
+        #[Autowire('%app.front_url%')]
+        private string $frontUrl,
     ) {
     }
 
@@ -28,14 +32,15 @@ final readonly class UserVerifyAccountMessageHandler
     public function __invoke(UserVerifyAccountMessage $message): void
     {
         $user = $this->userRepository->findOneByConfirmationToken($message->token);
+
         if (!$user instanceof User) {
             $this->logger->error('UserVerifyAccountMessage : Unable to verify user', [
                 'email' => $message->email,
             ]);
+
             throw new \Exception(sprintf('Unable to verify user %s', $message->email));
         }
 
-        $event = new UserVerifyRequestEvent($user);
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
             'app_activate_account',
             (string) $user->getId(),
@@ -46,7 +51,26 @@ final readonly class UserVerifyAccountMessageHandler
             ]
         );
 
-        $event->setSignatureUrl($signatureComponents->getSignedUrl());
+        $signedUrl = $signatureComponents->getSignedUrl();
+
+        // Context: Consumers must interact exclusively with the Front-End.
+        // Extracting signature parameters to route the verification link to the Front-End app,
+        // which will then call back our API to perform the database update.
+        if ($user instanceof Consumer) {
+            $queryString = parse_url($signedUrl, PHP_URL_QUERY);
+
+            if (!is_string($queryString)) {
+                throw new \LogicException('Unable to generate Consumer verification URL.');
+            }
+
+            $signedUrl = rtrim($this->frontUrl, '/')
+                .'/verification-compte?'
+                .$queryString;
+        }
+
+        $event = new UserVerifyRequestEvent($user);
+        $event->setSignatureUrl($signedUrl);
+
         $this->dispatcher->dispatch($event);
 
         $this->logger->info(

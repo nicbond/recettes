@@ -12,6 +12,7 @@ parameters:
     number_per_page_tags: '%env(int:NUMBER_PER_PAGE_TAGS)%'
     number_per_page_admin: '%env(int:NUMBER_PER_PAGE_ADMIN)%'
     app.recipe_pdf_path: '%kernel.project_dir%/%env(RECIPE_PDF_PATH)%'
+    app.front_url: '%env(string:resolve:FRONT_URL)%'
 
 services:
     # default configuration for services in *this* file
