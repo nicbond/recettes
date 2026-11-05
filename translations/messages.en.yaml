@@ -1,0 +1,5 @@
+consumer:
+    verification:
+        not_found: 'Account not found or already activated.'
+        invalid_link: 'This verification link is invalid or has expired.'
+        success: 'Your account has been successfully activated.'

@@ -41,8 +41,12 @@ final readonly class UserVerifyAccountMessageHandler
             throw new \Exception(sprintf('Unable to verify user %s', $message->email));
         }
 
+        $routeName = $user instanceof Consumer
+            ? 'app_activate_consumer_account'
+            : 'app_activate_account';
+
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
-            'app_activate_account',
+            $routeName,
             (string) $user->getId(),
             (string) $user->getEmail(),
             [

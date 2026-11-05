@@ -79,8 +79,9 @@ security:
         # ====================================================================
         - { path: ^/api/public, roles: ROLE_API }
         - { path: ^/api/login_check$, roles: PUBLIC_ACCESS }
-        - { path: ^/api/docs($|/|.), roles: PUBLIC_ACCESS } 
+        - { path: ^/api/docs($|/|.), roles: PUBLIC_ACCESS }
         - { path: ^/api/consumers$, methods: [POST], roles: PUBLIC_ACCESS }
+        - { path: ^/api/consumers/activate$, methods: [POST], roles: PUBLIC_ACCESS }
 
         # ====================================================================
         # 2. RESTRICTED API ACCESS

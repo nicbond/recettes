@@ -1,0 +1,5 @@
+consumer:
+    verification:
+        not_found: 'Compte introuvable ou déjà activé.'
+        invalid_link: 'Ce lien d’activation est invalide ou a expiré.'
+        success: 'Votre compte a bien été activé.'
