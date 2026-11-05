@@ -15,6 +15,7 @@ class LoginControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->client->setServerParameter('HTTP_ACCEPT_LANGUAGE', 'fr');
         $container = static::getContainer();
 
         /** @var EntityManagerInterface $em */
