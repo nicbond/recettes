@@ -51,6 +51,7 @@ class Consumer extends User
         orphanRemoval: true
     )]
     #[Groups(['consumer:read', 'consumer:write'])]
+    #[Assert\NotNull(message: 'The identity is required.')]
     #[Assert\Valid]
     private ?UserIdentity $identity = null;
 
@@ -65,7 +66,7 @@ class Consumer extends User
         return $this->identity;
     }
 
-    public function setIdentity(?UserIdentity $identity): self
+    public function setIdentity(UserIdentity $identity): self
     {
         if ($this->identity === $identity) {
             return $this;
@@ -73,7 +74,7 @@ class Consumer extends User
 
         $this->identity = $identity;
 
-        if (null !== $identity && $identity->getConsumer() !== $this) {
+        if ($identity->getConsumer() !== $this) {
             $identity->setConsumer($this);
         }
 
