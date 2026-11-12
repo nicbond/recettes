@@ -1,0 +1,9 @@
+form:
+  email:
+    required: "Please enter an email address."
+    invalid: "The email address is invalid."
+    already_used: "This email address is already in use."
+  password:
+    required: "Please enter a password."
+    valid: "The password must contain at least one uppercase letter, one lowercase letter, one number and one special character."
+    length_min: "The password must contain at least {{ limit }} characters."
