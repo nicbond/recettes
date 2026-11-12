@@ -1927,3 +1927,25 @@ FROM `user` u
 INNER JOIN `orders` o ON u.`id` = o.`user_id`
 WHERE HEX(u.`id`) = UPPER('01a19cb6dd2479f3abe3de5dafd6eecf');
 ```
+
+The following SQL query can be used in phpMyAdmin to inspect
+consumers with their associated identity information.
+
+UUID values are converted from their binary representation
+to a human-readable format.
+
+```sql
+SELECT
+    BIN_TO_UUID(u.id) AS consumer_id,
+    u.email,
+    i.gender,
+    i.first_name,
+    i.last_name,
+    i.birthdate,
+    u.is_verified,
+    u.is_active,
+    u.created_at
+FROM user u
+INNER JOIN identity i
+    ON i.consumer_id = u.id
+WHERE u.discriminator = 'consumer';
