@@ -1949,3 +1949,10 @@ FROM user u
 INNER JOIN identity i
     ON i.consumer_id = u.id
 WHERE u.discriminator = 'consumer';
+
+SELECT *
+FROM user u
+INNER JOIN identity i ON i.consumer_id = u.id
+INNER JOIN address a ON a.consumer_id = u.id
+WHERE u.discriminator = 'consumer'
+AND HEX(u.`id`) = UPPER('01a1d54d35e17cd2935005d3d526d3ed');

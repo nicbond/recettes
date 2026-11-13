@@ -7,3 +7,11 @@ form:
     required: "Please enter a password."
     valid: "The password must contain at least one uppercase letter, one lowercase letter, one number and one special character."
     length_min: "The password must contain at least {{ limit }} characters."
+  phone_number:
+    invalid: "Please enter a valid French phone number (ex: 0612345678)."
+  identity:
+    required: "Please enter an identity, this is required."
+  address:
+    required: "Please enter an address, this is required."  
+    postal_code:   
+      invalid: "Please enter a valid postal code"      

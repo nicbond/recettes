@@ -7,3 +7,12 @@ form:
     required: "Veuillez saisir un mot de passe."
     valid: "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial."
     length_min: "Le mot de passe doit contenir au moins {{ limit }} caractères."
+  phone_number:
+    invalid: "Veuillez saisir un numéro de téléphone français valide (ex. : 0612345678)."
+  identity:
+    required: "Veuillez saisir une identité, obligatoire."
+  address:
+    required: "Veuillez saisir une adresse, obligatoire."
+    postal_code:   
+      invalid: "Veuillez saisir un code postal valide"  
+

@@ -6,7 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use App\Entity\User\Identity as UserIdentity;
+use App\Entity\User\Address\Address;
 use App\Repository\User\ConsumerRepository;
 use App\Security\Voter\ConsumerVoter;
 use App\State\User\ConsumerPasswordChangeProcessor;
@@ -46,14 +46,25 @@ class Consumer extends User
 {
     #[ORM\OneToOne(
         mappedBy: 'consumer',
-        targetEntity: UserIdentity::class,
+        targetEntity: Identity::class,
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]
     #[Groups(['consumer:read', 'consumer:write'])]
-    #[Assert\NotNull(message: 'The identity is required.')]
+    #[Assert\NotNull(message: 'form.identity.required')]
     #[Assert\Valid]
-    private ?UserIdentity $identity = null;
+    private ?Identity $identity = null;
+
+    #[ORM\OneToOne(
+        mappedBy: 'consumer',
+        targetEntity: Address::class,
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
+    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Assert\NotNull(message: 'form.address.required')]
+    #[Assert\Valid]
+    private ?Address $address = null;
 
     #[Groups(['consumer:read'])]
     public function getRoles(): array
@@ -61,12 +72,12 @@ class Consumer extends User
         return array_unique(array_merge(parent::getRoles(), ['ROLE_CONSUMER']));
     }
 
-    public function getIdentity(): ?UserIdentity
+    public function getIdentity(): ?Identity
     {
         return $this->identity;
     }
 
-    public function setIdentity(UserIdentity $identity): self
+    public function setIdentity(Identity $identity): self
     {
         if ($this->identity === $identity) {
             return $this;
@@ -76,6 +87,26 @@ class Consumer extends User
 
         if ($identity->getConsumer() !== $this) {
             $identity->setConsumer($this);
+        }
+
+        return $this;
+    }
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function setAddress(Address $address): self
+    {
+        if ($this->address === $address) {
+            return $this;
+        }
+
+        $this->address = $address;
+
+        if ($address->getConsumer() !== $this) {
+            $address->setConsumer($this);
         }
 
         return $this;
