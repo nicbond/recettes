@@ -130,6 +130,142 @@ Authentication and authorization are intentionally separated:
 
 ---
 
+## API Platform: Consumer Profile
+
+The Consumer profile is exposed through dedicated API Platform operations.
+
+The implementation separates general authenticated user information from personal profile data.
+
+### Endpoints
+
+| Method | Endpoint | Purpose |
+| ------ | -------- | ------- |
+| `GET` | `/api/me` | Retrieves general authenticated user information |
+| `GET` | `/api/me/profile` | Retrieves the Consumer's identity and address |
+| `PATCH` | `/api/me/profile` | Updates the Consumer's identity and address |
+
+The `/api/me` endpoint intentionally remains lightweight.
+
+Identity and address data are exposed only through the dedicated profile endpoint.
+
+### Serialization Groups
+
+Dedicated serialization groups are used to isolate profile data from general Consumer information.
+
+The following groups are used:
+
+* `consumer:read` — general Consumer information.
+* `consumer:write` — registration and Consumer input data.
+* `consumer:profile:read` — profile output, including identity and address.
+* `consumer:profile:write` — profile update input, including identity and address.
+
+The `Identity` and `Address` associations are excluded from `consumer:read`.
+
+This ensures that `/api/me` does not expose personal profile information unnecessarily.
+
+### Custom State Provider
+
+The profile endpoints use a dedicated state provider:
+
+```text
+src/Provider/User/ConsumerProfileProvider.php
+```
+
+The provider retrieves the currently authenticated Consumer through Symfony Security and loads the corresponding managed Doctrine entity through `ConsumerRepository`.
+
+This ensures that profile operations work with the existing Consumer entity rather than creating a new instance.
+
+### GET Profile
+
+The profile retrieval operation uses the custom provider:
+
+```php
+new Get(
+    uriTemplate: '/me/profile',
+    name: 'api_me_profile',
+    security: "is_granted('ROLE_CONSUMER')",
+    provider: ConsumerProfileProvider::class,
+    normalizationContext: ['groups' => ['consumer:profile:read']],
+),
+```
+
+The response contains the Consumer's identity and address according to the `consumer:profile:read` serialization group.
+
+### PATCH Profile
+
+The profile update operation uses the same provider and API Platform's standard Doctrine `PersistProcessor`:
+
+```php
+new Patch(
+    uriTemplate: '/me/profile',
+    name: 'api_me_profile_update',
+    security: "is_granted('ROLE_CONSUMER')",
+    provider: ConsumerProfileProvider::class,
+    read: true,
+    processor: PersistProcessor::class,
+    normalizationContext: ['groups' => ['consumer:profile:read']],
+    denormalizationContext: ['groups' => ['consumer:profile:write']],
+    validationContext: ['groups' => ['consumer:profile:write']],
+),
+```
+
+**Important: `read: true`**
+
+When a custom provider must retrieve an existing entity before an API Platform write operation, 
+the read stage must be enabled to ensure that the provider is executed.
+
+In this implementation, explicitly setting `read: true` on the custom PATCH operation
+ensures that the existing Consumer is retrieved before deserialization and persistence.
+
+Without `read: true`, the provider was not executed as expected, causing the write process
+to attempt a Doctrine insertion instead of updating the existing Consumer. This resulted
+in a database constraint violation (`email cannot be null`).
+
+With `read: true`, API Platform follows the expected sequence:
+
+```text
+PATCH /api/me/profile
+          │
+          ▼
+    ReadProvider
+          │
+          ▼
+ConsumerProfileProvider
+          │
+          ▼
+Retrieve existing Consumer
+          │
+          ▼
+     Deserialize
+          │
+          ▼
+      Validate
+          │
+          ▼
+   PersistProcessor
+          │
+          ▼
+     Doctrine ORM
+          │
+          ▼
+         MySQL
+```
+
+The standard `PersistProcessor` remains responsible for persistence. No custom processor is required for this operation.
+
+The validation context is restricted to `consumer:profile:write` so that unrelated constraints, such as the general User email validation constraints, are not applied during a profile-only update.
+
+### Design Principles
+
+* Keep `/api/me` separate from personal profile data.
+* Use dedicated serialization groups for profile operations.
+* Retrieve the authenticated Consumer through a dedicated provider.
+* Use `read: true` when the custom provider must load the existing entity before a write operation.
+* Reuse API Platform's standard `PersistProcessor` whenever custom persistence behavior is unnecessary.
+* Keep profile validation isolated through dedicated validation groups.
+
+---
+
 ## User Hierarchy
 
 The application uses Doctrine single-table inheritance to manage different types of users:

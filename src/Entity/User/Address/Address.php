@@ -27,7 +27,11 @@ class Address
     #[SerializedName('street')]
     #[Assert\NotBlank]
     #[Assert\Length(max: 50)]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',
@@ -39,7 +43,11 @@ class Address
     #[ORM\Column(length: 50, nullable: true)]
     #[SerializedName('complement')]
     #[Assert\Length(max: 50)]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     private ?string $complement = null;
 
     #[ORM\Column(length: 5)]
@@ -50,7 +58,11 @@ class Address
         message: 'form.postal_code.invalid',
     )]
     #[Assert\Length(max: 5)]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',
@@ -63,7 +75,11 @@ class Address
     #[SerializedName('city')]
     #[Assert\NotBlank]
     #[Assert\Length(max: 40)]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',
@@ -76,7 +92,11 @@ class Address
     #[SerializedName('countryCode')]
     #[Assert\NotBlank]
     #[Assert\Country]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',
@@ -92,12 +112,20 @@ class Address
         pattern: '/^0[1-9](?:\d{2}){4}$/',
         message: 'form.phone_number.invalid',
     )]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[SerializedName('extraInformation')]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     private ?string $extraInformation = null;
 
     #[ORM\OneToOne(

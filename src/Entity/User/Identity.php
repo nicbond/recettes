@@ -27,7 +27,11 @@ class Identity
 
     #[ORM\Column(length: 5, nullable: true, enumType: Gender::class)]
     #[SerializedName('gender')]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     private ?Gender $gender = null;
 
     #[ORM\Column(length: 25)]
@@ -37,7 +41,11 @@ class Identity
         pattern: '/^[a-zA-Z-ëêéèâàäôïîç ]*$/',
         message: 'Numbers or special characters are not allowed'
     )]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',
@@ -54,7 +62,11 @@ class Identity
         pattern: '/^[a-zA-Z-ëêéèâàäôïîç ]*$/',
         message: 'Numbers or special characters are not allowed'
     )]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',
@@ -67,7 +79,11 @@ class Identity
     #[ORM\Column(type: 'date_immutable', nullable: true)]
     #[SerializedName('birthdate')]
     #[Assert\GreaterThan('1900-01-01')]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     #[ApiProperty(
         openapiContext: [
@@ -131,11 +147,6 @@ class Identity
         return $this;
     }
 
-    public function getFormattedGender(): ?string
-    {
-        return $this->gender?->label();
-    }
-
     public function getBirthdate(): ?\DateTimeImmutable
     {
         return $this->birthdate;
@@ -162,6 +173,11 @@ class Identity
         }
 
         return $this;
+    }
+
+    public function getFormattedGender(): ?string
+    {
+        return $this->gender?->label();
     }
 
     public function __toString(): string

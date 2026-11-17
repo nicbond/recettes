@@ -2,11 +2,13 @@
 
 namespace App\Entity\User;
 
+use ApiPlatform\Doctrine\Common\State\PersistProcessor;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\User\Address\Address;
+use App\Provider\User\ConsumerProfileProvider;
 use App\Repository\User\ConsumerRepository;
 use App\Security\Voter\ConsumerVoter;
 use App\State\User\ConsumerPasswordChangeProcessor;
@@ -40,6 +42,24 @@ use Symfony\Component\Validator\Constraints as Assert;
             denormalizationContext: ['groups' => ['consumer:password:write']],
             processor: ConsumerPasswordChangeProcessor::class,
         ),
+        new Get(
+            uriTemplate: '/me/profile',
+            name: 'api_me_profile',
+            security: "is_granted('ROLE_CONSUMER')",
+            provider: ConsumerProfileProvider::class,
+            normalizationContext: ['groups' => ['consumer:profile:read']],
+        ),
+        new Patch(
+            uriTemplate: '/me/profile',
+            name: 'api_me_profile_update',
+            security: "is_granted('ROLE_CONSUMER')",
+            provider: ConsumerProfileProvider::class,
+            read: true,
+            processor: PersistProcessor::class,
+            normalizationContext: ['groups' => ['consumer:profile:read']],
+            denormalizationContext: ['groups' => ['consumer:profile:write']],
+            validationContext: ['groups' => ['consumer:profile:write']],
+        ),
     ],
 )]
 class Consumer extends User
@@ -50,7 +70,11 @@ class Consumer extends User
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[Assert\NotNull(message: 'form.identity.required')]
     #[Assert\Valid]
     private ?Identity $identity = null;
@@ -61,7 +85,11 @@ class Consumer extends User
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]
-    #[Groups(['consumer:read', 'consumer:write'])]
+    #[Groups([
+        'consumer:write',
+        'consumer:profile:read',
+        'consumer:profile:write',
+    ])]
     #[Assert\NotNull(message: 'form.address.required')]
     #[Assert\Valid]
     private ?Address $address = null;
